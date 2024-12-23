@@ -173,7 +173,7 @@ if strcmp(rawData,'y') || strcmp(rawData,'Y')
         fids_raw=permute(fids_raw,[1,3,2]); 
     end
 
-elseif strcmp(rawdata,'n') || strcmp(rawData,'N')
+elseif strcmp(rawData,'n') || strcmp(rawData,'N')
     %REQUEST PROCESSED DATA ONLY:  Use the FID file instead of fid.raw.
     data = fopen([inDir '/fid']);
     fid_data=fread(data,'int');
