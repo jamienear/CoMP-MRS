@@ -17,6 +17,7 @@ Repository of processing tools and procedures for a multi-site preclinical MRS p
 #### Test data
 
 Testing requires the complete contents of the CoMP-MRS test data package stored in a folder `data` at the level of the main repository. All DP folders and sub-folders *must* follow BIDS terminology for the test to function properly; e.g., DP06 has another sub-folder DP06 whose contents must be moved to the parent DP06 directory. At the time of writing, this tests runs for DP01 to DP19.
+NOTE:  Today I removed all instances of nested DPXX folders (i.e. DP06/DP06/...) from both the test data package and the complete CoMP-MRS data repository. %JN - 30 Dec 2024 
 
 ```md
 .git
