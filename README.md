@@ -2,6 +2,19 @@
 
 Repository of processing tools and procedures for a multi-site preclinical MRS project
 
+## Update Log (for our internal development)
+
+### Jan 3, 2025
+
+I have created a new 'parallel' development version `io_loadspec_bruk_new.m` alongside a new test suite `io_loadspec_bruk_newTest`. The new reader has a completely rewritten routine to extract header information from acqp, acqus, and method files, allowing these to be quite flexibly plucked from a struct. The new reader successfully runs the current test suite (15 datasets between DP01 and DP19), i.e., it loads the datasets without error (both with and without the 'rawdata' flag). 
+
+TO DO:
+
+- Design tests to check that data are actually loaded *correctly*, i.e., do some sanity checks, visual inspection, etc.
+- Design tests for reference data.
+- I have found some interesting code in Jessie's loader that does some scaling according to the receiver gain - need to look into that
+- Need to figure out where to find amplitude and phase coefficients for coil combination
+
 ## Contents
 
 `code\notes` contains helpful documentation to understand the various Bruker file formats.
