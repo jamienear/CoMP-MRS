@@ -98,9 +98,36 @@ if contains(version, ["PV 5", "PV 6", "PV 7", "PV-7"])
 elseif contains(version,'PV-360')
     spectralwidth = headerMethod.PVM_SpecSWH;
 end
-txfrq = headerACQP.BF1*1e6;
+
+% TX freqs for PV6 onwards are explicitly stored separately for metabolite
+% and ref scans
+if contains(version, "PV 5")
+    txfrq       = headerACQP.BF1*1e6;
+    txfrq_ref   = txfrq;
+elseif contains(version, ["PV 6", "PV 7", "PV-7", "PV-360"])
+    txfrq       = headerMethod.PVM_FrqWork(1)*1e6;
+    txfrq_ref   = headerMethod.PVM_FrqRef(1)*1e6;
+end
+
 Bo=txfrq/42577000;
-spectralwidthppm=spectralwidth/(txfrq/1e6);
+
+% spectralwidthppm is stored in the header BUT it is slightly different 
+% than if we calculate it from txfrq and spectralwidth - this suggests we 
+% may have to correct txfrq itself with one of the freq offsets?
+spectralwidthppm=spectralwidth/(txfrq_ref/1e6); % old method
+spectralwidthppm=headerMethod.PVM_SpecSW; % better method?
+
+% Center frequency is *explicitly* stored in the headers from PV6 onwards -
+% mostly it's been 4.7 so we'll assume that for PV5 too. 
+% For compatibility with the other FID-A functions, we should probably
+% store centerfreq in the FID-A header?
+if contains(version, ["PV 5", "PV 6", "PV 7", "PV-7"])
+    centerfreq      = 4.7;
+    centerfreq_ref  = centerfreq;
+elseif contains(version,'PV-360')
+    centerfreq      = headerMethod.PVM_FrqRefPpm(1);
+end
+
 te = headerMethod.PVM_EchoTime;
 tr = headerMethod.PVM_RepetitionTime;
 sequence = headerMethod.Method;
@@ -147,9 +174,9 @@ elseif strcmp(rawData,'n') || strcmp(rawData,'N')
         data = fopen(fullfile(inDir, 'fid'));
         fid_data=fread(data,'int');
     end
-    real_fid = fid_data(2:2:length(fid_data));
-    imag_fid = fid_data(1:2:length(fid_data));
-    fids_raw=real_fid-1i*imag_fid;
+    real_fid = fid_data(1:2:length(fid_data));
+    imag_fid = fid_data(2:2:length(fid_data));
+    fids_raw=real_fid+1i*imag_fid;
     fclose(data); %WO
 
     averages=1; %since we requested the combined data.
@@ -173,9 +200,27 @@ fids_trunc=fids_raw(leftshift+1:end,:,:);
 %replace the left-shifted points with zeros at the end
 fids=padarray(fids_trunc, [leftshift,0],'post');
 
+sz=size(fids); %size of the array
+
+%calculate the dwelltime:
+dwelltime=1/spectralwidth;
+
+%calculate the time scale
+t=[0:dwelltime:(sz(1)-1)*dwelltime];
+
+%calculate the ppm scale
+fmax=spectralwidth/2;
+f=[fmax:-2*fmax/(sz(1)-1):-fmax];
+ppm=f/(txfrq/1e6)+centerfreq;
+
+% Apply ref freq shift (the difference between txfrq and txfrq_ref)
+if contains(version, ["PV-360"])
+    tmat=repmat(t',[1 sz(2:end)]);
+    fids=fids.*exp(-1i*tmat*(txfrq_ref-txfrq)*2*pi);
+end
+
 %Do the fourier transform
 specs=fftshift(ifft(fids,[],1),1);
-sz=size(specs); %size of the array
 
 %specify the dims:
 %Time dimension:
@@ -207,6 +252,11 @@ dims.subSpecs=0;
 dims.extras=0;
 
 
+%Specify the number of subspecs.  For now, this will always be one.
+subspecs=1;
+rawSubspecs=1;
+
+
 %NOW TRY LOADING IN THE REFERENCE SCAN DATA (IF IT EXISTS)
 isRef=false;
 if contains(version,'PV 5')
@@ -219,18 +269,22 @@ end
 
 if isRef
     if contains(version,'PV 5')
+        % No differentiation of TX freq for the reference AFAIK, so we can
+        % use the same ppm axis
         data = fopen(fullfile(inDir, 'fid.ref'));
-        ref_data=fread(data,'int16');
+        ref_data=fread(data,'int');
     elseif contains(version,'PV 6') || contains(version,'PV 7') || contains(version,'PV-360.2')
+        % Get TX freq of the reference, otherwise the reference ppm axis
+        % will not be correct
         data = fopen(fullfile(inDir, 'fid.refscan'));
         ref_data=fread(data,'int32');
     elseif contains(version,'PV-360.3')
         data = fopen(fullfile(inDir, 'pdata', '1', 'fid_refscan.64'));
         ref_data=fread(data,'float64');
     end
-    real_ref = ref_data(2:2:length(ref_data));
-    imag_ref = ref_data(1:2:length(ref_data));
-    fids_ref=real_ref-1i*imag_ref;
+    real_ref = ref_data(1:2:length(ref_data));
+    imag_ref = ref_data(2:2:length(ref_data));
+    fids_ref=real_ref+1i*imag_ref;
     fclose(data); %WO - added fclose
 
     %Find the number of averages in the ref dataset:
@@ -238,13 +292,21 @@ if isRef
         rawAverages_ref=rawAverages;
         averages_ref=rawAverages_ref;
     else
-        rawAverages_ref = headerMethod.PVM_RefScanNA;
+        rawAverages_ref = 1;
         averages_ref=rawAverages_ref;
     end
 
     fids_ref=reshape(fids_ref,[],rawAverages_ref);
     fids_ref_trunc=fids_ref(leftshift+1:end,:);
     reffids=padarray(fids_ref_trunc, [leftshift,0],'post');
+
+    % Apply ref freq shift (the difference between txfrq and txfrq_ref)
+    % (but not if it's PV360)
+    if ~contains(version, ["PV-360"])
+        tmat=repmat(t',[1 sz(2:end)]);
+        reffids=reffids.*exp(-1i*tmat*(txfrq_ref-txfrq)*2*pi);
+    end
+
     refspecs=fftshift(ifft(reffids,[],1),1);
     sz_ref=size(refspecs);
     ref.flags.averaged=0;
@@ -263,18 +325,6 @@ else
     disp('WARNING REFERENCE SCANS NOT FOUND.  RETURNING EMPTY REF STRUCTURE.');
 end
 
-%Specify the number of subspecs.  For now, this will always be one.
-subspecs=1;
-rawSubspecs=1;
-
-%calculate the ppm scale
-ppm=[4.65+(spectralwidthppm/2):-spectralwidthppm/(length(specs)-1):4.65-(spectralwidthppm/2)];
-
-%calculate the dwelltime:
-dwelltime=1/spectralwidth;
-
-%calculate the time scale
-t=[0:dwelltime:(sz(1)-1)*dwelltime];
 
 
 %FILLING IN DATA STRUCTURE FOR THE FID.RAW DATA
