@@ -16,18 +16,25 @@ classdef io_loadspec_brukTest < matlab.unittest.TestCase
 
         % Test 01: Bruker-combined data
         function testCombined(testCase, testDataFiles)
-            testOutput = testLoadCombined(testDataFiles);
+            [testOut, testRef] = testLoadCombined(testDataFiles);
 
-            % Verify that the test output is not empty
-            testCase.verifyNotEmpty(testOutput);
+            % Verify that the test output is not zero
+            testCase.verifyNotEqual(testOut, 0);
+
+            % Verify that the test ref output is not zero
+            testCase.verifyNotEqual(testRef, 0);
         end
 
         % Test 02: Raw (uncombined) data
         function testRaw(testCase, testDataFiles)
-            testOutput = testLoadRaw(testDataFiles);
+            [testOut, testRef] = testLoadRaw(testDataFiles);
 
-            % Verify that the test output is not empty
-            testCase.verifyNotEmpty(testOutput);
+            % Verify that the test output is not zero
+            testCase.verifyNotEqual(testOut, 0);
+
+            % Verify that the test ref output is not zero
+            testCase.verifyNotEqual(testRef, 0);
+
         end
 
     end
@@ -61,30 +68,40 @@ testDataFiles = {...
     fullfile(mainPath, 'data', 'DP17', 'sub-01', 'ses-01', 'mrs', 'sub-01_ses-01_acq-press_voi-hipp_svs'), ...
     fullfile(mainPath, 'data', 'DP18', 'sub-01', 'ses-01', 'mrs', 'sub-01_ses-01_acq-laser_voi-hipp_svs'), ...
     fullfile(mainPath, 'data', 'DP19', 'sub-01', 'ses-01', 'mrs', 'sub-01_ses-01_acq-press_voi-hipp_svs'), ...
+    fullfile(mainPath, 'data', 'DP20', 'sub-01', 'ses-01', 'mrs', 'sub-01_ses-01_acq-steam_voi-stri_svs'), ...
+    fullfile(mainPath, 'data', 'DP21', 'sub-01', 'ses-01', 'mrs', 'sub-01_ses-01_acq-press_voi-hipp_svs'), ...
+    fullfile(mainPath, 'data', 'DP22', 'sub-01', 'ses-01', 'mrs', 'met'), ...
+    fullfile(mainPath, 'data', 'DP23', 'sub-01', 'ses-01', 'mrs', 'met'), ...
+    fullfile(mainPath, 'data', 'DP24', 'sub-01', 'ses-01', 'mrs', 'sub-01_ses-01_acq-steam_voi-hipp_svs'), ...
+    fullfile(mainPath, 'data', 'DP25', 'sub-01', 'ses-01', 'mrs', 'sub-01_ses-01_acq-press_voi-hipp_svs'), ...
+    fullfile(mainPath, 'data', 'DP26', 'sub-01', 'ses-01', 'mrs', 'sub-01_ses-01_acq-press_voi-hipp_svs'), ...
+    fullfile(mainPath, 'data', 'DP27', 'sub-01', 'ses-01', 'mrs', 'sub-01_ses_01_acq_press_voi-hipp_svs'), ...
     };
 
 end
 
 
 
-function output = testLoadCombined(testDataFile)
+function [out, ref] = testLoadCombined(testDataFile)
 % Function to test the Bruker-combined data
 try
-    output = io_loadspec_bruk(testDataFile, 'n', 68);
+    [out, ref] = io_loadspec_bruk(testDataFile, 'n', 68);
 catch
-    % If load fails, return empty struct
-    output = [];
+    % If load fails, return zero flag
+    out = 0;
+    ref = 0;
 end
 
 end
 
-function output = testLoadRaw(testDataFile)
+function [out, ref] = testLoadRaw(testDataFile)
 % Function to test the Bruker-combined data
 try
-    output = io_loadspec_bruk(testDataFile, 'y', 68);
+    [out, ref] = io_loadspec_bruk(testDataFile, 'y', 68);
 catch
-    % If load fails, return empty struct
-    output = [];
+    % If load fails, return zero flag
+    out = 0;
+    ref = 0;
 end
 
 end

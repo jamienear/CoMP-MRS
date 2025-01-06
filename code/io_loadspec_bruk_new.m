@@ -74,25 +74,47 @@ if isfile(acqusFile)
 end
 
 % Get a few important bits
+% Software version
 version         = headerACQP.ACQ_sw_version;
+
+% Number of spectral points
 if contains(version, ["PV 5", "PV 6", "PV 7", "PV-7"])
     rawDataPoints = headerMethod.PVM_DigNp;
 elseif contains(version,'PV-360')
     rawDataPoints = headerMethod.PVM_SpecMatrix;
 end
+
+% Number of transients/repetitions
 rawAverages     = headerMethod.PVM_NAverages;
+
+% Number of receivers used
 Nrcvrs          = headerMethod.PVM_EncNReceivers;
 if Nrcvrs>1
     multiRcvrs=true;
 else
     multiRcvrs=false;
 end
+
+% Group delay (i.e. left shift)
 if contains(version, ["PV 5", "PV 6", "PV 7", "PV-7"])
     leftshift       = round(headerACQP.GRPDLY);
 elseif contains(version,'PV-360')
-    leftshift       = round(headerACQUS.GRPDLY);
+    % I'm not sure this differentiation is necessary but Jessie is getting
+    % GRPDELY from the ACQUS file - might remove if not needed
+    if exist('headerACQUS')
+        leftshift       = round(headerACQUS.GRPDLY);
+    else
+        leftshift       = round(headerACQP.GRPDLY);
+    end
+    
+    % Found a couple instances of GRPDLY being -1, in that case, set it to
+    % the PV360 default which is 77 (from Brayan Alves' script)
+    if leftshift == -1
+        leftshift = 77;
+    end
 end
 
+% Spectral width
 if contains(version, ["PV 5", "PV 6", "PV 7", "PV-7"])
     spectralwidth = headerMethod.PVM_DigSw;
 elseif contains(version,'PV-360')
@@ -108,12 +130,14 @@ elseif contains(version, ["PV 6", "PV 7", "PV-7", "PV-360"])
     txfrq       = headerMethod.PVM_FrqWork(1)*1e6;
     txfrq_ref   = headerMethod.PVM_FrqRef(1)*1e6;
 end
-
 Bo=txfrq/42577000;
 
 % spectralwidthppm is stored in the header BUT it is slightly different 
 % than if we calculate it from txfrq and spectralwidth - this suggests we 
 % may have to correct txfrq itself with one of the freq offsets?
+% Note: We are now calculating the ppm axis via a frequency axis (as in the
+% other FID-A functions), so this variable is probably not even needed
+% anymore - keeping it for now for sanity checks)
 spectralwidthppm=spectralwidth/(txfrq_ref/1e6); % old method
 spectralwidthppm=headerMethod.PVM_SpecSW; % better method?
 
@@ -128,8 +152,11 @@ elseif contains(version,'PV-360')
     centerfreq      = headerMethod.PVM_FrqRefPpm(1);
 end
 
+% TE/TR
 te = headerMethod.PVM_EchoTime;
 tr = headerMethod.PVM_RepetitionTime;
+
+% Sequence string
 sequence = headerMethod.Method;
 
 

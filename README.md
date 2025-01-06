@@ -6,16 +6,20 @@ Repository of processing tools and procedures for a multi-site preclinical MRS p
 
 ### Jan 5 2025
 
-First alpha version of the new reader. Tested the 'combined data loading' on Bruker sets between DP01-DP19. Main innovations compared to the 'old' reader are:
+First alpha version of the new reader. Main innovations compared to the 'old' reader are:
 
 - TX freqs for PV6 onwards are explicitly stored separately for metabolite and ref scans. headerACQP.BF1 is identical to headerMethod.PVM_FrqWork (and is slightly different from headerMethod.PVM_FrqRef). For PV6 onwards, I am now reading txfrq_ref and txfrq from these two fields and shift the time-domain signals accordingly (but see open questions below)
 - Center frequency is *explicitly* stored in the headers from PV6 onwards so I am reading it out and using it to calculate the ppm axis - mostly it's been 4.7 so we'll assume that for PV5 too. For compatibility with the other FID-A functions, we should probably store this centerfreq value in the FID-A header? (Note: I don't think we should end up with different ppm axes for ref and metabolite scans, so I'm just using the frequency shifts from above)
 
-All test datasets I've tried load without error and appear reasonable, but some doubts remain:
+I have tested the 'combined data loading' on Bruker sets between DP01-DP32 (with updated test suite). Most test datasets I've tried load without error (except DP22 and DP23 when trying to load in 'combined' mode, because don't have a `fid` file - I suppose this is because it's a non-standard sSPECIAL sequence? We can either let this throw an error or re-direct the function to open the `ser` file).
+
+Visual inspection of the combined data has appeared reasonable, but some doubts remain:
 
 - DP17 doesn't seem to be shifted right (residual water at 6.4 ppm?), so I am not totally certain I have the frequency/shift referencing nailed perfectly.
-- Some datasets (DP15, DP16) have NAA appear to the left of 2.01 ppm (e.g. 1.88, 1.95 ppm), but the residual water is where it should be. I was tearing my head out whether I'm calculating the ppm axis wrong, but I now think it's a temperature effect? Unfortunately the spreadsheet does not have the temperature for these two DPs.
+- Some datasets (DP15, DP16, DP27) have NAA appear to the left of 2.01 ppm (e.g. 1.88, 1.95 ppm), but the residual water is where it should be. I was tearing my head out whether I'm calculating the ppm axis wrong, but I now think it's a temperature effect? Unfortunately the spreadsheet does not have the temperature for these two DPs.
 - I was also under the impression that PV6 onwards *always* store a combined reference scan, but that does not appear to be the case (DP05, DP08, DP09, DP10, DP15, DP16, DP17, DP18)
+
+I have, so far, not visually inspected the output of the 'uncombined' (raw) data loading.
 
 ### Jan 3, 2025 (GO)
 
@@ -23,15 +27,16 @@ I have created a new 'parallel' development version `io_loadspec_bruk_new.m` alo
 
 ### Open Questions
 
+- (Jan 5 GO) Are the `fid` (combined and processed) data already eddy-current-corrected?
 - (Jan 5 GO) For now, I'm applying the frequency shift (corresponding to the difference between FrqRef and FrqWork) to the *water-suppressed* data (PV-360 only) or to the ref data (if not PV-360), but I'm not confident that this is correct.
 - (Jan 5 GO) Is cutting off the number of points indicated in GRPDLY really sufficient? When I look at the FIDs, I frequently find that the top of the echo appears slightly after that chop-off point
 
 ### TO DO
 
-- [ ] (Jan 5 GO) Test the extended dataset (DP20-DP32)
+- [x] (Jan 5 GO) Test the extended dataset (DP20-DP32)
 - [ ] (Jan 5 GO) Test raw data loading
 - [ ] (Jan 3 GO) Design tests to check that data are actually loaded *correctly*, i.e., do some sanity checks, visual inspection, etc.
-- [ ] (Jan 3 GO) Design tests for reference data.
+- [ ] (Jan 3 GO) Design tests for reference data (in the `mrsref` directories).
 - [ ] (Jan 3 GO) I have found some interesting code in Jessie's loader that does some scaling according to the receiver gain - need to look into that
 - [ ] (Jan 3 GO) Need to figure out where to find amplitude and phase coefficients for coil combination
 
