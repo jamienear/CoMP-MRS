@@ -4,6 +4,27 @@ Repository of processing tools and procedures for a multi-site preclinical MRS p
 
 ## Update Log (for our internal development)
 
+### Jan 10 2025
+
+Major update for raw data. Main innovations:
+
+- Added (and tested) functionality to load raw (coil-uncombined) data and store the multi-dimensional arrays correctly. Note that it appears from the available test data that PV5 does not store separate channel data.
+- Navigator scans (PV5, if available) are now returned as a separate `nav` struct, not `ref`.
+- Data with multiple repetitions (which are an outer loop around averages) are now correctly loaded (at least in 'combined' mode), with the `subSpecs` dimension being used to store the repetition dimension.
+- Parse the sequence method string from the `PULPROG` variable in `ACQP` file.
+- Refactored the FID data load function.
+
+We still need to figure out where to get the proper coil combination coefficients from:
+
+- Phases are in `PVM_PhasedArray`
+- Some datasets have values in `PVM_EncChanScaling` (but not sure they are what I think they are)
+- Some datasets (definitely not all) seem to have a water signal stored in `PVM_RefScan` with separate coil elements. This might be able to be used.
+
+Notes on scaling - getting that right is going to be very important:
+
+- It seems that (at least for PV5), combined data is simply the **sum** of the individual transients, **not the average**.
+- Receiver gain is not loaded at all yet (Jessie does it in her code), but it can differ between water reference and metabolite scans.
+  
 ### Jan 5 2025
 
 First alpha version of the new reader. Main innovations compared to the 'old' reader are:
@@ -23,18 +44,19 @@ I have, so far, not visually inspected the output of the 'uncombined' (raw) data
 
 ### Jan 3, 2025 (GO)
 
-I have created a new 'parallel' development version `io_loadspec_bruk_new.m` alongside a new test suite `io_loadspec_bruk_newTest`. The new reader has a completely rewritten routine to extract header information from acqp, acqus, and method files, allowing these to be quite flexibly plucked from a struct. The new reader successfully runs the current test suite (15 datasets between DP01 and DP19), i.e., it loads the datasets without error (both with and without the 'rawdata' flag). 
+I have created a new 'parallel' development version `io_loadspec_bruk_new.m` alongside a new test suite `io_loadspec_bruk_newTest`. The new reader has a completely rewritten routine to extract header information from acqp, acqus, and method files, allowing these to be quite flexibly plucked from a struct. The new reader successfully runs the current test suite (15 datasets between DP01 and DP19), i.e., it loads the datasets without error (both with and without the 'rawdata' flag).
 
 ### Open Questions
 
-- (Jan 5 GO) Are the `fid` (combined and processed) data already eddy-current-corrected?
+- (Jan 5 GO) Are the `fid` (combined and processed) data already eddy-current-corrected? There appears to be a parameter `EDC_OnOff` indicating this but it does not appear in all data.
 - (Jan 5 GO) For now, I'm applying the frequency shift (corresponding to the difference between FrqRef and FrqWork) to the *water-suppressed* data (PV-360 only) or to the ref data (if not PV-360), but I'm not confident that this is correct.
 - (Jan 5 GO) Is cutting off the number of points indicated in GRPDLY really sufficient? When I look at the FIDs, I frequently find that the top of the echo appears slightly after that chop-off point
 
 ### TO DO
 
+- [ ] (Jan 7 GO) If combined data are requested but not fid file is found, look for ser file (and return that)
 - [x] (Jan 5 GO) Test the extended dataset (DP20-DP32)
-- [ ] (Jan 5 GO) Test raw data loading
+- [x] (Jan 5 GO) Test raw data loading
 - [ ] (Jan 3 GO) Design tests to check that data are actually loaded *correctly*, i.e., do some sanity checks, visual inspection, etc.
 - [ ] (Jan 3 GO) Design tests for reference data (in the `mrsref` directories).
 - [ ] (Jan 3 GO) I have found some interesting code in Jessie's loader that does some scaling according to the receiver gain - need to look into that
