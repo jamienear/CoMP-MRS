@@ -4,6 +4,20 @@ Repository of processing tools and procedures for a multi-site preclinical MRS p
 
 ## Update Log (for our internal development)
 
+### Jan 17 2025
+
+Updates for the raw data loader. Details:
+
+- For multi-channel data, the phases are read from `PVM_PhasedArray` and returned in a field `ph` of a new output struct `coilcombos` which can be fed into the FID-A coil combination function `op_addrcrvs.m`. 
+- Coil combination *amplitudes* are still a mystery.  My hunch is that they just add the (phased) coil signals up (or average them), but I can't get the scaling between raw and processed data consistent.
+- Receiver gain for the water-suppressed data is read from `ACQ_jobs` in the ACQP file (according to the Bruker manual, the `RG` value in the same file is *not* correct).
+
+By applying the coil combination phases to the raw data (and then simply summing the averages up), one can get remarkably close to the Bruker-processed data, but only to a scaling factor that I cannot wrap my head around.
+Between the coil combination amplitudes and the receiver gain, we must still be missing something. I think that, at this point, we should e-mail Bruker about the details of the on-scanner recon.
+
+Other additions include a script `processBrukerRaw.m` in `code\tests` that can be used to compare the Bruker-processed spectrum with one that we process with FID-A functions from the raw data.
+This function requires a couple of FID-A functions (`op_addrcvrs`, `op_ampScale`, `op_averaging` and `phase`) that I have added for convenience. I've also added my own FID-A-style function for a classic Klose eddy current correction (`op_eccKlose`).
+
 ### Jan 10 2025
 
 Major update for raw data. Main innovations:
@@ -48,6 +62,7 @@ I have created a new 'parallel' development version `io_loadspec_bruk_new.m` alo
 
 ### Open Questions
 
+- (Jan 10 GO) How does Bruker do the on-scanner processing? What are the coil combination amplitudes? How is the receiver gain applied? Any other scalings that we're missing?
 - (Jan 5 GO) Are the `fid` (combined and processed) data already eddy-current-corrected? There appears to be a parameter `EDC_OnOff` indicating this but it does not appear in all data.
 - (Jan 5 GO) For now, I'm applying the frequency shift (corresponding to the difference between FrqRef and FrqWork) to the *water-suppressed* data (PV-360 only) or to the ref data (if not PV-360), but I'm not confident that this is correct.
 - (Jan 5 GO) Is cutting off the number of points indicated in GRPDLY really sufficient? When I look at the FIDs, I frequently find that the top of the echo appears slightly after that chop-off point
@@ -59,8 +74,8 @@ I have created a new 'parallel' development version `io_loadspec_bruk_new.m` alo
 - [x] (Jan 5 GO) Test raw data loading
 - [ ] (Jan 3 GO) Design tests to check that data are actually loaded *correctly*, i.e., do some sanity checks, visual inspection, etc.
 - [ ] (Jan 3 GO) Design tests for reference data (in the `mrsref` directories).
-- [ ] (Jan 3 GO) I have found some interesting code in Jessie's loader that does some scaling according to the receiver gain - need to look into that
-- [ ] (Jan 3 GO) Need to figure out where to find amplitude and phase coefficients for coil combination
+- [x] (Jan 3 GO) I have found some interesting code in Jessie's loader that does some scaling according to the receiver gain - need to look into that
+- [x] (Jan 3 GO) Need to figure out where to find amplitude and phase coefficients for coil combination
 
 ## Contents
 

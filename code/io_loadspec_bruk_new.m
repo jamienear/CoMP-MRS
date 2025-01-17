@@ -46,11 +46,14 @@
 %             'n' - load the Bruker combined data
 %
 % OUTPUTS:
-% out = Metabolite scan data in FID-A structure format.
-% ref = Reference scan data in FID-A structure format, if applicable.
-% nav = Navigator echo data in FID-A structure format, if applicable.
+% out        = Metabolite scan data in FID-A structure format.
+% ref        = Reference scan data in FID-A structure format, if applicable.
+% nav        = Navigator echo data in FID-A structure format, if applicable.
+% coilcombos = Structure containing two fields:
+%              ph:  Vector of coil phases (in [degrees]) used for alignment.
+%              sig: Vector of coil weights.
 
-function [out,ref,nav]=io_loadspec_bruk_new(inDir, rawData)
+function [out,ref,nav,coilcombos]=io_loadspec_bruk_new(inDir, rawData)
 
 %Allow the user to pass the input directory as either a string or an
 %integer.
@@ -100,15 +103,46 @@ end
 % Number of receivers used
 Nrcvrs          = headerMethod.PVM_EncNReceivers;
 if Nrcvrs>1
+    multiRcvrs = true;
+end
+
+% A few other fields seem to be relevant here
+if isfield(headerMethod, 'PVM_ArrayPhase')
+    arrayPhase = headerMethod.PVM_ArrayPhase;
+else
+    arrayPhase = zeros(Nrcvrs,1);
+end
+% At least one dataset has only one channel but stores the correct
+% phase in headerMethod.PVM_EncChanPhase
+if isfield(headerMethod, 'PVM_EncChanPhase')
+    encChanPhase = headerMethod.PVM_EncChanPhase;
+else
+    encChanPhase = zeros(Nrcvrs,1);
+end
+% At least one dataset (PV5) has what appears to be channel scaling coefficients
+% stored, even if PV5 does not store separate channel data.
+if isfield(headerMethod, 'PVM_EncChanScaling')
+    encChanScaling = headerMethod.PVM_EncChanScaling;
+else
+    encChanScaling = ones(size(Nrcvrs));
+end
+
+if Nrcvrs>1
     % If multi-phase, get coil phases
     multiRcvrs=true;
     if isfield(headerMethod, 'PVM_ArrayPhase')
         rcvrPhases = headerMethod.PVM_ArrayPhase;
     else
-        rcvrPhases = zeros(Nrcvrs);
+        rcvrPhases = zeros(Nrcvrs,1);
     end
 else
     multiRcvrs=false;
+    
+    if isfield(headerMethod, 'PVM_EncChanPhase')
+        rcvrPhases = headerMethod.PVM_EncChanPhase;
+    else
+        rcvrPhases = zeros(Nrcvrs,1);
+    end
 end
 
 % Group delay (i.e. left shift)
@@ -168,6 +202,20 @@ elseif contains(version,'PV-360')
     centerfreq      = headerMethod.PVM_FrqRefPpm(1);
 end
 
+% Receiver gain which we seem to need when reconciling raw and processed data
+% According to the manual, this appears to be stored in ACQ_jobs (in fifth
+% position), *NOT* the regular ACQP RG parameter.
+if isfield(headerACQP, 'ACQ_jobs')
+    if iscell(headerACQP.ACQ_jobs{1})
+        receiverGain = str2double(headerACQP.ACQ_jobs{1}{5});
+    else
+        receiverGain = str2double(headerACQP.ACQ_jobs{5});
+    end
+else
+    receiverGain = 1;
+end
+
+
 % TE/TR
 te = headerMethod.PVM_EchoTime;
 tr = headerMethod.PVM_RepetitionTime;
@@ -226,6 +274,15 @@ if strcmpi(rawData,'y')
         fids_raw=reshape(fids_raw,rawDataPoints,rawAverages,rawRepetitions);
 
     end
+
+    % Normalize by the receiver gain for multi-channel data
+    % This appears to be necessary but I can't quite figure out the
+    % condition for that
+    % Scale by receiver gain (if that has been previously extracted)
+    if receiverGain
+        fids_raw = fids_raw ./ receiverGain;
+    end
+
 
 elseif strcmpi(rawData,'n')
     %REQUEST PROCESSED DATA ONLY:  Use the FID file instead of fid.raw.
@@ -358,13 +415,13 @@ if isRef
 
     % Apply ref freq shift (the difference between txfrq and txfrq_ref)
     % (but not if it's PV360)
+    sz_ref=size(fids_ref); %size of the array
     if ~contains(version, ["PV-360"])
-        tmat=repmat(t',[1 sz(2:end)]);
+        tmat=repmat(t',[1 sz_ref(2:end)]);
         reffids=reffids.*exp(-1i*tmat*(txfrq_ref-txfrq)*2*pi);
     end
 
     refspecs=fftshift(ifft(reffids,[],1),1);
-    sz_ref=size(refspecs);
 
     %specify the dims
     refdims.t=1;
@@ -597,6 +654,35 @@ else
     nav = [];
 end
 
+%% Store coil combination coefficients
+
+% Only return coil combination coefficients if raw data are requested.
+if multiRcvrs && strcmpi(rawData,'y')
+
+    % All phases in PVM_ArrayPhase are calculated relative to the first 
+    % channel, so the phases we need to feed into the coil combination are
+    % the negative of that
+    if length(rcvrPhases) > 1
+        rcvrPhases = rcvrPhases(1) - rcvrPhases;
+    else
+        % I've seen single-coil data with a non-zero value here that
+        % perfectly corresponds to the phase of that single channel. I'll
+        % save that, but won't apply it here - can do that in the next step
+        % outside of this function
+    end
+    coilcombos.ph   = rcvrPhases;
+
+    % I *believe* that Bruker simply adds up the channel signals without
+    % any weighting. This also means that the normalization of the various
+    % FID-A functions to combine the signal will afterwards need to be
+    % undone (by scaling by the number of channels)
+    coilcombos.sig  = ones(size(rcvrPhases));
+
+else
+    % If only one coil, store trivial output
+    coilcombos.ph   = 0;
+    coilcombos.sig  = 1;
+end
 
 end
 
@@ -613,13 +699,40 @@ fid_data = fread(data, formatRaw);
 % Make complex
 real_fid = fid_data(1:2:length(fid_data));
 imag_fid = fid_data(2:2:length(fid_data));
-fids_raw = real_fid+1i*imag_fid;
+fids_raw = (real_fid+1i*imag_fid);
 
 % Close
 fclose(data);
 
 end
 
+function coilcombos_emp = getCoilCombos(in, mode)
+% This subroutine empirically calculates the coil combination coefficients
+% to compare them against the ones that may be stored in the headers.
+% Only here for validation/testing purposes.
+
+% Get first point
+point = 1;
+
+coilcombos_emp.ph=zeros(in.sz(in.dims.coils),1);
+coilcombos_emp.sig=zeros(in.sz(in.dims.coils),1);
+
+for n=1:in.sz(in.dims.coils)
+    coilcombos_emp.ph(n)=phase(in.fids(point,n,1,1))*180/pi; %in [degrees]
+    switch mode
+        case 'w'
+            coilcombos_emp.sig(n)=abs(in.fids(point,n,1,1));
+        case 'h'
+            S=abs(in.fids(point,n,1,1));
+            N=std(in.fids(end-100:end,n,1,1));
+            coilcombos_emp.sig(n)=(S/(N.^2));
+    end
+end
+
+%Now normalize the coilcombos.sig so that the max amplitude is 1;
+coilcombos_emp.sig=coilcombos_emp.sig/max(coilcombos_emp.sig);
+
+end
 
 
 function header = parseBrukerFormat(inputFile)
