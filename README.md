@@ -4,13 +4,29 @@ Repository of processing tools and procedures for a multi-site preclinical MRS p
 
 ## Update Log (for our internal development)
 
+### Jan 23 2025
+
+Update for the raw data loader about eddy-current correction. Details:
+
+- The loader returns an additional flag `isECCed` that indicates whether the **processed data** have been eddy-current-corrected (this is determined by the checkbox on the Bruker console).
+- The governing parameter `EDC_OnOff` is stored in different places (apparently in method file in PV5 or in methodreco file in other versions) - if not found anywhere, it is assumed to be set to "Off"
+- Oddly enough, some datasets have this parameter set to "On", but do not have a reference dataset (according to the manual, the checkbox can only be set if a reference scan is acquired)
+- In any case, this extra flag can be used in a subsequent script to dynamically decide whether ECC needs to be applied or not.
+So far, a few findings:
+- If the dataset has reference scan and `EDC_OnOff` set to `Off`, applying `op_eccKlose` seems to perfectly phase the data (ex: DP19, DP20)
+- If the dataset has `EDC_OnOff` set to `On`, the metabolite data are ECC-ed and perfectly phased, but the **reference data are not** (ex: DP14, DP17, DP18, DP21, DP24, DP25, DP26, DP27)
+- If the dataset has **no** reference scan and `EDC_OnOff` set to `Off`, things are a little more difficult:
+  - DP08 still seems perfectly phased
+  - DP04, DP09, DP16, DP16 are not
+  - In some cases (DP15), applying the *last element* of `PVM_ArrayPhase` appears to fix the overall phase, but that's definitely not the case consistently.
+
 ### Jan 17 2025
 
 Updates for the raw data loader. Details:
 
 - For multi-channel data, the phases are read from `PVM_PhasedArray` and returned in a field `ph` of a new output struct `coilcombos` which can be fed into the FID-A coil combination function `op_addrcrvs.m`. 
 - Coil combination *amplitudes* are still a mystery.  My hunch is that they just add the (phased) coil signals up (or average them), but I can't get the scaling between raw and processed data consistent.
-- Receiver gain for the water-suppressed data is read from `ACQ_jobs` in the ACQP file (according to the Bruker manual, the `RG` value in the same file is *not* correct).
+- Receiver gain for the water-suppressed data is read from `ACQ_jobs` in the ACQP file (according to the Bruker manual, the `RG` value in the same file is *not* correct) and applied to the raw data.
 
 By applying the coil combination phases to the raw data (and then simply summing the averages up), one can get remarkably close to the Bruker-processed data, but only to a scaling factor that I cannot wrap my head around.
 Between the coil combination amplitudes and the receiver gain, we must still be missing something. I think that, at this point, we should e-mail Bruker about the details of the on-scanner recon.

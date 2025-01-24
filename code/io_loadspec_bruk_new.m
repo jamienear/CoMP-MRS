@@ -52,8 +52,10 @@
 % coilcombos = Structure containing two fields:
 %              ph:  Vector of coil phases (in [degrees]) used for alignment.
 %              sig: Vector of coil weights.
+% isECCed    = Flag indicating whether processed data have been
+%              eddy-current-corrected (read out from EdcOnOff fields)
 
-function [out,ref,nav,coilcombos]=io_loadspec_bruk_new(inDir, rawData)
+function [out,ref,nav,coilcombos,isECCed]=io_loadspec_bruk_new(inDir, rawData)
 
 %Allow the user to pass the input directory as either a string or an
 %integer.
@@ -65,6 +67,8 @@ if isnumeric(inDir)
     end
 end
 
+%% HEADER READING 
+
 % Populate the header information from the ACQP file
 acqpFile        = fullfile(inDir, 'acqp');
 headerACQP      = parseBrukerFormat(acqpFile);
@@ -74,9 +78,15 @@ methodFile      = fullfile(inDir, 'method');
 headerMethod    = parseBrukerFormat(methodFile);
 
 % Populate the header information from the ACQUS file
-acqusFile      = fullfile(inDir, 'acqus');
+acqusFile       = fullfile(inDir, 'acqus');
 if isfile(acqusFile)
-    headerACQUS    = parseBrukerFormat(acqusFile);
+    headerACQUS = parseBrukerFormat(acqusFile);
+end
+
+% Populate the header information from the RECO file
+methRecoFile        = fullfile(inDir, 'pdata', '1', 'methreco');
+if isfile(methRecoFile)
+    headerMETHRECO  = parseBrukerFormat(methRecoFile);
 end
 
 % Get a few important bits
@@ -236,6 +246,34 @@ elseif contains(pulprog, 'special', 'IgnoreCase', true)
 else
     sequence = 'Unknown';
 end
+
+% Take a guess at whether the data are eddy-current-corrected
+if isfield(headerMethod, 'OPT_EDCOnOff')
+    % This seems to be stored in the method file for PV5
+    if strcmpi(headerMethod.OPT_EDCOnOff, 'Off')
+        isECCed = 0;
+    else
+        isECCed = 1;
+    end
+elseif exist('headerMETHRECO', 'var')
+    if isfield(headerMETHRECO, 'Edc_OnOff')
+        % 
+        if strcmpi(headerMETHRECO.Edc_OnOff, 'Off')
+            isECCed = 0;
+        else
+            isECCed = 1;
+        end
+    else
+        % Assume it's off
+        isECCed = 0;
+    end
+else
+    % Assume it's off
+    isECCed = 0;
+end
+
+
+%% DATA LOADING
 
 %Now load in the data.  Either raw or averaged data, depending on what was
 %requested via the 'rawData' parameter. 
