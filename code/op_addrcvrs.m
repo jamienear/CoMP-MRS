@@ -30,9 +30,15 @@
 % coilcombos    = Structure containing two fields:
 %                   ph:  Vector of coil phases (in [degrees]) used for alignment.
 %                   sig: Vector of coil weights.
+% normalizeWeights = Flag determining whether the coil weights should be
+%                   normalized (1, default) or not (0).
 
          
-function [out,fids_presum,specs_presum,coilcombos]=op_addrcvrs(in,point,mode,coilcombos);
+function [out,fids_presum,specs_presum,coilcombos]=op_addrcvrs(in,point,mode,coilcombos,normalizeWeights);
+
+if nargin<5
+    normalizeWeights = 1;
+end
 
 if in.flags.addedrcvrs || ~in.dims.coils
     disp('WARNING:  Only one receiver channel found!  Returning input without modification!');
@@ -102,8 +108,12 @@ else
     % replicate(in.dims.coils)=1;
     % ph=repmat(ph,replicate);
     % sig=repmat(sig,replicate);
-    sigs=sigs/norm(sigs(:));
-    
+
+    % Normalize weights (or don't)
+    if normalizeWeights
+        sigs=sigs/norm(sigs(:));
+    end
+
     ph=ones(in.sz);
     sig=ones(in.sz);
     

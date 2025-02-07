@@ -313,33 +313,60 @@ if strcmpi(rawData,'y')
 
     end
 
-    % Normalize by the receiver gain for multi-channel data
-    % This appears to be necessary but I can't quite figure out the
-    % condition for that
-    % Scale by receiver gain (if that has been previously extracted)
-    if receiverGain
-        fids_raw = fids_raw ./ receiverGain;
-    end
+    % Remove singletons
+    fids_raw = squeeze(fids_raw);
+
+%     % Normalize by the receiver gain for multi-channel data
+%     % This appears to be necessary but I can't quite figure out the
+%     % condition for that
+%     % Scale by receiver gain (if that has been previously extracted)
+%     % GO 2/7/2025: THIS SEEMS TO BE WRONG, ALSO PER THANH RECEIVER GAIN
+%     % SCALING IS NOT DONE
+%     if receiverGain
+%         fids_raw = fids_raw ./ receiverGain;
+%     end
 
 
 elseif strcmpi(rawData,'n')
     %REQUEST PROCESSED DATA ONLY:  Use the FID file instead of fid.raw.
     if contains(version, ["PV-360"])
         fileRaw     = fullfile(inDir, 'pdata', '1', 'fid_proc.64');
-        fids_raw    = readBrukerRaw(fileRaw, 'float64');
+        if ~isfile(fileRaw)
+            % try if there is a ser file
+            fileRaw = fullfile(inDir, 'ser');
+            if ~isfile(fileRaw)
+                error("No processed (fid_proc.64) or series (ser) data found in the target folder!");
+            else
+                % set a series flag
+                serFileFlag = 1;
+                fids_raw    = readBrukerRaw(fileRaw, 'int');
+            end
+        else
+            serFileFlag = 0;
+            fids_raw    = readBrukerRaw(fileRaw, 'float64');
+        end
+        
     else
         fileRaw     = fullfile(inDir, 'fid');
+        serFileFlag = 0;
         fids_raw    = readBrukerRaw(fileRaw, 'int');
     end
 
     % Combined data have the averages combined, but the repetitions separate
-    fids_raw = reshape(fids_raw, rawDataPoints, 1, rawRepetitions);
+    if serFileFlag
+        fids_raw = reshape(fids_raw, rawDataPoints, rawAverages, rawRepetitions);
+        averages=1; %since we received the series data.
+        out.flags.averaged=0; %make the flags structure
+    else
+        fids_raw = reshape(fids_raw, rawDataPoints, 1, rawRepetitions);
+        averages=1; %since we requested the combined data.
+        out.flags.averaged=1; %make the flags structure
+    end
 
     % Remove singletons
     fids_raw = squeeze(fids_raw);
 
-    averages=1; %since we requested the combined data.
-    out.flags.averaged=1; %make the flags structure
+
 
 else
     error('ERROR:  rawData variable not recognized.  Options are ''y'' or ''n''.');
@@ -366,7 +393,7 @@ f=[fmax:-2*fmax/(rawDataPoints-1):-fmax];
 ppm=f/(txfrq/1e6)+centerfreq;
 
 % Apply ref freq shift (the difference between txfrq and txfrq_ref)
-if contains(version, ["PV-360"])
+if contains(version, ["PV-360"]) || (contains(version, ["PV 6.0.1", "PV-7"]) && strcmpi(rawData,'y'))
     tmat=repmat(t',[1 sz(2:end)]);
     fids=fids.*exp(-1i*tmat*(txfrq_ref-txfrq)*2*pi);
 end
@@ -385,10 +412,12 @@ if ~contains(version,'PV 5') && multiRcvrs && strcmpi(rawData,'y')
     %Coils dimension should normally be after the averages dimension,
     %unless there are no averages, in which case the coild dimension will
     %be after the time dimension.  
-    if rawAverages==1
+    if rawAverages==1 && rawRepetitions==1
         dims.coils=2;
     elseif rawAverages>1
         dims.coils=3;
+    else
+        dims.coils=0;
     end
 else
     dims.coils=0;
