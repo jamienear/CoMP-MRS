@@ -347,6 +347,8 @@ elseif strcmpi(rawData,'n')
         end
         
     else
+        % NB: If a file called 'fid.orig' exists, it contains data that is not
+        % further corrected on the scanner
         fileRaw     = fullfile(inDir, 'fid');
         serFileFlag = 0;
         fids_raw    = readBrukerRaw(fileRaw, 'int');
@@ -739,11 +741,13 @@ if multiRcvrs && strcmpi(rawData,'y')
     end
     coilcombos.ph   = rcvrPhases;
 
-    % I *believe* that Bruker simply adds up the channel signals without
-    % any weighting. This also means that the normalization of the various
+    % Bruker apparently just adds up the weighted coils (per Thanh Phong
+    % Le) and then divides by the number of channels.
+    % This also means that the normalization of the various
     % FID-A functions to combine the signal will afterwards need to be
-    % undone (by scaling by the number of channels)
-    coilcombos.sig  = ones(size(rcvrPhases));
+    % undone - I have added a flag to the op_addrcvrs function that allows 
+    % this.
+    coilcombos.sig  = encChanScaling;
 
 else
     % If only one coil, store trivial output

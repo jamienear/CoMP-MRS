@@ -4,6 +4,48 @@ Repository of processing tools and procedures for a multi-site preclinical MRS p
 
 ## Update Log (for our internal development)
 
+### Feb 07 2025
+
+Big progress today:
+
+- I figured out the mystery scaling incoherences, thanks to the very useful notes from Thanh!
+  1) I removed the receiver gain scaling (it should *NOT* be applied anywhere);
+  2) used the coil weighting in `encChanScaling`;
+  3) did either coil averaging or summation (depending on the software version);
+  4) *averaged* the raw data across the averages/transients dimension, independent of software version. 
+- I also added Klose eddy-current correction to the `processBrukerRaw` script (which will eventually end up as an Osprey `osp_loadBruker` wrapper).
+- **For many datasets, reconstruction from the raw data agrees with the scanner-processed data either *perfectly* ([DP06](/code/notes/graphics/DP06_perfect_020725.png),07,08,10) or to within noise (DP04,05,15,16,19,21,[26](/code/notes/graphics/DP26_perfect_020725.png),27).**
+- There are a few remaining datasets with phase and frequency shift differences resulting in structural differences that I haven’t quite figured out (DP01,09,14,20,24,25).
+  - Do we, maybe, need to apply eddy-current correction to each channel *before* combining the coils? (see e.g. DP14,18,24,25 - all of these have `Edc_OnOff = Yes`)
+  - Do we, maybe, need to apply the interleaved frequency correction update `RetroFrequencyLock_OnOff`? Some datasets have `PVM_RefScan` and `PVM_RefScanPC` (PC = phase correction?), others `PVM_DriftCompYesNo`
+- Finally, some datasets (even scanner-processed ones) have a, sometimes huge, zero-order phase shift. It’s nothing we can’t fix in post-processing and modeling, but maybe we’re overlooking one final phase correction parameter somewhere (it may be related to the other phase issues).
+
+#### Notes per dataset
+
+- DP01: Processed and scanner spectra agree to within noise except for minuscule frequency shift; both have ~45 deg phase; no ECC reference. 
+  - If I load `fid.orig` as the scanner-processed file instead, the outcome is *identical*!
+- DP04: Processed and scanner spectra agree to within noise but are approximately 170 degrees out of phase 
+- DP05: Processed and scanner spectra agree to within noise; both have ~160 deg phase; no ECC reference
+- DP06: Processed and scanner spectra agree are perfectly *identical* and both are perfectly phased after ECC
+- DP07: Processed and scanner spectra agree are perfectly *identical* and both are perfectly phased after ECC
+- DP08: Processed and scanner spectra agree are perfectly *identical* and both are perfectly phased; no ECC reference
+- DP09: Processed and scanner spectra agree to within noise except for a small frequency/phase shift; both appear overall well-phased after ECC
+- DP10: Processed and scanner spectra agree are perfectly *identical* (only 1 coil present though, so no coil combination); both have ~160 deg phase; no ECC reference
+- DP14: Processed and scanner spectra agree to within 10%; somewhat of a difference around the water base; both are perfectly phased after ECC
+- DP15: Processed and scanner spectra agree to within noise; both have ~180 deg phase; no ECC reference
+- DP16: Processed and scanner spectra agree to within noise; both have ~180 deg phase; no ECC reference
+- DP17: Super noisy dataset; even the ref is noisy; I basically discard this as useless
+- DP18: Processed and scanner spectra agree to within 10%; phase difference of about maybe 10%?; both are well phased; no ECC reference ALTHOUGH Edc_OnOff is set (MYSTERY, this shouldn’t be able to happen)
+- DP19: Processed and scanner spectra agree to within noise; both are perfectly phased after ECC
+- DP20: Processed and scanner spectra agree to within noise except for minuscule frequency shift; both are perfectly phased after ECC
+- DP21: Processed and scanner spectra agree to within noise; both are perfectly phased after ECC
+- DP22: SPECIAL data (not yet supported, working on it)
+- DP23: SPECIAL data (not yet supported, working on it)
+- DP24: Processed and scanner spectra agree to within 10%; but approximately 30 Hz frequency and -75 deg phase offset between them (scanner spectrum perfectly phased); no ECC reference ALTHOUGH Edc_OnOff is set (MYSTERY, this shouldn’t be able to happen)
+- DP25: Processed and scanner spectra agree to within 10%; but approximately 4 Hz frequency and 152 deg phase offset between them (scanner spectrum perfectly phased); no ECC reference ALTHOUGH Edc_OnOff is set (MYSTERY, this shouldn’t be able to happen)
+- DP26: Processed and scanner spectra agree to within noise; both are perfectly phased after ECC
+- DP27: Processed and scanner spectra agree to within noise; both have approximately 20 deg phase after ECC
+
 ### Jan 23 2025
 
 Update for the raw data loader about eddy-current correction. Details:
