@@ -4,6 +4,99 @@ Repository of processing tools and procedures for a multi-site preclinical MRS p
 
 ## Update Log (for our internal development)
 
+### Feb 07 2025
+
+Big progress today:
+
+- I figured out the mystery scaling incoherences, thanks to the very useful notes from Thanh!
+  1) I removed the receiver gain scaling (it should *NOT* be applied anywhere);
+  2) used the coil weighting in `encChanScaling`;
+  3) did either coil averaging or summation (depending on the software version);
+  4) *averaged* the raw data across the averages/transients dimension, independent of software version. 
+- I also added Klose eddy-current correction to the `processBrukerRaw` script (which will eventually end up as an Osprey `osp_loadBruker` wrapper).
+- **For many datasets, reconstruction from the raw data agrees with the scanner-processed data either *perfectly* ([DP06](/code/notes/graphics/DP06_perfect_020725.png),07,08,10) or to within noise (DP04,05,15,16,19,21,[26](/code/notes/graphics/DP26_perfect_020725.png),27).**
+- There are a few remaining datasets with phase and frequency shift differences resulting in structural differences that I haven’t quite figured out (DP01,09,14,20,24,25).
+  - Do we, maybe, need to apply eddy-current correction to each channel *before* combining the coils? (see e.g. DP14,18,24,25 - all of these have `Edc_OnOff = Yes`)
+  - Do we, maybe, need to apply the interleaved frequency correction update `RetroFrequencyLock_OnOff`? Some datasets have `PVM_RefScan` and `PVM_RefScanPC` (PC = phase correction?), others `PVM_DriftCompYesNo`
+- Finally, some datasets (even scanner-processed ones) have a, sometimes huge, zero-order phase shift. It’s nothing we can’t fix in post-processing and modeling, but maybe we’re overlooking one final phase correction parameter somewhere (it may be related to the other phase issues).
+
+#### Notes per dataset
+
+- DP01: Processed and scanner spectra agree to within noise except for minuscule frequency shift; both have ~45 deg phase; no ECC reference. 
+  - If I load `fid.orig` as the scanner-processed file instead, the outcome is *identical*!
+- DP04: Processed and scanner spectra agree to within noise but are approximately 170 degrees out of phase 
+- DP05: Processed and scanner spectra agree to within noise; both have ~160 deg phase; no ECC reference
+- DP06: Processed and scanner spectra agree are perfectly *identical* and both are perfectly phased after ECC
+- DP07: Processed and scanner spectra agree are perfectly *identical* and both are perfectly phased after ECC
+- DP08: Processed and scanner spectra agree are perfectly *identical* and both are perfectly phased; no ECC reference
+- DP09: Processed and scanner spectra agree to within noise except for a small frequency/phase shift; both appear overall well-phased after ECC
+- DP10: Processed and scanner spectra agree are perfectly *identical* (only 1 coil present though, so no coil combination); both have ~160 deg phase; no ECC reference
+- DP14: Processed and scanner spectra agree to within 10%; somewhat of a difference around the water base; both are perfectly phased after ECC
+- DP15: Processed and scanner spectra agree to within noise; both have ~180 deg phase; no ECC reference
+- DP16: Processed and scanner spectra agree to within noise; both have ~180 deg phase; no ECC reference
+- DP17: Super noisy dataset; even the ref is noisy; I basically discard this as useless
+- DP18: Processed and scanner spectra agree to within 10%; phase difference of about maybe 10%?; both are well phased; no ECC reference ALTHOUGH Edc_OnOff is set (MYSTERY, this shouldn’t be able to happen)
+- DP19: Processed and scanner spectra agree to within noise; both are perfectly phased after ECC
+- DP20: Processed and scanner spectra agree to within noise except for minuscule frequency shift; both are perfectly phased after ECC
+- DP21: Processed and scanner spectra agree to within noise; both are perfectly phased after ECC
+- DP22: SPECIAL data (not yet supported, working on it)
+- DP23: SPECIAL data (not yet supported, working on it)
+- DP24: Processed and scanner spectra agree to within 10%; but approximately 30 Hz frequency and -75 deg phase offset between them (scanner spectrum perfectly phased); no ECC reference ALTHOUGH Edc_OnOff is set (MYSTERY, this shouldn’t be able to happen)
+- DP25: Processed and scanner spectra agree to within 10%; but approximately 4 Hz frequency and 152 deg phase offset between them (scanner spectrum perfectly phased); no ECC reference ALTHOUGH Edc_OnOff is set (MYSTERY, this shouldn’t be able to happen)
+- DP26: Processed and scanner spectra agree to within noise; both are perfectly phased after ECC
+- DP27: Processed and scanner spectra agree to within noise; both have approximately 20 deg phase after ECC
+
+### Jan 23 2025
+
+Update for the raw data loader about eddy-current correction. Details:
+
+- The loader returns an additional flag `isECCed` that indicates whether the **processed data** have been eddy-current-corrected (this is determined by the checkbox on the Bruker console).
+- The governing parameter `EDC_OnOff` is stored in different places (apparently in method file in PV5 or in methodreco file in other versions) - if not found anywhere, it is assumed to be set to "Off"
+- Oddly enough, some datasets have this parameter set to "On", but do not have a reference dataset (according to the manual, the checkbox can only be set if a reference scan is acquired)
+- In any case, this extra flag can be used in a subsequent script to dynamically decide whether ECC needs to be applied or not.
+So far, a few findings:
+- If the dataset has reference scan and `EDC_OnOff` set to `Off`, applying `op_eccKlose` seems to perfectly phase the data (ex: DP19, DP20)
+- If the dataset has `EDC_OnOff` set to `On`, the metabolite data are ECC-ed and perfectly phased, but the **reference data are not** (ex: DP14, DP17, DP18, DP21, DP24, DP25, DP26, DP27)
+- If the dataset has **no** reference scan and `EDC_OnOff` set to `Off`, things are a little more difficult:
+  - DP08 still seems perfectly phased
+  - DP04, DP09, DP16, DP16 are not
+  - In some cases (DP15), applying the *last element* of `PVM_ArrayPhase` appears to fix the overall phase, but that's definitely not the case consistently.
+
+### Jan 17 2025
+
+Updates for the raw data loader. Details:
+
+- For multi-channel data, the phases are read from `PVM_PhasedArray` and returned in a field `ph` of a new output struct `coilcombos` which can be fed into the FID-A coil combination function `op_addrcrvs.m`. 
+- Coil combination *amplitudes* are still a mystery.  My hunch is that they just add the (phased) coil signals up (or average them), but I can't get the scaling between raw and processed data consistent.
+- Receiver gain for the water-suppressed data is read from `ACQ_jobs` in the ACQP file (according to the Bruker manual, the `RG` value in the same file is *not* correct) and applied to the raw data.
+
+By applying the coil combination phases to the raw data (and then simply summing the averages up), one can get remarkably close to the Bruker-processed data, but only to a scaling factor that I cannot wrap my head around.
+Between the coil combination amplitudes and the receiver gain, we must still be missing something. I think that, at this point, we should e-mail Bruker about the details of the on-scanner recon.
+
+Other additions include a script `processBrukerRaw.m` in `code\tests` that can be used to compare the Bruker-processed spectrum with one that we process with FID-A functions from the raw data.
+This function requires a couple of FID-A functions (`op_addrcvrs`, `op_ampScale`, `op_averaging` and `phase`) that I have added for convenience. I've also added my own FID-A-style function for a classic Klose eddy current correction (`op_eccKlose`).
+
+### Jan 10 2025
+
+Major update for raw data. Main innovations:
+
+- Added (and tested) functionality to load raw (coil-uncombined) data and store the multi-dimensional arrays correctly. Note that it appears from the available test data that PV5 does not store separate channel data.
+- Navigator scans (PV5, if available) are now returned as a separate `nav` struct, not `ref`.
+- Data with multiple repetitions (which are an outer loop around averages) are now correctly loaded (at least in 'combined' mode), with the `subSpecs` dimension being used to store the repetition dimension.
+- Parse the sequence method string from the `PULPROG` variable in `ACQP` file.
+- Refactored the FID data load function.
+
+We still need to figure out where to get the proper coil combination coefficients from:
+
+- Phases are in `PVM_PhasedArray`
+- Some datasets have values in `PVM_EncChanScaling` (but not sure they are what I think they are)
+- Some datasets (definitely not all) seem to have a water signal stored in `PVM_RefScan` with separate coil elements. This might be able to be used.
+
+Notes on scaling - getting that right is going to be very important:
+
+- It seems that (at least for PV5), combined data is simply the **sum** of the individual transients, **not the average**.
+- Receiver gain is not loaded at all yet (Jessie does it in her code), but it can differ between water reference and metabolite scans.
+  
 ### Jan 5 2025
 
 First alpha version of the new reader. Main innovations compared to the 'old' reader are:
@@ -23,22 +116,24 @@ I have, so far, not visually inspected the output of the 'uncombined' (raw) data
 
 ### Jan 3, 2025 (GO)
 
-I have created a new 'parallel' development version `io_loadspec_bruk_new.m` alongside a new test suite `io_loadspec_bruk_newTest`. The new reader has a completely rewritten routine to extract header information from acqp, acqus, and method files, allowing these to be quite flexibly plucked from a struct. The new reader successfully runs the current test suite (15 datasets between DP01 and DP19), i.e., it loads the datasets without error (both with and without the 'rawdata' flag). 
+I have created a new 'parallel' development version `io_loadspec_bruk_new.m` alongside a new test suite `io_loadspec_bruk_newTest`. The new reader has a completely rewritten routine to extract header information from acqp, acqus, and method files, allowing these to be quite flexibly plucked from a struct. The new reader successfully runs the current test suite (15 datasets between DP01 and DP19), i.e., it loads the datasets without error (both with and without the 'rawdata' flag).
 
 ### Open Questions
 
-- (Jan 5 GO) Are the `fid` (combined and processed) data already eddy-current-corrected?
+- (Jan 10 GO) How does Bruker do the on-scanner processing? What are the coil combination amplitudes? How is the receiver gain applied? Any other scalings that we're missing?
+- (Jan 5 GO) Are the `fid` (combined and processed) data already eddy-current-corrected? There appears to be a parameter `EDC_OnOff` indicating this but it does not appear in all data.
 - (Jan 5 GO) For now, I'm applying the frequency shift (corresponding to the difference between FrqRef and FrqWork) to the *water-suppressed* data (PV-360 only) or to the ref data (if not PV-360), but I'm not confident that this is correct.
 - (Jan 5 GO) Is cutting off the number of points indicated in GRPDLY really sufficient? When I look at the FIDs, I frequently find that the top of the echo appears slightly after that chop-off point
 
 ### TO DO
 
+- [ ] (Jan 7 GO) If combined data are requested but not fid file is found, look for ser file (and return that)
 - [x] (Jan 5 GO) Test the extended dataset (DP20-DP32)
-- [ ] (Jan 5 GO) Test raw data loading
+- [x] (Jan 5 GO) Test raw data loading
 - [ ] (Jan 3 GO) Design tests to check that data are actually loaded *correctly*, i.e., do some sanity checks, visual inspection, etc.
 - [ ] (Jan 3 GO) Design tests for reference data (in the `mrsref` directories).
-- [ ] (Jan 3 GO) I have found some interesting code in Jessie's loader that does some scaling according to the receiver gain - need to look into that
-- [ ] (Jan 3 GO) Need to figure out where to find amplitude and phase coefficients for coil combination
+- [x] (Jan 3 GO) I have found some interesting code in Jessie's loader that does some scaling according to the receiver gain - need to look into that
+- [x] (Jan 3 GO) Need to figure out where to find amplitude and phase coefficients for coil combination
 
 ## Contents
 

@@ -22,8 +22,11 @@
 % For Bruker versions PV5 and earlier, the water suppressed and water
 % unsuppressed data were acquired separately.  In such cases,
 % io_loadspec_bruk would need to be run separately on the water suppressed
-% and water unsuppressed scan folders, and the 2nd output 'ref' refers to
-% any separately acquired navigator echoes.  For Bruker versions PV6 and later,
+% and water unsuppressed scan folders. When run on the water-suppressed 
+% folders, the 2nd output 'ref' will be empty, and the 3rd output 'nav'
+% will contain the acquired navigator echoes.  
+% 
+% For Bruker versions PV6 and later,
 % it became common for the water suppressed data to be acquired
 % concurrently with the water unsuppressed data (within a single scan ID).
 % For such datasets, this function reads both the water suppressed data
@@ -43,11 +46,16 @@
 %             'n' - load the Bruker combined data
 %
 % OUTPUTS:
-% out = Input dataset in FID-A structure format.
-% ref = The Reference scan data (Navigator echoes in PV5, water reference
-%       data in later versions) in FID-A structure format, if applicable.
+% out        = Metabolite scan data in FID-A structure format.
+% ref        = Reference scan data in FID-A structure format, if applicable.
+% nav        = Navigator echo data in FID-A structure format, if applicable.
+% coilcombos = Structure containing two fields:
+%              ph:  Vector of coil phases (in [degrees]) used for alignment.
+%              sig: Vector of coil weights.
+% isECCed    = Flag indicating whether processed data have been
+%              eddy-current-corrected (read out from EdcOnOff fields)
 
-function [out,ref]=io_loadspec_bruk_new(inDir, rawData)
+function [out,ref,nav,coilcombos,isECCed]=io_loadspec_bruk_new(inDir, rawData)
 
 %Allow the user to pass the input directory as either a string or an
 %integer.
@@ -59,6 +67,8 @@ if isnumeric(inDir)
     end
 end
 
+%% HEADER READING 
+
 % Populate the header information from the ACQP file
 acqpFile        = fullfile(inDir, 'acqp');
 headerACQP      = parseBrukerFormat(acqpFile);
@@ -68,9 +78,15 @@ methodFile      = fullfile(inDir, 'method');
 headerMethod    = parseBrukerFormat(methodFile);
 
 % Populate the header information from the ACQUS file
-acqusFile      = fullfile(inDir, 'acqus');
+acqusFile       = fullfile(inDir, 'acqus');
 if isfile(acqusFile)
-    headerACQUS    = parseBrukerFormat(acqusFile);
+    headerACQUS = parseBrukerFormat(acqusFile);
+end
+
+% Populate the header information from the RECO file
+methRecoFile        = fullfile(inDir, 'pdata', '1', 'methreco');
+if isfile(methRecoFile)
+    headerMETHRECO  = parseBrukerFormat(methRecoFile);
 end
 
 % Get a few important bits
@@ -84,15 +100,59 @@ elseif contains(version,'PV-360')
     rawDataPoints = headerMethod.PVM_SpecMatrix;
 end
 
-% Number of transients/repetitions
+% Number of transients
 rawAverages     = headerMethod.PVM_NAverages;
+
+% Number of repetitions
+if isfield(headerMethod, 'PVM_NRepetitions')
+    rawRepetitions  = headerMethod.PVM_NRepetitions;
+else
+    rawRepetitions = 1;
+end
 
 % Number of receivers used
 Nrcvrs          = headerMethod.PVM_EncNReceivers;
 if Nrcvrs>1
+    multiRcvrs = true;
+end
+
+% A few other fields seem to be relevant here
+if isfield(headerMethod, 'PVM_ArrayPhase')
+    arrayPhase = headerMethod.PVM_ArrayPhase;
+else
+    arrayPhase = zeros(Nrcvrs,1);
+end
+% At least one dataset has only one channel but stores the correct
+% phase in headerMethod.PVM_EncChanPhase
+if isfield(headerMethod, 'PVM_EncChanPhase')
+    encChanPhase = headerMethod.PVM_EncChanPhase;
+else
+    encChanPhase = zeros(Nrcvrs,1);
+end
+% At least one dataset (PV5) has what appears to be channel scaling coefficients
+% stored, even if PV5 does not store separate channel data.
+if isfield(headerMethod, 'PVM_EncChanScaling')
+    encChanScaling = headerMethod.PVM_EncChanScaling;
+else
+    encChanScaling = ones(size(Nrcvrs));
+end
+
+if Nrcvrs>1
+    % If multi-phase, get coil phases
     multiRcvrs=true;
+    if isfield(headerMethod, 'PVM_ArrayPhase')
+        rcvrPhases = headerMethod.PVM_ArrayPhase;
+    else
+        rcvrPhases = zeros(Nrcvrs,1);
+    end
 else
     multiRcvrs=false;
+    
+    if isfield(headerMethod, 'PVM_EncChanPhase')
+        rcvrPhases = headerMethod.PVM_EncChanPhase;
+    else
+        rcvrPhases = zeros(Nrcvrs,1);
+    end
 end
 
 % Group delay (i.e. left shift)
@@ -101,7 +161,7 @@ if contains(version, ["PV 5", "PV 6", "PV 7", "PV-7"])
 elseif contains(version,'PV-360')
     % I'm not sure this differentiation is necessary but Jessie is getting
     % GRPDELY from the ACQUS file - might remove if not needed
-    if exist('headerACQUS')
+    if exist('headerACQUS', 'var')
         leftshift       = round(headerACQUS.GRPDLY);
     else
         leftshift       = round(headerACQP.GRPDLY);
@@ -152,77 +212,171 @@ elseif contains(version,'PV-360')
     centerfreq      = headerMethod.PVM_FrqRefPpm(1);
 end
 
+% Receiver gain which we seem to need when reconciling raw and processed data
+% According to the manual, this appears to be stored in ACQ_jobs (in fifth
+% position), *NOT* the regular ACQP RG parameter.
+if isfield(headerACQP, 'ACQ_jobs')
+    if iscell(headerACQP.ACQ_jobs{1})
+        receiverGain = str2double(headerACQP.ACQ_jobs{1}{5});
+    else
+        receiverGain = str2double(headerACQP.ACQ_jobs{5});
+    end
+else
+    receiverGain = 1;
+end
+
+
 % TE/TR
 te = headerMethod.PVM_EchoTime;
 tr = headerMethod.PVM_RepetitionTime;
 
 % Sequence string
-sequence = headerMethod.Method;
+pulprog = headerACQP.PULPROG;
+% Parse it
+if contains(pulprog, 'press', 'IgnoreCase', true)
+    sequence = 'PRESS';
+elseif contains(pulprog, ["slaser", "semilaser"], 'IgnoreCase', true)
+    sequence = 'sLASER';
+elseif contains(pulprog, 'steam', 'IgnoreCase', true)
+    sequence = 'STEAM';
+elseif contains(pulprog, 'laser', 'IgnoreCase', true)
+    sequence = 'LASER';
+elseif contains(pulprog, 'special', 'IgnoreCase', true)
+    sequence = 'SPECIAL';
+else
+    sequence = 'Unknown';
+end
 
+% Take a guess at whether the data are eddy-current-corrected
+if isfield(headerMethod, 'OPT_EDCOnOff')
+    % This seems to be stored in the method file for PV5
+    if strcmpi(headerMethod.OPT_EDCOnOff, 'Off')
+        isECCed = 0;
+    else
+        isECCed = 1;
+    end
+elseif exist('headerMETHRECO', 'var')
+    if isfield(headerMETHRECO, 'Edc_OnOff')
+        % 
+        if strcmpi(headerMETHRECO.Edc_OnOff, 'Off')
+            isECCed = 0;
+        else
+            isECCed = 1;
+        end
+    else
+        % Assume it's off
+        isECCed = 0;
+    end
+else
+    % Assume it's off
+    isECCed = 0;
+end
+
+
+%% DATA LOADING
 
 %Now load in the data.  Either raw or averaged data, depending on what was
 %requested via the 'rawData' parameter. 
-if strcmp(rawData,'y') || strcmp(rawData,'Y')
+if strcmpi(rawData,'y')
     if contains(version, ["PV 6", "PV 7", "PV-7", "PV-360"])
-        data = fopen(fullfile(inDir, 'rawdata.job0')); % WO - changed for PV6.0
-        fid_data = fread(data,'int32');
+        fileRaw     = fullfile(inDir, 'rawdata.job0');
+        fids_raw    = readBrukerRaw(fileRaw, 'int32');
     elseif contains(version,'PV 5')
-        data = fopen(fullfile(inDir, 'fid.raw'));
-        fid_data = fread(data,'int');
+        fileRaw     = fullfile(inDir, 'fid.raw');
+        fids_raw    = readBrukerRaw(fileRaw, 'int');
     end
-    real_fid = fid_data(2:2:length(fid_data));
-    imag_fid = fid_data(1:2:length(fid_data));
-    fids_raw=real_fid-1i*imag_fid;
-    fclose(data); %WO - added fclose
 
     averages=rawAverages;  %since these data are uncombined;
     out.flags.averaged=0; %make the flags structure
-
-    %Reshape to put the averages along a 2nd dimension
-    fids_raw=reshape(fids_raw,[],rawAverages);
 
     %If there are multiple receivers *I think* that these always get stored
     %separately by default in the fid.raw file.  Therefore, at this stage, 
     %if this is a PV360 dataset with multiple receivers, we need to reshape 
     %the dataset again:
     if ~contains(version,'PV 5') && multiRcvrs
-        fids_raw=reshape(fids_raw,rawDataPoints,Nrcvrs,rawAverages);
+        % Reshape into a Npts x Ncoils x Naverages x Nrepetitions array
+        fids_raw=reshape(fids_raw,rawDataPoints,Nrcvrs,rawAverages,rawRepetitions);
         %Permute so that time is along 1st dimension, averages is along 2nd 
         %dimension, and coils is along 3rd dimension:
-        fids_raw=permute(fids_raw,[1,3,2]); 
+        fids_raw=permute(fids_raw,[1,3,2,4]); 
+
+    elseif contains(version,'PV 5') && multiRcvrs
+        % PV 5 does not appear to store individual coil channels in the
+        % job0 file, but still preserves individual transients
+
+        % Reshape into a Npts x Naverages x Nrepetitions array
+        fids_raw=reshape(fids_raw,rawDataPoints,rawAverages,rawRepetitions);
+
+    elseif ~contains(version,'PV 5') && ~multiRcvrs
+        % Found a dataset with only one receiver and one repetition
+        fids_raw=reshape(fids_raw,rawDataPoints,rawAverages,rawRepetitions);
+
     end
 
-elseif strcmp(rawData,'n') || strcmp(rawData,'N')
+    % Remove singletons
+    fids_raw = squeeze(fids_raw);
+
+%     % Normalize by the receiver gain for multi-channel data
+%     % This appears to be necessary but I can't quite figure out the
+%     % condition for that
+%     % Scale by receiver gain (if that has been previously extracted)
+%     % GO 2/7/2025: THIS SEEMS TO BE WRONG, ALSO PER THANH RECEIVER GAIN
+%     % SCALING IS NOT DONE
+%     if receiverGain
+%         fids_raw = fids_raw ./ receiverGain;
+%     end
+
+
+elseif strcmpi(rawData,'n')
     %REQUEST PROCESSED DATA ONLY:  Use the FID file instead of fid.raw.
     if contains(version, ["PV-360"])
-        data = fopen(fullfile(inDir, 'pdata', '1', 'fid_proc.64'));
-        fid_data=fread(data,'float64');
+        fileRaw     = fullfile(inDir, 'pdata', '1', 'fid_proc.64');
+        if ~isfile(fileRaw)
+            % try if there is a ser file
+            fileRaw = fullfile(inDir, 'ser');
+            if ~isfile(fileRaw)
+                error("No processed (fid_proc.64) or series (ser) data found in the target folder!");
+            else
+                % set a series flag
+                serFileFlag = 1;
+                fids_raw    = readBrukerRaw(fileRaw, 'int');
+            end
+        else
+            serFileFlag = 0;
+            fids_raw    = readBrukerRaw(fileRaw, 'float64');
+        end
+        
     else
-        data = fopen(fullfile(inDir, 'fid'));
-        fid_data=fread(data,'int');
+        % NB: If a file called 'fid.orig' exists, it contains data that is not
+        % further corrected on the scanner
+        fileRaw     = fullfile(inDir, 'fid');
+        serFileFlag = 0;
+        fids_raw    = readBrukerRaw(fileRaw, 'int');
     end
-    real_fid = fid_data(1:2:length(fid_data));
-    imag_fid = fid_data(2:2:length(fid_data));
-    fids_raw=real_fid+1i*imag_fid;
-    fclose(data); %WO
 
-    averages=1; %since we requested the combined data.
-    out.flags.averaged=1; %make the flags structure
+    % Combined data have the averages combined, but the repetitions separate
+    if serFileFlag
+        fids_raw = reshape(fids_raw, rawDataPoints, rawAverages, rawRepetitions);
+        averages=1; %since we received the series data.
+        out.flags.averaged=0; %make the flags structure
+    else
+        fids_raw = reshape(fids_raw, rawDataPoints, 1, rawRepetitions);
+        averages=1; %since we requested the combined data.
+        out.flags.averaged=1; %make the flags structure
+    end
+
+    % Remove singletons
+    fids_raw = squeeze(fids_raw);
 
 
-    %***JN***
-    % REMOVED THIS SECTION.  DON'T THINK IT IS NECESSARY.
-    %     if mod(size(real_fid,1),rawDataPoints) ~=0
-    %         display 'number of repetitions cannot be accurately found';
-    %     end
-    %     fids_raw=reshape(fids_raw,rawDataPoints,[]);
-    %***JN***
+
 else
     error('ERROR:  rawData variable not recognized.  Options are ''y'' or ''n''.');
 end
 
+
 %Perform left-shifting to remove points before the echo
-fids_trunc=fids_raw(leftshift+1:end,:,:);
+fids_trunc=fids_raw(leftshift+1:end,:,:,:);
 
 %replace the left-shifted points with zeros at the end
 fids=padarray(fids_trunc, [leftshift,0],'post');
@@ -233,15 +387,15 @@ sz=size(fids); %size of the array
 dwelltime=1/spectralwidth;
 
 %calculate the time scale
-t=[0:dwelltime:(sz(1)-1)*dwelltime];
+t=[0:dwelltime:(rawDataPoints-1)*dwelltime];
 
 %calculate the ppm scale
 fmax=spectralwidth/2;
-f=[fmax:-2*fmax/(sz(1)-1):-fmax];
+f=[fmax:-2*fmax/(rawDataPoints-1):-fmax];
 ppm=f/(txfrq/1e6)+centerfreq;
 
 % Apply ref freq shift (the difference between txfrq and txfrq_ref)
-if contains(version, ["PV-360"])
+if contains(version, ["PV-360"]) || (contains(version, ["PV 6.0.1", "PV-7"]) && strcmpi(rawData,'y'))
     tmat=repmat(t',[1 sz(2:end)]);
     fids=fids.*exp(-1i*tmat*(txfrq_ref-txfrq)*2*pi);
 end
@@ -252,107 +406,177 @@ specs=fftshift(ifft(fids,[],1),1);
 %specify the dims:
 %Time dimension:
 dims.t=1;%the time dimension is always the 1st dimension
+dims.extras=0; %so far, no data files with extra dimensions
 
 %Coils dimension:
 %As far as I am aware, the RF coils are only stored separately in PV360.
-if ~contains(version,'PV 5') && multiRcvrs
+if ~contains(version,'PV 5') && multiRcvrs && strcmpi(rawData,'y')
     %Coils dimension should normally be after the averages dimension,
     %unless there are no averages, in which case the coild dimension will
     %be after the time dimension.  
-    if rawAverages==1
+    if rawAverages==1 && rawRepetitions==1
         dims.coils=2;
     elseif rawAverages>1
         dims.coils=3;
+    else
+        dims.coils=0;
     end
 else
     dims.coils=0;
 end
 
-if strcmp(rawData,'y') || strcmp(rawData,'Y')
+if strcmpi(rawData,'y')
     dims.averages=2;
-elseif strcmp(rawData,'n') || strcmp(rawData,'N')
+    if rawRepetitions>1
+        dims.subSpecs=4;
+    else
+        dims.subSpecs=0;
+    end
+elseif strcmpi(rawData,'n')
     dims.averages=0;
+    if rawRepetitions>1
+        dims.subSpecs=2;
+    else
+        dims.subSpecs=0;
+    end
 end
-%I have not encountered any Bruker datasets so far where there are
-%subSpectra or extras dimensions.  
-dims.subSpecs=0;
-dims.extras=0;
+
+%Specify the number of subspecs. If NRepetitions > 1, subSpecs will hold 
+%the Repetitions dimensions (since it is the outer loop per Bruker manual)
+subspecs=rawRepetitions;
+rawSubspecs=rawRepetitions;
 
 
-%Specify the number of subspecs.  For now, this will always be one.
-subspecs=1;
-rawSubspecs=1;
-
-
-%NOW TRY LOADING IN THE REFERENCE SCAN DATA (IF IT EXISTS)
+%% NOW TRY LOADING IN THE REFERENCE SCAN DATA (IF IT EXISTS)
+% Reference data only exist for PV6 upwards
 isRef=false;
-if contains(version,'PV 5')
-    isRef=exist(fullfile(inDir, 'fid.ref'));
-elseif contains(version,'PV 6') || contains(version,'PV 7') || contains(version,'PV-360.2')
+if contains(version, ["PV 6", "PV 7", "PV-7", "PV-360.2"])
     isRef=exist(fullfile(inDir, 'fid.refscan'));
 elseif contains(version,'PV-360.3')
     isRef=exist(fullfile(inDir, 'pdata', '1', 'fid_refscan.64'));
 end
 
 if isRef
-    if contains(version,'PV 5')
-        % No differentiation of TX freq for the reference AFAIK, so we can
-        % use the same ppm axis
-        data = fopen(fullfile(inDir, 'fid.ref'));
-        ref_data=fread(data,'int');
-    elseif contains(version,'PV 6') || contains(version,'PV 7') || contains(version,'PV-360.2')
-        % Get TX freq of the reference, otherwise the reference ppm axis
-        % will not be correct
-        data = fopen(fullfile(inDir, 'fid.refscan'));
-        ref_data=fread(data,'int32');
+    if contains(version, ["PV 6", "PV 7", "PV-7", "PV-360.2"])
+        fileRef     = fullfile(inDir, 'fid.refscan');
+        fids_ref    = readBrukerRaw(fileRef, 'int32');
     elseif contains(version,'PV-360.3')
-        data = fopen(fullfile(inDir, 'pdata', '1', 'fid_refscan.64'));
-        ref_data=fread(data,'float64');
+        fileRef     = fullfile(inDir, 'pdata', '1', 'fid_refscan.64');
+        fids_ref    = readBrukerRaw(fileRef, 'float64');
     end
-    real_ref = ref_data(1:2:length(ref_data));
-    imag_ref = ref_data(2:2:length(ref_data));
-    fids_ref=real_ref+1i*imag_ref;
-    fclose(data); %WO - added fclose
 
     %Find the number of averages in the ref dataset:
     if contains(version,'PV 5')
+        % These are navigator echoes acquired every TR
         rawAverages_ref=rawAverages;
         averages_ref=rawAverages_ref;
+        ref.flags.averaged=0;
     else
-        rawAverages_ref = 1;
-        averages_ref=rawAverages_ref;
+        % These are water reference scans that are averaged
+        rawAverages_ref = headerMethod.PVM_RefScanNA;
+        averages_ref=1;
+        ref.flags.averaged=1;
     end
 
-    fids_ref=reshape(fids_ref,[],rawAverages_ref);
+    fids_ref=reshape(fids_ref,[],averages_ref);
     fids_ref_trunc=fids_ref(leftshift+1:end,:);
     reffids=padarray(fids_ref_trunc, [leftshift,0],'post');
 
     % Apply ref freq shift (the difference between txfrq and txfrq_ref)
     % (but not if it's PV360)
+    sz_ref=size(fids_ref); %size of the array
     if ~contains(version, ["PV-360"])
-        tmat=repmat(t',[1 sz(2:end)]);
+        tmat=repmat(t',[1 sz_ref(2:end)]);
         reffids=reffids.*exp(-1i*tmat*(txfrq_ref-txfrq)*2*pi);
     end
 
     refspecs=fftshift(ifft(reffids,[],1),1);
-    sz_ref=size(refspecs);
-    ref.flags.averaged=0;
+
     %specify the dims
     refdims.t=1;
     refdims.coils=0;
-    if rawAverages_ref>1
+    if averages_ref>1
         refdims.averages=2;
     else
         refdims.averages=0;
     end    
     refdims.subSpecs=0;
     refdims.extras=0;
+
+    %Specify the number of subspecs. For ref data, I think these are always
+    %1
+    subspecs_ref=1;
+    rawSubspecs_ref=1;
+
 else
     %Ref scans not found.  Print warning:
     disp('WARNING REFERENCE SCANS NOT FOUND.  RETURNING EMPTY REF STRUCTURE.');
 end
 
+%% Now load navigator scans
+% For now, I know they're exported in PV 5 in fid.ref, and also in
+% rawdata.job1 in the others, but I haven't figured out that format yet, so
+% I'll skip PV6+ for now
+isNav = false;
+if contains(version,'PV 5')
+    isNav=exist(fullfile(inDir, 'fid.ref'));
+% elseif contains(version, ["PV 6", "PV 7", "PV-7", "PV-360"])
+%     isNav=exist(fullfile(inDir, 'rawdata.job1'));
+end
 
+if isNav
+    if contains(version,'PV 5')
+        fileNav     = fullfile(inDir, 'fid.ref');
+        fids_nav    = readBrukerRaw(fileNav, 'int');
+
+%     elseif contains(version,'PV 6') || contains(version,'PV 7') || contains(version,'PV-360.2')
+%         % Get TX freq of the reference, otherwise the reference ppm axis
+%         % will not be correct
+%         data = fopen(fullfile(inDir, 'fid.refscan'));
+%         ref_data=fread(data,'int32');
+%     elseif contains(version,'PV-360.3')
+%         data = fopen(fullfile(inDir, 'pdata', '1', 'fid_refscan.64'));
+%         ref_data=fread(data,'float64');
+
+    end
+
+    %Find the number of averages in the ref dataset:
+    if contains(version,'PV 5')
+        rawAverages_nav=rawAverages;
+        averages_nav=rawAverages_nav;
+%     else
+%         rawAverages_ref = 1;
+%         averages_nav=rawAverages_nav;
+    end
+
+    fids_nav=reshape(fids_nav,[],rawAverages_nav);
+    fids_nav_trunc=fids_nav(leftshift+1:end,:);
+    navfids=padarray(fids_nav_trunc, [leftshift,0],'post');
+
+%     % Apply ref freq shift (the difference between txfrq and txfrq_ref)
+%     % (but not if it's PV360)
+%     if ~contains(version, ["PV-360"])
+%         tmat=repmat(t',[1 sz(2:end)]);
+%         navfids=navfids.*exp(-1i*tmat*(txfrq_ref-txfrq)*2*pi);
+%     end
+
+    navspecs=fftshift(ifft(navfids,[],1),1);
+    sz_nav=size(navspecs);
+    nav.flags.averaged=0;
+    %specify the dims
+    navdims.t=1;
+    navdims.coils=0;
+    if rawAverages_nav>1
+        navdims.averages=2;
+    else
+        navdims.averages=0;
+    end    
+    navdims.subSpecs=0;
+    navdims.extras=0;
+else
+    %Ref scans not found.  Print warning:
+    disp('WARNING NAVIGATOR SCANS NOT FOUND.  RETURNING EMPTY NAV STRUCTURE.');
+end
 
 %FILLING IN DATA STRUCTURE FOR THE FID.RAW DATA
 out.fids=fids;
@@ -417,8 +641,8 @@ if isRef
     ref.Bo=Bo;
     ref.averages=averages_ref;
     ref.rawAverages=rawAverages_ref;
-    ref.subspecs=subspecs;
-    ref.rawSubspecs=rawSubspecs;
+    ref.subspecs=subspecs_ref;
+    ref.rawSubspecs=rawSubspecs_ref;
     ref.seq=sequence;
     ref.te=te;
     ref.tr=tr;
@@ -451,9 +675,135 @@ else
 end
 
 
+if isNav
+    %FILLING IN DATA STRUCTURE FOR THE FID.REF DATA
+    nav.fids=navfids;
+    nav.specs=navspecs;
+    nav.sz=sz_nav;
+    nav.ppm=ppm;
+    nav.t=t;
+    nav.spectralwidth=spectralwidth;
+    nav.dwelltime=dwelltime;
+    nav.txfrq=txfrq;
+    nav.date=date;
+    nav.dims=navdims;
+    nav.Bo=Bo;
+    nav.averages=averages_nav;
+    nav.rawAverages=rawAverages_nav;
+    nav.subspecs=subspecs;
+    nav.rawSubspecs=rawSubspecs;
+    nav.seq=sequence;
+    nav.te=te;
+    nav.tr=tr;
+    nav.pointsToLeftshift=0;
+    nav.version=version;
+    
+    
+    %FILLING IN THE FLAGS FOR THE NAV DATA
+    nav.flags.writtentostruct=1;
+    nav.flags.gotparams=1;
+    nav.flags.leftshifted=1;
+    nav.flags.filtered=0;
+    nav.flags.zeropadded=0;
+    nav.flags.freqcorrected=0;
+    nav.flags.phasecorrected=0;
+    
+    nav.flags.addedrcvrs=1;
+    nav.flags.subtracted=0;
+    nav.flags.writtentotext=0;
+    nav.flags.downsampled=0;
+    nav.flags.avgNormalized=0;
+    if nav.dims.subSpecs==0
+        nav.flags.isFourSteps=0;
+    else
+        nav.flags.isFourSteps=(nav.sz(nav.dims.subSpecs)==4);
+    end
+else
+    %NAV NOT FOUND.  RETURN EMPTY STRUCTURE.
+    nav = [];
+end
+
+%% Store coil combination coefficients
+
+% Only return coil combination coefficients if raw data are requested.
+if multiRcvrs && strcmpi(rawData,'y')
+
+    % All phases in PVM_ArrayPhase are calculated relative to the first 
+    % channel, so the phases we need to feed into the coil combination are
+    % the negative of that
+    if length(rcvrPhases) > 1
+        rcvrPhases = rcvrPhases(1) - rcvrPhases;
+    else
+        % I've seen single-coil data with a non-zero value here that
+        % perfectly corresponds to the phase of that single channel. I'll
+        % save that, but won't apply it here - can do that in the next step
+        % outside of this function
+    end
+    coilcombos.ph   = rcvrPhases;
+
+    % Bruker apparently just adds up the weighted coils (per Thanh Phong
+    % Le) and then divides by the number of channels.
+    % This also means that the normalization of the various
+    % FID-A functions to combine the signal will afterwards need to be
+    % undone - I have added a flag to the op_addrcvrs function that allows 
+    % this.
+    coilcombos.sig  = encChanScaling;
+
+else
+    % If only one coil, store trivial output
+    coilcombos.ph   = 0;
+    coilcombos.sig  = 1;
+end
+
 end
 
 
+
+function fids_raw = readBrukerRaw(fileRaw, formatRaw)
+% This subroutine reads the complex data from 'fileRaw' in the format 
+% 'formatRaw' and returns a complex time-domain FID array
+
+% Open and read
+data     = fopen(fileRaw);
+fid_data = fread(data, formatRaw);
+
+% Make complex
+real_fid = fid_data(1:2:length(fid_data));
+imag_fid = fid_data(2:2:length(fid_data));
+fids_raw = (real_fid+1i*imag_fid);
+
+% Close
+fclose(data);
+
+end
+
+function coilcombos_emp = getCoilCombos(in, mode)
+% This subroutine empirically calculates the coil combination coefficients
+% to compare them against the ones that may be stored in the headers.
+% Only here for validation/testing purposes.
+
+% Get first point
+point = 1;
+
+coilcombos_emp.ph=zeros(in.sz(in.dims.coils),1);
+coilcombos_emp.sig=zeros(in.sz(in.dims.coils),1);
+
+for n=1:in.sz(in.dims.coils)
+    coilcombos_emp.ph(n)=phase(in.fids(point,n,1,1))*180/pi; %in [degrees]
+    switch mode
+        case 'w'
+            coilcombos_emp.sig(n)=abs(in.fids(point,n,1,1));
+        case 'h'
+            S=abs(in.fids(point,n,1,1));
+            N=std(in.fids(end-100:end,n,1,1));
+            coilcombos_emp.sig(n)=(S/(N.^2));
+    end
+end
+
+%Now normalize the coilcombos.sig so that the max amplitude is 1;
+coilcombos_emp.sig=coilcombos_emp.sig/max(coilcombos_emp.sig);
+
+end
 
 
 function header = parseBrukerFormat(inputFile)
