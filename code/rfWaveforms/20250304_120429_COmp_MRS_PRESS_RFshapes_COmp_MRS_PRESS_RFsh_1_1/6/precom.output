@@ -1,0 +1,2189 @@
+label list:
+line no.  pc   label
+     801 0xffffffff start
+
+pulse program: "/opt/nmrdata/PV6.0.1_data/nmrsu/20250304_120429_COmp_MRS_PRESS_RFshapes_COmp_MRS_PRESS_RFsh_1_1/6/pulseprogram"
+================
+dur0 == line 0
+fixdel(10.000000 usec) setNmr5: 0x80 setNmr6: 0xc 
+
+dur1 == line 0
+fixdel(1000.000000 usec) clrNmr1: 0x400000 
+
+'comp_MRS_PRESS.ppg': line   1--->;****************************************************************
+'comp_MRS_PRESS.ppg': line   2--->;
+'comp_MRS_PRESS.ppg': line   3--->; Copyright (c) 2002-2003
+'comp_MRS_PRESS.ppg': line   4--->; Bruker BioSpin MRI GmbH
+'comp_MRS_PRESS.ppg': line   5--->; D-76275 Ettlingen, Germany
+'comp_MRS_PRESS.ppg': line   6--->;
+'comp_MRS_PRESS.ppg': line   7--->; All Rights Reserved
+'comp_MRS_PRESS.ppg': line   8--->;
+'comp_MRS_PRESS.ppg': line   9--->; comp_MRS_PRESS.ppg - voxel selective spectroscogpy  method
+'comp_MRS_PRESS.ppg': line  10--->;
+'comp_MRS_PRESS.ppg': line  11--->;****************************************************************
+'comp_MRS_PRESS.ppg': line  12--->
+'MRI.include': line   1--->;****************************************************************
+'MRI.include': line   2--->;
+'MRI.include': line   3--->; $Source: /pv/CvsTree/pv/gen/src/prg/methManag/PPG/Attic/MRI.include,v $
+'MRI.include': line   4--->;
+'MRI.include': line   5--->; Copyright (c) 2006
+'MRI.include': line   6--->; Bruker BioSpin MRI GmbH
+'MRI.include': line   7--->; D-76275 Ettlingen, Germany
+'MRI.include': line   8--->;
+'MRI.include': line   9--->; All Rights Reserved
+'MRI.include': line  10--->;
+'MRI.include': line  11--->;;****************************************************************
+'MRI.include': line  12--->;MRI.include
+'MRI.include': line  13--->
+'Avance.incl': line   1--->;Avance3.incl
+'Avance.incl': line   2--->;   for AV III
+'Avance.incl': line   3--->;
+'Avance.incl': line   4--->;avance-version (13/06/17)
+'Avance.incl': line   5--->;
+'Avance.incl': line   6--->;$CLASS=HighRes Incl
+'Avance.incl': line   7--->;$COMMENT=
+'Avance.incl': line 169--->;$Id: Avance3.incl,v 1.9.6.1 2013/06/17 15:32:55 pfre Exp $
+'MRI.include': line  14--->
+'MRI.include': line  15--->define delay aqq
+'MRI.include': line  16--->define delay deparx
+'MRI.include': line  17--->define delay derxadc
+'MRI.include': line  18--->define delay rdepa
+'MRI.include': line  19--->
+'MRI.include': line  21--->"aqq=dw*td"
+'MRI.include': line  22--->"rdepa=de-depa"
+'MRI.include': line  23--->"deparx=depa-derx"
+'MRI.include': line  24--->"derxadc=derx-deadc"
+'MRI.include': line  25--->
+'MRI.include': line  26--->
+'MRI.include': line  27--->; contents of De2.incl - usage for different hardware versions to 
+'MRI.include': line  28--->; be checked - intermediate solution to support Jobs
+'MRI.include': line  29--->define delay rde1
+'MRI.include': line  31--->"rde1=de-de1"
+'MRI.include': line  32--->
+'MRI.include': line  33--->
+'MRI.include': line  44--->; end of contents of De2.incl
+'MRI.include': line  45--->
+'MRI.include': line  46--->
+'MRI.include': line  65--->	
+'MRI.include': line  66--->	
+'MRI.include': line  67--->
+'MRI.include': line  68--->
+'MRI.include': line  74--->	
+'MRI.include': line  75--->
+'MRI.include': line  76--->
+'MRI.include': line 129--->   
+'MRI.include': line 130--->
+'MRI.include': line 131--->
+'MRI.include': line 141--->	
+'MRI.include': line 142--->
+'MRI.include': line 143--->
+'comp_MRS_PRESS.ppg': line  13--->
+'comp_MRS_PRESS.ppg': line  14--->
+'PrepModulesHead.mod': line   1--->;****************************************************************
+'PrepModulesHead.mod': line   2--->;
+'PrepModulesHead.mod': line   3--->; Copyright (c) 2003-2007
+'PrepModulesHead.mod': line   4--->; Bruker BioSpin MRI GmbH
+'PrepModulesHead.mod': line   5--->; D-76275 Ettlingen, Germany
+'PrepModulesHead.mod': line   6--->;
+'PrepModulesHead.mod': line   7--->; $Id: PrepModulesHead.mod,v 1.19 2012/01/20 10:19:48 wemch Exp $
+'PrepModulesHead.mod': line   8--->;
+'PrepModulesHead.mod': line   9--->; All Rights Reserved
+'PrepModulesHead.mod': line  10--->;
+'PrepModulesHead.mod': line  11--->; Declaration of pulseprogram parameters and subroutines for 
+'PrepModulesHead.mod': line  12--->; preparation  modules
+'PrepModulesHead.mod': line  13--->;
+'PrepModulesHead.mod': line  14--->; Must be included after MRI.include!
+'PrepModulesHead.mod': line  15--->;
+'PrepModulesHead.mod': line  16--->;****************************************************************
+'PrepModulesHead.mod': line  18--->;**** Fat Suppression ****
+'PrepModulesHead.mod': line  19--->
+'FatSupDef.mod': line   1--->;****************************************************************
+'FatSupDef.mod': line   2--->;
+'FatSupDef.mod': line   3--->; Copyright (c) 2002-2007
+'FatSupDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'FatSupDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'FatSupDef.mod': line   6--->;
+'FatSupDef.mod': line   7--->; $Id: FatSupDef.mod,v 1.7 2013/07/05 14:15:26 sako Exp $
+'FatSupDef.mod': line   8--->;
+'FatSupDef.mod': line   9--->; All Rights Reserved
+'FatSupDef.mod': line  10--->;
+'FatSupDef.mod': line  11--->; FatSupDef.mod : Declaration of Fat Suppression Subroutine
+'FatSupDef.mod': line  12--->;
+'FatSupDef.mod': line  13--->;****************************************************************
+'FatSupDef.mod': line  14--->
+'FatSupDef.mod': line  15--->if (PVM_FatSupPerform == Yes)
+'FatSupDef.mod': line  16--->{
+'FatSupDef.mod': line  17--->  define pulse           fatSupPul   = {$PVM_FatSupRfLength}
+'FatSupDef.mod': line  18--->  define list<frequency> fatSupList  = {$PVM_FatSupFL}
+'FatSupDef.mod': line  19--->  
+'FatSupDef.mod': line  20--->  define delay fatSupRamp  = {$PVM_FatSupRampTime}
+'FatSupDef.mod': line  21--->  define delay fatSupAmp   = {$PVM_FatSupAmpEnable}
+'FatSupDef.mod': line  22--->  define delay fatSupGrad  = {$PVM_FatSupGradWait}
+'FatSupDef.mod': line  23--->  define delay fatSupSpoil = {$PVM_FatSupSpoilDur}
+'FatSupDef.mod': line  25--->  ; convert from ms to s
+'FatSupDef.mod': line  26--->  "fatSupRamp  = fatSupRamp  / 1000"
+'FatSupDef.mod': line  27--->  "fatSupAmp   = fatSupAmp   / 1000"
+'FatSupDef.mod': line  28--->  "fatSupGrad  = fatSupGrad  / 1000"
+'FatSupDef.mod': line  29--->  "fatSupSpoil = fatSupSpoil / 1000"
+'FatSupDef.mod': line  30--->}
+'FatSupDef.mod': line  31--->
+'FatSupDef.mod': line  32--->subroutine FatSup
+'FatSupDef.mod': line  33--->
+'PrepModulesHead.mod': line  20--->
+'PrepModulesHead.mod': line  21--->
+'PrepModulesHead.mod': line  22--->;**** Flow Saturation ****
+'FlowSatDef.mod': line   1--->;****************************************************************
+'FlowSatDef.mod': line   2--->;
+'FlowSatDef.mod': line   3--->; Copyright (c) 2005-2007
+'FlowSatDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'FlowSatDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'FlowSatDef.mod': line   6--->;
+'FlowSatDef.mod': line   7--->; $Id: FlowSatDef.mod,v 1.7 2013/06/04 10:11:30 sako Exp $
+'FlowSatDef.mod': line   8--->;
+'FlowSatDef.mod': line   9--->; All Rights Reserved
+'FlowSatDef.mod': line  10--->;
+'FlowSatDef.mod': line  11--->; FlowSatDef.mod: Declaration of subroutines for Flow Saturation 
+'FlowSatDef.mod': line  12--->; call
+'FlowSatDef.mod': line  13--->; subr FlowSat()
+'FlowSatDef.mod': line  14--->; subr FlowSatInit()
+'FlowSatDef.mod': line  15--->; subr FlowSatInc()
+'FlowSatDef.mod': line  16--->; 
+'FlowSatDef.mod': line  17--->;****************************************************************
+'FlowSatDef.mod': line  18--->
+'FlowSatDef.mod': line  19--->if(PVM_InFlowSatOnOff == 1)
+'FlowSatDef.mod': line  20--->{
+'FlowSatDef.mod': line  21--->define list<frequency> modlis4 = {$PVM_InFlowSatFL}
+'FlowSatDef.mod': line  22--->define list<grad_scalar> flowSatGrad={$PVM_InFlowSatGrad}
+'FlowSatDef.mod': line  23--->define delay SfD0 = {$PVM_SfD0}
+'FlowSatDef.mod': line  24--->define delay SfD1 = {$PVM_SfD1}
+'FlowSatDef.mod': line  25--->define delay SfD2 = {$PVM_SfD2}
+'FlowSatDef.mod': line  26--->
+'FlowSatDef.mod': line  27--->define pulse SfP0 = {$PVM_SfP0}
+'FlowSatDef.mod': line  28--->define loopcounter SfLp0 = {$PVM_SfLp0}
+'FlowSatDef.mod': line  29--->}
+'FlowSatDef.mod': line  30--->subroutine FlowSat
+'FlowSatDef.mod': line  31--->subroutine FlowSatInc
+'FlowSatDef.mod': line  32--->subroutine FlowSatInit
+'PrepModulesHead.mod': line  24--->
+'PrepModulesHead.mod': line  25--->
+'PrepModulesHead.mod': line  26--->;**** Inversion Pulse ****
+'InvPulseDef.mod': line   1--->;****************************************************************
+'InvPulseDef.mod': line   2--->;
+'InvPulseDef.mod': line   3--->; Copyright (c) 2002-2007
+'InvPulseDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'InvPulseDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'InvPulseDef.mod': line   6--->;
+'InvPulseDef.mod': line   7--->; $Id: InvPulseDef.mod,v 1.2 2010/12/15 10:52:31 mah Exp $
+'InvPulseDef.mod': line   8--->;
+'InvPulseDef.mod': line   9--->; All Rights Reserved
+'InvPulseDef.mod': line  10--->;
+'InvPulseDef.mod': line  11--->; InvPulseDef.mod : Declaration of Inversion Pulse subroutine
+'InvPulseDef.mod': line  12--->;
+'InvPulseDef.mod': line  13--->; call
+'InvPulseDef.mod': line  14--->; subr InvPulse()
+'InvPulseDef.mod': line  15--->;
+'InvPulseDef.mod': line  16--->;****************************************************************
+'InvPulseDef.mod': line  17--->;   
+'InvPulseDef.mod': line  18--->;       PVM_InvRFPulseArr      :  
+'InvPulseDef.mod': line  19--->;     
+'InvPulseDef.mod': line  20--->;       sp22            TPQQ[14].name : PVM_InvRFPulsePropertyArr[0].Filename
+'InvPulseDef.mod': line  21--->;
+'InvPulseDef.mod': line  22--->;       PVM_IpP0                      :  PVM_InvRFPulseArr[0].PulseLength
+'InvPulseDef.mod': line  23--->;
+'InvPulseDef.mod': line  24--->;       PVM_IpD2                      :  PVM_InvPulseDelay[0]
+'InvPulseDef.mod': line  25--->;       PVM_IpD3                      :  PVM_InvPulseSpoilTime[0]
+'InvPulseDef.mod': line  26--->;       PVM_IpD1                      :  CONFIG_amplifier _enable
+'InvPulseDef.mod': line  27--->;       PVM_IpD0                      :  PVM_RampTime
+'InvPulseDef.mod': line  28--->;
+'InvPulseDef.mod': line  29--->
+'InvPulseDef.mod': line  30--->if(PVM_InvPulseOnOff == 1)
+'InvPulseDef.mod': line  31--->{
+'InvPulseDef.mod': line  32--->define list<frequency>  modlis2= {$PVM_InvPulseOffsetHz}
+'InvPulseDef.mod': line  33--->define delay IpD0 = {$PVM_IpD0}
+'InvPulseDef.mod': line  34--->define delay IpD1 = {$PVM_IpD1}
+'InvPulseDef.mod': line  35--->define delay IpD2 = {$PVM_IpD2}
+'InvPulseDef.mod': line  36--->define delay IpD3 = {$PVM_IpD3}
+'InvPulseDef.mod': line  37--->
+'InvPulseDef.mod': line  38--->define pulse IpP0 = {$PVM_IpP0}
+'InvPulseDef.mod': line  39--->}
+'InvPulseDef.mod': line  40--->subroutine InvPulse
+'PrepModulesHead.mod': line  28--->
+'PrepModulesHead.mod': line  29--->
+'PrepModulesHead.mod': line  30--->;**** Magnetisation Transfer ****
+'MagTransDef.mod': line   1--->;****************************************************************
+'MagTransDef.mod': line   2--->; $Source: /pv/CvsTree/pv/gen/src/prg/methManag/PPG/Attic/MagTransDef.mod,v $
+'MagTransDef.mod': line   3--->;
+'MagTransDef.mod': line   4--->; Copyright (c) 2005-2007
+'MagTransDef.mod': line   5--->; Bruker BioSpin MRI GmbH
+'MagTransDef.mod': line   6--->; D-76275 Ettlingen, Germany
+'MagTransDef.mod': line   7--->;
+'MagTransDef.mod': line   8--->; All Rights Reserved
+'MagTransDef.mod': line   9--->;
+'MagTransDef.mod': line  10--->; MagTransDef.mod: Declaration of subroutine for Magnetization 
+'MagTransDef.mod': line  11--->;                  transfer 
+'MagTransDef.mod': line  12--->; call
+'MagTransDef.mod': line  13--->; subr MagTrans()
+'MagTransDef.mod': line  14--->;
+'MagTransDef.mod': line  15--->; $Id: MagTransDef.mod,v 1.6.2.1 2015/03/24 14:30:00 sako Exp $
+'MagTransDef.mod': line  16--->;****************************************************************
+'MagTransDef.mod': line  17--->;**** Magnetisation Transfer Module ****
+'MagTransDef.mod': line  18--->
+'MagTransDef.mod': line  19--->
+'MagTransDef.mod': line  20--->if(PVM_MagTransOnOff)
+'MagTransDef.mod': line  21--->{
+'MagTransDef.mod': line  22--->define list<frequency> modlis3 = {$PVM_MagTransFL} 
+'MagTransDef.mod': line  23--->define delay MtD0 = {$PVM_MtD0}
+'MagTransDef.mod': line  24--->define delay MtD1 = {$PVM_MtD1}
+'MagTransDef.mod': line  25--->define delay MtD2 = {$PVM_MtD2}
+'MagTransDef.mod': line  26--->define delay MtD3 = {$PVM_MtD3}
+'MagTransDef.mod': line  28--->define pulse MtP0 = {$PVM_MtP0}
+'MagTransDef.mod': line  29--->
+'MagTransDef.mod': line  30--->define loopcounter MtLp0 = {$PVM_MtLp0}
+'MagTransDef.mod': line  31--->}
+'MagTransDef.mod': line  32--->
+'MagTransDef.mod': line  33--->subroutine MagTrans
+'PrepModulesHead.mod': line  32--->
+'PrepModulesHead.mod': line  33--->
+'PrepModulesHead.mod': line  34--->;**** Saturation Pulse ****
+'SatPulseDef.mod': line   1--->;****************************************************************
+'SatPulseDef.mod': line   2--->;
+'SatPulseDef.mod': line   3--->; Copyright (c) 2002-2003
+'SatPulseDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'SatPulseDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'SatPulseDef.mod': line   6--->;
+'SatPulseDef.mod': line   7--->; $Id: SatPulseDef.mod,v 1.3 2010/12/15 10:52:31 mah Exp $
+'SatPulseDef.mod': line   8--->;
+'SatPulseDef.mod': line   9--->; All Rights Reserved
+'SatPulseDef.mod': line  10--->;
+'SatPulseDef.mod': line  11--->; SatPulseDef.mod : Declaration of Saturation Pulse subroutines
+'SatPulseDef.mod': line  12--->; call 
+'SatPulseDef.mod': line  13--->; subr SatPulse()
+'SatPulseDef.mod': line  14--->;
+'SatPulseDef.mod': line  15--->;****************************************************************
+'SatPulseDef.mod': line  16--->;   
+'SatPulseDef.mod': line  17--->;    PVM_SatRFPulseArr      :  
+'SatPulseDef.mod': line  18--->;     
+'SatPulseDef.mod': line  19--->;       sp28            DPQQ[12].name : PVM_SatRFPulsePropertyArr[0].Filename
+'SatPulseDef.mod': line  20--->;       sp29            DPQQ[13].name : PVM_SatRFPulsePropertyArr[1].Filename
+'SatPulseDef.mod': line  21--->;       sp30            DPQQ[14].name : PVM_SatRFPulsePropertyArr[2].Filename
+'SatPulseDef.mod': line  22--->;       sp31            DPQQ[15].name : PVM_SatRFPulsePropertyArr[3].Filename
+'SatPulseDef.mod': line  23--->;
+'SatPulseDef.mod': line  24--->;       PVM_SpP0                     :  PVM_SatRFPulseArr[0].PulseLength
+'SatPulseDef.mod': line  25--->;       PVM_SpP1                     :  PVM_SatRFPulseArr[1].PulseLength
+'SatPulseDef.mod': line  26--->;       PVM_SpP2                     :  PVM_SatRFPulseArr[2].PulseLength
+'SatPulseDef.mod': line  27--->;       PVM_SpP3                     :  PVM_SatRFPulseArr[3].PulseLength
+'SatPulseDef.mod': line  28--->;
+'SatPulseDef.mod': line  29--->;       PVM_SpD2                     :  PVM_SatPulseDelay1[0]
+'SatPulseDef.mod': line  30--->;       PVM_SpD6                     :  PVM_SatPulseSpoilTime[0]
+'SatPulseDef.mod': line  31--->;       PVM_SpD10                    :  PVM_SatPulseDelay2[0]
+'SatPulseDef.mod': line  32--->;       PVM_SpD3                     :  PVM_SatPulseSpoilTime[1]
+'SatPulseDef.mod': line  33--->;       PVM_SpD7                     :  PVM_SatPulseDelay1[1]
+'SatPulseDef.mod': line  34--->;       PVM_SpD11                    :  PVM_SatPulseDelay2[1]
+'SatPulseDef.mod': line  35--->;       PVM_SpD4                     :  PVM_SatPulseDelay1[2]
+'SatPulseDef.mod': line  36--->;       PVM_SpD8                     :  PVM_SatPulseSpoilTime[2]
+'SatPulseDef.mod': line  37--->;       PVM_SpD12                    :  PVM_SatPulseDelay2[2]
+'SatPulseDef.mod': line  38--->;       PVM_SpD5                     :  PVM_SatPulseDelay1[3]
+'SatPulseDef.mod': line  39--->;       PVM_SpD9                     :  PVM_SatPulseSpoilTime[3]
+'SatPulseDef.mod': line  40--->;       PVM_SpD13                    :  PVM_SatPulseDelay2[3]
+'SatPulseDef.mod': line  41--->;
+'SatPulseDef.mod': line  42--->
+'SatPulseDef.mod': line  43--->if(PVM_SatPulseOnOff == 1)
+'SatPulseDef.mod': line  44--->   {
+'SatPulseDef.mod': line  45--->define list<frequency> modlis7 = {$PVM_SatPulseOffsetHz}
+'SatPulseDef.mod': line  46--->
+'SatPulseDef.mod': line  47--->define delay SpD0 = {$PVM_SpD0}
+'SatPulseDef.mod': line  48--->define delay SpD1 = {$PVM_SpD1}
+'SatPulseDef.mod': line  49--->define delay SpD2 = {$PVM_SpD2}
+'SatPulseDef.mod': line  50--->define delay SpD3 = {$PVM_SpD3}
+'SatPulseDef.mod': line  51--->define delay SpD4 = {$PVM_SpD4}
+'SatPulseDef.mod': line  52--->define delay SpD5 = {$PVM_SpD5}
+'SatPulseDef.mod': line  53--->define delay SpD6 = {$PVM_SpD6}
+'SatPulseDef.mod': line  54--->define delay SpD7 = {$PVM_SpD7}
+'SatPulseDef.mod': line  55--->define delay SpD8 = {$PVM_SpD8}
+'SatPulseDef.mod': line  56--->define delay SpD9 = {$PVM_SpD9}
+'SatPulseDef.mod': line  57--->define delay SpD10 = {$PVM_SpD10}
+'SatPulseDef.mod': line  58--->define delay SpD11 = {$PVM_SpD11}
+'SatPulseDef.mod': line  59--->define delay SpD12 = {$PVM_SpD12}
+'SatPulseDef.mod': line  60--->define delay SpD13 = {$PVM_SpD13}
+'SatPulseDef.mod': line  61--->define pulse SpP0 = {$PVM_SpP0}
+'SatPulseDef.mod': line  62--->define pulse SpP1 = {$PVM_SpP1}
+'SatPulseDef.mod': line  63--->define pulse SpP2 = {$PVM_SpP2}
+'SatPulseDef.mod': line  64--->define pulse SpP3 = {$PVM_SpP3}
+'SatPulseDef.mod': line  66--->   }
+'SatPulseDef.mod': line  67--->
+'SatPulseDef.mod': line  68--->
+'SatPulseDef.mod': line  69--->subroutine SatPulse
+'PrepModulesHead.mod': line  36--->
+'PrepModulesHead.mod': line  37--->
+'PrepModulesHead.mod': line  38--->;*** FOV Saturation ***
+'FovSatDef.mod': line   1--->;****************************************************************
+'FovSatDef.mod': line   2--->;
+'FovSatDef.mod': line   3--->; Copyright (c) 2002-2007
+'FovSatDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'FovSatDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'FovSatDef.mod': line   6--->;
+'FovSatDef.mod': line   7--->; $Id: FovSatDef.mod,v 1.8 2013/08/06 08:09:43 sako Exp $
+'FovSatDef.mod': line   8--->;
+'FovSatDef.mod': line   9--->; All Rights Reserved
+'FovSatDef.mod': line  10--->;
+'FovSatDef.mod': line  11--->; FovSat.mod : Declaration of FOV Saturation subroutine
+'FovSatDef.mod': line  12--->; call: subr FovSat()
+'FovSatDef.mod': line  13--->;
+'FovSatDef.mod': line  14--->;****************************************************************
+'FovSatDef.mod': line  15--->
+'FovSatDef.mod': line  16--->
+'FovSatDef.mod': line  17--->if (PVM_FovSatOnOff == On)
+'FovSatDef.mod': line  18--->{
+'FovSatDef.mod': line  19--->  define pulse           fovSatPul   = {$PVM_FovSatRfLength}
+'FovSatDef.mod': line  20--->  define list<frequency> fovSatList  = {$PVM_FovSatFL}
+'FovSatDef.mod': line  21--->  
+'FovSatDef.mod': line  22--->  define delay fovSatRamp  = {$PVM_FovSatRampTime}
+'FovSatDef.mod': line  23--->  define delay fovSatAmp   = {$PVM_FovSatAmpEnable}
+'FovSatDef.mod': line  24--->  define delay fovSatGrad  = {$PVM_FovSatGradWait}
+'FovSatDef.mod': line  25--->  define delay fovSatSpoil = {$PVM_FovSatSpoilDur}
+'FovSatDef.mod': line  27--->  ; convert from ms to s
+'FovSatDef.mod': line  28--->  "fovSatRamp  = fovSatRamp  / 1000"
+'FovSatDef.mod': line  29--->  "fovSatAmp   = fovSatAmp   / 1000"
+'FovSatDef.mod': line  30--->  "fovSatGrad  = fovSatGrad  / 1000"
+'FovSatDef.mod': line  31--->  "fovSatSpoil = fovSatSpoil / 1000"  
+'FovSatDef.mod': line  32--->}
+'FovSatDef.mod': line  33--->
+'FovSatDef.mod': line  34--->subroutine FovSat
+'FovSatDef.mod': line  35--->
+'FovSatDef.mod': line  53--->; backwards compatibility
+'FovSatDef.mod': line  54--->subroutine SatSlices
+'FovSatDef.mod': line  55--->
+'FovSatDef.mod': line  56--->
+'PrepModulesHead.mod': line  40--->
+'PrepModulesHead.mod': line  41--->
+'PrepModulesHead.mod': line  42--->;**** Black Blood ****
+'BlBloodDef.mod': line   1--->;****************************************************************
+'BlBloodDef.mod': line   2--->;
+'BlBloodDef.mod': line   3--->; Copyright (c) 2007
+'BlBloodDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'BlBloodDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'BlBloodDef.mod': line   6--->;
+'BlBloodDef.mod': line   7--->; $Id: BlBloodDef.mod,v 1.4 2013/06/04 10:11:30 sako Exp $
+'BlBloodDef.mod': line   8--->;
+'BlBloodDef.mod': line   9--->; All Rights Reserved
+'BlBloodDef.mod': line  10--->;
+'BlBloodDef.mod': line  11--->; BlBloodDef.mod : Declaration of Black blood  subroutine
+'BlBloodDef.mod': line  12--->;
+'BlBloodDef.mod': line  13--->; call
+'BlBloodDef.mod': line  14--->; subr BlBlood(ph0) : Black blood preparation with RF phaselist
+'BlBloodDef.mod': line  15--->;                     ph0
+'BlBloodDef.mod': line  16--->;
+'BlBloodDef.mod': line  17--->;****************************************************************
+'BlBloodDef.mod': line  18--->
+'BlBloodDef.mod': line  19--->if(PVM_BlBloodOnOff)
+'BlBloodDef.mod': line  20--->{
+'BlBloodDef.mod': line  21--->define list<frequency> modlis8 = {$PVM_BlBloodFL}
+'BlBloodDef.mod': line  22--->define delay BlbD0 = {$PVM_BlbD0}
+'BlBloodDef.mod': line  23--->define delay BlbD1 = {$PVM_BlbD1}
+'BlBloodDef.mod': line  24--->define delay BlbD2 = {$PVM_BlbD2}
+'BlBloodDef.mod': line  25--->define delay BlbD3 = {$PVM_BlbD3}
+'BlBloodDef.mod': line  26--->
+'BlBloodDef.mod': line  27--->define pulse BlbP0 = {$PVM_BlbP0}
+'BlBloodDef.mod': line  28--->}
+'BlBloodDef.mod': line  29--->subroutine BlBlood
+'PrepModulesHead.mod': line  44--->
+'PrepModulesHead.mod': line  45--->
+'PrepModulesHead.mod': line  46--->;**** Trigger ****
+'TriggerDef.mod': line   1--->;****************************************************************
+'TriggerDef.mod': line   2--->;
+'TriggerDef.mod': line   3--->; Copyright (c) 1998-2003
+'TriggerDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'TriggerDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'TriggerDef.mod': line   6--->;
+'TriggerDef.mod': line   7--->; All Rights Reserved
+'TriggerDef.mod': line   8--->;
+'TriggerDef.mod': line   9--->; TriggerDef.mod - Trigger Module
+'TriggerDef.mod': line  10--->;
+'TriggerDef.mod': line  11--->;****************************************************************
+'TriggerDef.mod': line  12--->
+'TriggerDef.mod': line  13--->if (PVM_TriggerModule == On)
+'TriggerDef.mod': line  14--->{
+'TriggerDef.mod': line  15--->  define delay trigDur = {$PVM_TriggerDur}
+'TriggerDef.mod': line  16--->  define delay trigDel = {$PVM_TriggerDelay}
+'TriggerDef.mod': line  17--->
+'TriggerDef.mod': line  18--->  ; convert from ms to s
+'TriggerDef.mod': line  19--->  "trigDur = trigDur / 1000"
+'TriggerDef.mod': line  20--->  "trigDel = trigDel / 1000"
+'TriggerDef.mod': line  21--->}
+'TriggerDef.mod': line  22--->subroutine Trigger
+'TriggerDef.mod': line  23--->subroutine TriggerPhase
+'TriggerDef.mod': line  24--->subroutine TriggerSlice
+'PrepModulesHead.mod': line  48--->
+'PrepModulesHead.mod': line  49--->
+'PrepModulesHead.mod': line  50--->;**** Trigger Out ****
+'TriggerOutDef.mod': line   1--->;****************************************************************
+'TriggerOutDef.mod': line   2--->;
+'TriggerOutDef.mod': line   3--->; Copyright (c) 2003
+'TriggerOutDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'TriggerOutDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'TriggerOutDef.mod': line   6--->;
+'TriggerOutDef.mod': line   7--->; All Rights Reserved
+'TriggerOutDef.mod': line   8--->; $Id: TriggerOutDef.mod,v 1.2 2013/07/05 14:15:26 sako Exp $
+'TriggerOutDef.mod': line   9--->;****************************************************************
+'TriggerOutDef.mod': line  10--->
+'TriggerOutDef.mod': line  11--->if (PVM_TriggerOutOnOff == On)
+'TriggerOutDef.mod': line  12--->{
+'TriggerOutDef.mod': line  13--->  define delay trigOutDur = {$PVM_TriggerOutDur}
+'TriggerOutDef.mod': line  14--->  define delay trigOutDel = {$PVM_TriggerOutDelay}
+'TriggerOutDef.mod': line  15--->
+'TriggerOutDef.mod': line  16--->  ; convert from ms to s
+'TriggerOutDef.mod': line  17--->  "trigOutDur = trigOutDur / 1000"
+'TriggerOutDef.mod': line  18--->  "trigOutDel = trigOutDel / 1000"
+'TriggerOutDef.mod': line  19--->}
+'TriggerOutDef.mod': line  20--->subroutine TriggerOut
+'TriggerOutDef.mod': line  21--->subroutine TriggerOutStart
+'TriggerOutDef.mod': line  22--->subroutine TriggerOutSlice
+'TriggerOutDef.mod': line  23--->subroutine TriggerOutVolume
+'PrepModulesHead.mod': line  52--->
+'PrepModulesHead.mod': line  53--->
+'PrepModulesHead.mod': line  54--->;**** Outer Volume Suppression ****
+'WsOvsDef.mod': line   1--->;****************************************************************
+'WsOvsDef.mod': line   2--->;
+'WsOvsDef.mod': line   3--->; Copyright (c) 2005-2007
+'WsOvsDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'WsOvsDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'WsOvsDef.mod': line   6--->;
+'WsOvsDef.mod': line   7--->; $Id: WsOvsDef.mod,v 1.6 2013/07/08 08:33:32 josh Exp $
+'WsOvsDef.mod': line   8--->;
+'WsOvsDef.mod': line   9--->; All Rights Reserved
+'WsOvsDef.mod': line  10--->;
+'WsOvsDef.mod': line  11--->; WsOvsDef.mod: Declaration of water suppression and Outer 
+'WsOvsDef.mod': line  12--->;               volume suppression subroutines
+'WsOvsDef.mod': line  13--->;
+'WsOvsDef.mod': line  14--->; call 
+'WsOvsDef.mod': line  15--->; subr Ovs(ph0) ;  execution of OVS with ph0 phaselist
+'WsOvsDef.mod': line  16--->;
+'WsOvsDef.mod': line  17--->; subr WsOvs(ph0,ph1) : execution of OVS with ph0 and WS with ph1
+'WsOvsDef.mod': line  18--->;                       phaselist
+'WsOvsDef.mod': line  19--->;****************************************************************
+'WsOvsDef.mod': line  20--->
+'WsOvsDef.mod': line  21--->;**** OuterVolumeSuppression ****
+'WsOvsDef.mod': line  22--->
+'WsOvsDef.mod': line  23--->if(PVM_OvsOnOff == 1)
+'WsOvsDef.mod': line  24--->{
+'WsOvsDef.mod': line  25--->define list<frequency> Ovslist={$PVM_OvsFrequencyList}
+'WsOvsDef.mod': line  26--->define delay OvsD0 = {$PVM_OvsD0}
+'WsOvsDef.mod': line  27--->define delay OvsD1 = {$PVM_OvsD1}
+'WsOvsDef.mod': line  28--->define pulse OvsP0 = {$PVM_OvsP0}
+'WsOvsDef.mod': line  29--->}
+'WsOvsDef.mod': line  30--->subroutine Ovs
+'WsOvsDef.mod': line  59--->;*** WaterSuppression Module with OVS ****
+'WsOvsDef.mod': line  60--->
+'WsOvsDef.mod': line  61--->if (PVM_WsMode)
+'WsOvsDef.mod': line  62--->{
+'WsOvsDef.mod': line  63--->
+'WsOvsDef.mod': line  64--->define list<frequency> Wslist={$PVM_WsOffsetHz}
+'WsOvsDef.mod': line  65--->define pulse WsP0 = {$PVM_WsP0}
+'WsOvsDef.mod': line  66--->define pulse WsP1 = {$PVM_WsP1}
+'WsOvsDef.mod': line  67--->define pulse WsP2 = {$PVM_WsP2}
+'WsOvsDef.mod': line  68--->define delay WsNp0 
+'WsOvsDef.mod': line  69--->"WsNp0 = WsP0"
+'WsOvsDef.mod': line  70--->define delay WsNp1 
+'WsOvsDef.mod': line  71--->"WsNp1 = WsP1"
+'WsOvsDef.mod': line  72--->define delay WsNp2 
+'WsOvsDef.mod': line  73--->"WsNp2 = WsP2"
+'WsOvsDef.mod': line  74--->define list<delay> ChD1={$PVM_ChppgD1}
+'WsOvsDef.mod': line  75--->define list<delay> ChD2={$PVM_ChppgD2}
+'WsOvsDef.mod': line  76--->define list<delay> VpD1={$PVM_VpppgD1}
+'WsOvsDef.mod': line  77--->define list<delay> VpD2={$PVM_VpppgD2}
+'WsOvsDef.mod': line  79--->}
+'WsOvsDef.mod': line  80--->
+'WsOvsDef.mod': line  81--->
+'WsOvsDef.mod': line  82--->subroutine WsOvsMain
+'WsOvsDef.mod': line  83--->subroutine WsOvs
+'WsOvsDef.mod': line  84--->subroutine Ws
+'PrepModulesHead.mod': line  56--->
+'PrepModulesHead.mod': line  57--->
+'PrepModulesHead.mod': line  58--->;**** Solvent Suppression module ****
+'WsSatDef.mod': line   1--->;******************************************************************
+'WsSatDef.mod': line   2--->;
+'WsSatDef.mod': line   3--->; Copyright (c) 2002-2007
+'WsSatDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'WsSatDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'WsSatDef.mod': line   6--->;
+'WsSatDef.mod': line   7--->; $Id: WsSatDef.mod,v 1.11 2013/08/23 08:37:06 josh Exp $ 
+'WsSatDef.mod': line   8--->;
+'WsSatDef.mod': line   9--->; All Rights Reserved
+'WsSatDef.mod': line  10--->;
+'WsSatDef.mod': line  11--->; WsSatDef.mod - Declaration of water suppression and FOV saturation 
+'WsSatDef.mod': line  12--->;                subroutines
+'WsSatDef.mod': line  13--->; call
+'WsSatDef.mod': line  14--->; subr WsSat(ph0) : execution of WS with ph0 phaselist and 
+'WsSatDef.mod': line  15--->;                   FOV saturation (as passed as argument)    
+'WsSatDef.mod': line  16--->;      
+'WsSatDef.mod': line  17--->;*******************************************************************
+'WsSatDef.mod': line  18--->
+'WsSatDef.mod': line  19--->
+'WsSatDef.mod': line  20--->; Definitions for WsPpgParams are included in WsOvsDef.mod
+'WsSatDef.mod': line  21--->subroutine WsSatMain
+'WsSatDef.mod': line  22--->subroutine WsSat
+'PrepModulesHead.mod': line  60--->
+'PrepModulesHead.mod': line  61--->
+'PrepModulesHead.mod': line  62--->;**** Selective Inversion Recovery ****
+'SelSliceIrDef.mod': line   1--->;****************************************************************
+'SelSliceIrDef.mod': line   2--->;
+'SelSliceIrDef.mod': line   3--->; Copyright (c) 2007
+'SelSliceIrDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'SelSliceIrDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'SelSliceIrDef.mod': line   6--->;
+'SelSliceIrDef.mod': line   7--->; $Id: SelSliceIrDef.mod,v 1.5 2013/06/04 10:11:30 sako Exp $
+'SelSliceIrDef.mod': line   8--->;
+'SelSliceIrDef.mod': line   9--->; All Rights Reserved
+'SelSliceIrDef.mod': line  10--->;
+'SelSliceIrDef.mod': line  11--->; SelSliceIrDef.mod : declaration of slice Selective Inversion 
+'SelSliceIrDef.mod': line  12--->;                     Recovery subroutine
+'SelSliceIrDef.mod': line  13--->; call SliceSelIr()
+'SelSliceIrDef.mod': line  14--->; 
+'SelSliceIrDef.mod': line  15--->;
+'SelSliceIrDef.mod': line  16--->;****************************************************************
+'SelSliceIrDef.mod': line  17--->
+'SelSliceIrDef.mod': line  18--->
+'SelSliceIrDef.mod': line  19--->if(PVM_SelIrOnOff)
+'SelSliceIrDef.mod': line  20--->{
+'SelSliceIrDef.mod': line  21--->  define list<frequency> IrFL = {$PVM_SelIrFL} 
+'SelSliceIrDef.mod': line  22--->  define delay IrD0 = {$PVM_SelIrD0}
+'SelSliceIrDef.mod': line  23--->  define delay IrD1 = {$PVM_SelIrD1}
+'SelSliceIrDef.mod': line  24--->  define delay IrD2 = {$PVM_SelIrD2}
+'SelSliceIrDef.mod': line  25--->  define delay IrD3 = {$PVM_SelIrD3}
+'SelSliceIrDef.mod': line  26--->  define delay IrD4 = {$PVM_SelIrD4}
+'SelSliceIrDef.mod': line  28--->  define pulse IrP0 = {$PVM_SelIrP0}
+'SelSliceIrDef.mod': line  29--->  define loopcounter IrL0 = {$PVM_SelIrL0}
+'SelSliceIrDef.mod': line  30--->}
+'SelSliceIrDef.mod': line  31--->
+'SelSliceIrDef.mod': line  32--->subroutine SliceSelIr
+'SelSliceIrDef.mod': line  33--->
+'PrepModulesHead.mod': line  64--->
+'PrepModulesHead.mod': line  65--->
+'PrepModulesHead.mod': line  66--->;**** Tagging ****
+'TagDef.mod': line   1--->;****************************************************************
+'TagDef.mod': line   2--->;
+'TagDef.mod': line   3--->; Copyright (c) 2007
+'TagDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'TagDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'TagDef.mod': line   6--->;
+'TagDef.mod': line   7--->; $Id: TagDef.mod,v 1.6 2013/06/05 12:55:35 sako Exp $
+'TagDef.mod': line   8--->;
+'TagDef.mod': line   9--->; All Rights Reserved
+'TagDef.mod': line  10--->;
+'TagDef.mod': line  11--->; TagDef.mod : Declaration of tagging subroutine
+'TagDef.mod': line  12--->; call
+'TagDef.mod': line  13--->; subr Tagging()
+'TagDef.mod': line  14--->;
+'TagDef.mod': line  15--->;****************************************************************
+'TagDef.mod': line  16--->
+'TagDef.mod': line  17--->if(PVM_TaggingOnOff)
+'TagDef.mod': line  18--->{
+'TagDef.mod': line  19--->define list<frequency> taggfreq={$PVM_TaggingFL}
+'TagDef.mod': line  20--->
+'TagDef.mod': line  21--->define delay TaggD0 = {$PVM_TaggingD0}
+'TagDef.mod': line  22--->define delay TaggD1 = {$PVM_TaggingD1}
+'TagDef.mod': line  23--->define delay TaggD2 = {$PVM_TaggingD2}
+'TagDef.mod': line  24--->define delay TaggD3 = {$PVM_TaggingD3}
+'TagDef.mod': line  25--->define delay TaggD4 = {$PVM_TaggingD4}
+'TagDef.mod': line  26--->define delay TaggD5 = {$PVM_TaggingD5}
+'TagDef.mod': line  28--->define pulse TaggP0 = {$PVM_TaggingP0}
+'TagDef.mod': line  29--->define loopcounter TaggL0 = {$PVM_TaggingLp0}
+'TagDef.mod': line  30--->}
+'TagDef.mod': line  31--->
+'TagDef.mod': line  32--->subroutine Tagging
+'TagDef.mod': line  33--->
+'PrepModulesHead.mod': line  68--->
+'PrepModulesHead.mod': line  69--->
+'PrepModulesHead.mod': line  70--->;**** Noe ****
+'NoeDef.mod': line   1--->;****************************************************************
+'NoeDef.mod': line   2--->;
+'NoeDef.mod': line   3--->; Copyright (c) 2007
+'NoeDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'NoeDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'NoeDef.mod': line   6--->;
+'NoeDef.mod': line   7--->; $Id: NoeDef.mod,v 1.1 2007/07/02 14:26:00 mawi Exp $
+'NoeDef.mod': line   8--->;
+'NoeDef.mod': line   9--->; All Rights Reserved
+'NoeDef.mod': line  10--->;
+'NoeDef.mod': line  11--->; NoeDef.mod: Declaration of Nuclear Overhouser Enhancement 
+'NoeDef.mod': line  12--->;             subroutine
+'NoeDef.mod': line  13--->; call
+'NoeDef.mod': line  14--->; subr Noe()
+'NoeDef.mod': line  15--->;
+'NoeDef.mod': line  16--->;****************************************************************
+'NoeDef.mod': line  17--->
+'NoeDef.mod': line  18--->if(PVM_NoeOnOff == On)
+'NoeDef.mod': line  19--->{
+'NoeDef.mod': line  20--->define delay NoeD0 = {$PVM_NoeD0}
+'NoeDef.mod': line  21--->define delay NoeD1 = {$PVM_NoeD1}
+'NoeDef.mod': line  22--->}
+'NoeDef.mod': line  23--->
+'NoeDef.mod': line  24--->subroutine Noe
+'PrepModulesHead.mod': line  72--->
+'PrepModulesHead.mod': line  73--->
+'PrepModulesHead.mod': line  74--->;**** Evolution ****
+'EvolutionDef.mod': line   1--->;****************************************************************
+'EvolutionDef.mod': line   2--->;
+'EvolutionDef.mod': line   3--->; Copyright (c) 1998-2003
+'EvolutionDef.mod': line   4--->; Bruker BioSpin MRI GmbH
+'EvolutionDef.mod': line   5--->; D-76275 Ettlingen, Germany
+'EvolutionDef.mod': line   6--->;
+'EvolutionDef.mod': line   7--->; All Rights Reserved
+'EvolutionDef.mod': line   8--->;
+'EvolutionDef.mod': line   9--->; EvolutionDef.mod - Evolution Module
+'EvolutionDef.mod': line  10--->;
+'EvolutionDef.mod': line  11--->;****************************************************************
+'EvolutionDef.mod': line  12--->
+'EvolutionDef.mod': line  13--->if (PVM_EvolutionOnOff == On)
+'EvolutionDef.mod': line  14--->{
+'EvolutionDef.mod': line  15--->  define delay       evolDel  = {$PVM_EvolutionDelay}
+'EvolutionDef.mod': line  16--->  define list<delay> evolTime = {$PVM_EvolutionTime}
+'EvolutionDef.mod': line  17--->}
+'EvolutionDef.mod': line  18--->
+'EvolutionDef.mod': line  19--->subroutine Evolution
+'PrepModulesHead.mod': line  76--->
+'PrepModulesHead.mod': line  77--->
+'comp_MRS_PRESS.ppg': line  17--->define delay de4
+'comp_MRS_PRESS.ppg': line  18--->"de4=0.00002s-de"
+'comp_MRS_PRESS.ppg': line  19--->
+'acqdec.mod': line   1--->;****************************************************************
+'acqdec.mod': line   2--->;
+'acqdec.mod': line   3--->; Copyright (c) 2012
+'acqdec.mod': line   4--->; Bruker BioSpin MRI GmbH 
+'acqdec.mod': line   5--->; D-76275 Ettlingen, Germany
+'acqdec.mod': line   6--->;
+'acqdec.mod': line   7--->; All Rights Reserved
+'acqdec.mod': line   8--->; 
+'acqdec.mod': line   9--->; $Id: acqdec.mod,v 1.2.2.1 2014/10/22 14:10:34 josh Exp $
+'acqdec.mod': line  10--->; 
+'acqdec.mod': line  11--->; All Rights Reserved
+'acqdec.mod': line  12--->; 
+'acqdec.mod': line  13--->; Declaration of subroutine for decoupling
+'acqdec.mod': line  14--->;
+'acqdec.mod': line  15--->;****************************************************************
+'acqdec.mod': line  16--->
+'acqdec.mod': line  18--->if(PVM_DecOnOff == On)
+'acqdec.mod': line  19--->{
+'acqdec.mod': line  20--->define delay DecD0 = {$PVM_DecD0}
+'acqdec.mod': line  21--->define delay DecD1 = {$PVM_DecD1}
+'acqdec.mod': line  22--->}
+'acqdec.mod': line  23--->define delay durx
+'acqdec.mod': line  24--->"durx = 10u - de - 1u" ; 10u - fixed delays
+'acqdec.mod': line  25--->
+'acqdec.mod': line  26--->
+'acqdec.mod': line  27--->subroutine acqdec
+'acqdec.mod': line  28--->subroutine acqdec_jobs
+'comp_MRS_PRESS.ppg': line  20--->
+'Navigator.mod': line   1--->;****************************************************************
+'Navigator.mod': line   2--->;
+'Navigator.mod': line   3--->; Copyright (c) 2011
+'Navigator.mod': line   4--->; Bruker BioSpin MRI GmbH
+'Navigator.mod': line   5--->; D-76275 Ettlingen, Germany
+'Navigator.mod': line   6--->;
+'Navigator.mod': line   7--->; All Rights Reserved
+'Navigator.mod': line   8--->; 
+'Navigator.mod': line   9--->; Navigator.mod - Preparation Module for Navigator
+'Navigator.mod': line  10--->;
+'Navigator.mod': line  11--->;****************************************************************
+'Navigator.mod': line  12--->
+'Navigator.mod': line  13--->if (PVM_NavOnOff == On)
+'Navigator.mod': line  14--->{
+'Navigator.mod': line  15--->  define list<frequency> navlist = {$PVM_NavFrequencyList}
+'Navigator.mod': line  16--->  define list<frequency> navrec ={$PVM_NavFreqRecList}
+'Navigator.mod': line  17--->  define list<grad_vector> vec ={$PVM_NavVec}
+'Navigator.mod': line  18--->  define pulse NavP0 = {$PVM_NavP0}	
+'Navigator.mod': line  19--->  define delay NAVD1 = {$PVM_NavD1}
+'Navigator.mod': line  20--->  define delay NAVD2 = {$PVM_NavD2}
+'Navigator.mod': line  21--->  define delay NAVD3 = {$PVM_NavD3}
+'Navigator.mod': line  22--->  define delay NAVD4 = {$PVM_NavD4}
+'Navigator.mod': line  23--->}
+'Navigator.mod': line  24--->subroutine Navigator
+'Navigator.mod': line  25--->subroutine Navigator_NOPH
+'Navigator.mod': line  26--->subroutine NavigatorDummy
+'Navigator.mod': line  27--->subroutine NavigatorGlobal
+'comp_MRS_PRESS.ppg': line  21--->
+'comp_MRS_PRESS.ppg': line  22--->define loopcounter lds={$PVM_DummyScans}
+'comp_MRS_PRESS.ppg': line  23--->define list<loopcounter> avList={$AverageList}
+'comp_MRS_PRESS.ppg': line  24--->preset off
+'comp_MRS_PRESS.ppg': line  25--->
+'comp_MRS_PRESS.ppg': line  28--->if (ACQ_jobs_size >1)
+'comp_MRS_PRESS.ppg': line  29--->{
+'comp_MRS_PRESS.pp': line  30, macro line 0--->  3u  setrtp1|1	
+dur2 == line 762
+fixdel(3.000000 usec) setNmr1: 0x200 
+
+'comp_MRS_PRESS.pp': line  30, macro line 1--->	7u  setrtp1^1             
+dur3 == line 763
+fixdel(7.000000 usec) clrNmr1: 0x200 
+
+'comp_MRS_PRESS.pp': line  30, macro line 2---> 1m	swj1    
+dur4 == line 764
+fixdel(1000.000000 usec)  SWITCH to JOB 0 
+
+'comp_MRS_PRESS.pp': line  30, macro line 3---> 1m	dccorr1         
+dur5 == line 765
+fixdel(1000.000000 usec) 
+
+
+Begin of PTList: lalign
+{
+    dur6 == line 765
+    fixdel(1.500000 usec) SYNCRCU 
+    
+    dur7 == line 765
+    fixdel(4.500000 usec) ADCGO RCU 1 ADCGO_DC channel 1: SY receive phase(65,0) PHADDO PHREF 
+    phase(65,8) receive 
+}
+
+
+{
+    dur8 == line 765
+    de 
+    
+    dur9 == line 765
+    fixdel(1000.000000 usec) setNmr1: 0x2100 
+    
+    dur10 == line 765
+    fixdel(500.000000 usec) clrNmr1: 0x2100  EVENT-EOSZ eos1 
+}
+End of PTList
+
+'comp_MRS_PRESS.pp': line  30, macro line 4--->	3u  setrtp1|1	
+dur11 == line 766
+fixdel(3.000000 usec) setNmr1: 0x200 
+
+'comp_MRS_PRESS.pp': line  30, macro line 5--->	187u  setrtp1^1	
+dur12 == line 767
+fixdel(187.000000 usec) clrNmr1: 0x200 
+
+'comp_MRS_PRESS.pp': line  30, macro line 6--->	1u  setrtp1|1	
+dur13 == line 768
+fixdel(1.000000 usec) setNmr1: 0x200 
+
+'comp_MRS_PRESS.pp': line  30, macro line 7--->	9u  setrtp1^1            
+dur14 == line 769
+fixdel(9.000000 usec) clrNmr1: 0x200 
+
+'comp_MRS_PRESS.pp': line  30, macro line 8---> 1m	swj2   
+dur15 == line 770
+fixdel(1000.000000 usec)  SWITCH to JOB 1 
+
+'comp_MRS_PRESS.pp': line  30, macro line 9---> 1m	dccorr2       
+dur16 == line 771
+fixdel(1000.000000 usec) 
+
+
+Begin of PTList: lalign
+{
+    dur17 == line 771
+    fixdel(1.500000 usec) SYNCRCU 
+    
+    dur18 == line 771
+    fixdel(4.500000 usec) ADCGO RCU 2 ADCGO_DC channel 1: SY receive phase(65,0) PHADDO PHREF 
+    phase(65,8) receive 
+}
+
+
+{
+    dur19 == line 771
+    de 
+    
+    dur20 == line 771
+    fixdel(1000.000000 usec) setNmr1: 0x2100 
+    
+    dur21 == line 771
+    fixdel(500.000000 usec) clrNmr1: 0x2100  EVENT-EOSZ eos1 
+}
+End of PTList
+
+'comp_MRS_PRESS.pp': line  30, macro line 10---> 3u  setrtp1|1	
+dur22 == line 772
+fixdel(3.000000 usec) setNmr1: 0x200 
+
+'comp_MRS_PRESS.pp': line  30, macro line 11--->	7u  setrtp1^1            
+dur23 == line 773
+fixdel(7.000000 usec) clrNmr1: 0x200 
+
+'comp_MRS_PRESS.pp': line  30, macro line 12---> 1m	swj1	  
+'comp_MRS_PRESS.pp': line  30, macro line 13--->	if (CONFIG_preemp_type == GREAT_60)               
+'comp_MRS_PRESS.pp': line  30, macro line 14---> {                                                 
+'comp_MRS_PRESS.pp': line  30, macro line 15---> if (CONFIG_instrument_type != Avance_III)      
+'comp_MRS_PRESS.pp': line  30, macro line 16---> {                                              
+'comp_MRS_PRESS.pp': line  30, macro line 17---> 500m setnmr0|34|33|32                          
+dur24 == line 774
+fixdel(1000.000000 usec)  SWITCH to JOB 0 
+
+'comp_MRS_PRESS.pp': line  30, macro line 19---> }                                              
+'comp_MRS_PRESS.pp': line  30, macro line 20---> else                                           
+'comp_MRS_PRESS.ppg': line  31---> {                                              
+'comp_MRS_PRESS.ppg': line  32---> 200u setnmr0|34|33|32                          
+'comp_MRS_PRESS.ppg': line  33---> }                                              
+'comp_MRS_PRESS.ppg': line  34---> }                                                 
+'comp_MRS_PRESS.ppg': line  35---> if (CONFIG_preemp_type == DPP_with_SW_Blanking)   
+'comp_MRS_PRESS.ppg': line  36---> {
+dur25 == line 781
+fixdel(10.000000 usec) Gradient statement # 0, type = 0x100 NEXTGRAD 
+
+'comp_MRS_PRESS.ppg': line  37---> 10u ctrlgrad 0  
+dur26 == line 789
+fixdel(10.000000 usec) 
+
+'comp_MRS_PRESS.pp': line  38, macro line 0---> 10u grad{(0)|(0)|(0) }	  
+dur27 == line 790
+fixdel(3.000000 usec) setNmr1: 0x200 
+
+'comp_MRS_PRESS.pp': line  38, macro line 1---> 200u setnmr0|34|33|32     
+'comp_MRS_PRESS.ppg': line  39---> }
+'comp_MRS_PRESS.ppg': line  61---> if (CONFIG_preemp_type == DPP)  
+'comp_MRS_PRESS.ppg': line  62---> {    
+'comp_MRS_PRESS.ppg': line  63---> 10u groff 
+dur28 == line 791
+fixdel(7.000000 usec) clrNmr1: 0x200 
+
+'comp_MRS_PRESS.ppg': line  64---> }
+dur29 == line 796
+fixdel(1.000000 usec) 
+reset phase (1) 
+
+'comp_MRS_PRESS.ppg': line  65--->}
+dur30 == line 797
+fixdel(1.000000 usec) 
+reset phase (2) 
+
+'comp_MRS_PRESS.ppg': line  66--->else
+dur31 == line 798
+fixdel(1.000000 usec) 
+reset phase (3) 
+
+'comp_MRS_PRESS.ppg': line  67--->{
+'comp_MRS_PRESS.ppg': line  68--->  dccorr                                             
+dur32 == line 799
+fixdel(1.000000 usec) 
+reset phase (31) 
+
+'comp_MRS_PRESS.ppg': line  69--->                           
+dur33 == line 801
+fixdel(10.000000 usec) 
+
+'comp_MRS_PRESS.ppg': line  70---> if (CONFIG_preemp_type == GREAT_60)               
+'comp_MRS_PRESS.ppg': line  71---> {                                                 
+'comp_MRS_PRESS.ppg': line  72---> if (CONFIG_instrument_type != Avance_III)      
+'TriggerDef.mod': line  73---> {                                              
+'TriggerDef.mod': line  74---> 500m setnmr0|34|33|32                          
+'TriggerDef.mod': line  75---> }                                              
+'TriggerDef.mod': line  76---> else                                           
+'TriggerDef.mod': line  77---> {                                              
+'TriggerDef.mod': line  43---> 200u setnmr0|34|33|3'TriggerDef.mod': line  44--->2                          
+'TriggerDef.mod': line  45---> }                                              
+'TriggerDef.mod': line  46---> }                                                 
+'TriggerDef.mod': line  47---> if (CONFIG_preemp_type == DPP_with_SW_Blanking)   
+'TriggerDef.mod': line  48---> {
+'TriggerDef.mod': line  49---> 10u ctrlgrad 0  
+'TriggerDef.mod': line  50---> 10u grad{(0)|(0)|(0) }	  
+'TriggerDef.mod': line  51---> 200u setnmr0|34|33|32     
+'TriggerDef.mod': line  52---> }
+'TriggerDef.mod': line  53---> if (CONFIG_preemp_type == DPP)  
+'TriggerDef.mod': line  54---> {    
+'TriggerDef.mod': line  55---> 10u groff 
+'TriggerDef.mod': line  56---> }
+'TriggerDef.mod': line  57--->}
+'TriggerDef.mod': line  58--->
+'TriggerDef.mod': line  59--->        10u  ;delay after dccorr                                             
+'TriggerDef.mod': line  60--->                           
+'TriggerDef.mod': line  61---> if (CONFIG_preemp_type == GREAT_60)               
+'TriggerDef.mod': line  62---> {                                                 
+'TriggerDef.mod': line  63---> if (CONFIG_instrument_type != Avance_III)      
+'TriggerDef.mod': line  64---> {                                              
+'TriggerDef.mod': line  65---> 500m setnmr0|34|33|32                          
+'TriggerDef.mod': line  66---> }                                              
+'TriggerDef.mod': line  67---> else                                           
+'comp_MRS_PRESS.ppg': line  71---> {                                             'comp_MRS_PRESS.ppg': line  72---> 
+'comp_MRS_PRESS.ppg': line  73---> 200u setnmr0|34|33|32                          
+'NoeDef.mod': line  44---> }                                              
+'NoeDef.mod': line  45---> }                                                 
+'NoeDef.mod': line  46---> if (CONFIG_preemp_type == DPP_with_SW_Blanking)   
+'NoeDef.mod': line  47---> {
+'NoeDef.mod': line  48---> 10u ctrlgrad 0  
+'NoeDef.mod': line  49---> 10u grad{(0)|(0)|(0) }	  
+'NoeDef.mod': line  50---> 200u setnmr0|34|33|32     
+'NoeDef.mod': line  51---> }
+'NoeDef.mod': line  52---> if (CONFIG_preemp_type == DPP)  
+'NoeDef.mod': line  53---> {    
+'NoeDef.mod': line  54---> 10u groff 
+'NoeDef.mod': line  55---> } needed
+'NoeDef.mod': line  56--->	3u  setrtp1|1	
+'NoeDef.mod': line  57--->	7u  setrtp1^1 ; lasts 10u
+'NoeDef.mod': line  58--->
+'NoeDef.mod': line  60--->;-------D/P-----GRAD-----------------------------RF/ACQ---------
+'NoeDef.mod': line  61--->
+'NoeDef.mod': line  62--->        1u      rpp1
+'NoeDef.mod': line  63--->        1u      rpp2
+'NoeDef.mod': line  64--->        1u      rpp3
+'comp_MRS_PRESS.ppg': line  72--->        1u	rpp31
+'comp_MRS_PRESS.ppg': line  73--->
+'comp_MRS_PRESS.ppg': line  74--->start,	10u					
+'WsOvsDef.mod': line 268--->	1m					fq8(receive):f1
+'WsOvsDef.mod': line 269--->subr TriggerSlice
+'WsOvsDef.mod': line 270--->;EXEC_begin TriggerSlice TriggerSlice()
+'WsOvsDef.mod': line 103---> 
+'WsOvsDef.mod': line 104--->  if (PVM_TriggerMode == per_Slice)
+'WsOvsDef.mod': line 105--->  {
+'WsOvsDef.mod': line 106--->;EXEC_begin Trigger Trigger()
+'WsOvsDef.mod': line 108---> 
+'WsOvsDef.mod': line 109--->  if (PVM_TriggerModule == On)
+'WsOvsDef.mod': line 110--->  {
+'WsOvsDef.mod': line 111--->    trigDur     setnmr3|6
+'WsOvsDef.mod': line 112--->  
+'WsOvsDef.mod': line 113--->    if (CONFIG_instrument_type == Avance_III)
+'WsOvsDef.mod': line 114--->    {
+'WsOvsDef.mod': line 115--->      trigDur   trignl1
+'WsOvsDef.mod': line 116--->      trigDur   trigpe3
+'WsOvsDef.mod': line 117--->    }
+'WsOvsDef.mod': line 118--->    else
+'WsOvsDef.mod': line 119--->    {
+'WsOvsDef.mod': line 120--->      trigDur
+'WsOvsDef.mod': line 121--->      trigDur   trigpl1
+'WsOvsDef.mod': line 122--->    }
+'WsOvsDef.mod': line 123--->  
+'WsOvsDef.mod': line 124--->    trigDur     setnmr3^6 
+'WsOvsDef.mod': line 125--->    trigDel
+'WsOvsDef.mod': line 126--->  }
+'WsOvsDef.mod': line 127---> 
+'WsOvsDef.mod': line 128--->;EXEC_end   Trigger
+'WsOvsDef.mod': line 129--->  }
+'WsOvsDef.mod': line 130---> 
+'WsOvsDef.mod': line 131--->;EXEC_end   TriggerSlice
+'WsOvsDef.mod': line 133--->subr Noe
+'WsOvsDef.mod': line 134--->;EXEC_begin Noe Noe()
+'WsOvsDef.mod': line 136---> 
+'WsOvsDef.mod': line 137--->if(PVM_NoeOnOff == On)
+'WsOvsDef.mod': line 138--->{
+'WsOvsDef.mod': line 139--->  if (PVM_NoeMode == Continuous_Wave_Noe)
+'WsOvsDef.mod': line 140--->     {  
+'WsOvsDef.mod': line 141--->        3u pl1:f2
+'WsOvsDef.mod': line 142--->        NoeD0  cw:f2
+'WsOvsDef.mod': line 143--->        1u do:f2
+'WsOvsDef.mod': line 144--->        NoeD1
+'WsOvsDef.mod': line 145--->     }
+'WsOvsDef.mod': line 146--->  if (PVM_NoeMode == Composite_Pulse_Noe)
+'WsOvsDef.mod': line 147--->     {  
+'WsOvsDef.mod': line 148--->        3u pl1:f2
+'WsOvsDef.mod': line 149--->        NoeD0 cpds1:f2
+'WsOvsDef.mod': line 150--->        1u do:f2
+'WsOvsDef.mod': line 151--->        NoeD1
+'WsOvsDef.mod': line 152--->     }
+'WsOvsDef.mod': line 153--->}
+'WsOvsDef.mod': line 154---> 
+'WsOvsDef.mod': line 155--->;EXEC_end   Noe
+'WsOvsDef.mod': line 157--->subr WsOvs
+'WsOvsDef.mod': line 158--->;EXEC_begin WsOvs WsOvs(phase ph0, phase ph0)
+'WsOvsDef.mod': line 160---> 
+'WsOvsDef.mod': line 161--->;EXEC_begin WsOvsMain WsOvsMain(phase ph0, phase ph0, any PVM_OvsOnOff)
+'WsOvsDef.mod': line 163---> 
+'WsOvsDef.mod': line 164--->
+'WsOvsDef.mod': line 165--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 166--->; NO_SUPPRESSION
+'WsOvsDef.mod': line 167--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 168--->
+'WsOvsDef.mod': line 169--->;WS_Mode == NO_SUPPRESSION
+'WsOvsDef.mod': line 170--->if ( PVM_WsMode == 0 ) {
+'WsOvsDef.mod': line 171--->
+'WsOvsDef.mod': line 172--->if ( PVM_OvsOnOff == On ) {
+'WsOvsDef.mod': line 173--->;EXEC_begin Ovs Ovs(phase ph0)
+'WsOvsDef.mod': line 175---> 
+'WsOvsDef.mod': line 176--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 177--->;	delays		grads			rf/rec		comments
+'WsOvsDef.mod': line 178--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 179--->	;pulses 1 + 2	
+'WsOvsDef.mod': line 180--->	OvsD0 	grad_ramp{  PVM_OvsTrim0, 0.0, 0.0 }	Ovslist[0]:f1
+'WsOvsDef.mod': line 181--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 182--->	10u					Ovslist[1]:f1
+'WsOvsDef.mod': line 183--->	(OvsP0:sp53 ph0):f1										
+'WsOvsDef.mod': line 184--->	OvsD1	grad_ramp{  PVM_OvsTrim1, 0.0, 0.0 }					
+'WsOvsDef.mod': line 185--->	
+'WsOvsDef.mod': line 186--->	;pulses 3 + 4
+'WsOvsDef.mod': line 187--->	OvsD0 	grad_ramp{  0.0, PVM_OvsTrim0, 0.0 }	Ovslist[2]:f1		
+'WsOvsDef.mod': line 188--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 189--->	10u 					Ovslist[3]:f1
+'WsOvsDef.mod': line 190--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 191--->	OvsD1	grad_ramp{  0.0, PVM_OvsTrim2, 0.0 }
+'WsOvsDef.mod': line 192--->			
+'WsOvsDef.mod': line 193--->	;pulses 5 + 6
+'WsOvsDef.mod': line 194--->	OvsD0 	grad_ramp{  0.0, 0.0, PVM_OvsTrim0 }	Ovslist[4]:f1			
+'WsOvsDef.mod': line 195--->	(OvsP0:sp53 ph0):f1						
+'WsOvsDef.mod': line 196--->	10u 					Ovslist[5]:f1
+'WsOvsDef.mod': line 197--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 198--->	OvsD1	grad_ramp{  0.0, 0.0, PVM_OvsTrim3 }
+'WsOvsDef.mod': line 199--->	OvsD0 	grad_off
+'WsOvsDef.mod': line 200---> 
+'WsOvsDef.mod': line 201--->;EXEC_end   Ovs
+'WsOvsDef.mod': line 202--->;EXEC_begin Ovs Ovs(phase ph0)
+'WsOvsDef.mod': line 204---> 
+'WsOvsDef.mod': line 205--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 206--->;	delays		grads			rf/rec		comments
+'WsOvsDef.mod': line 207--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 208--->	;pulses 1 + 2	
+'WsOvsDef.mod': line 209--->	OvsD0 	grad_ramp{  PVM_OvsTrim0, 0.0, 0.0 }	Ovslist[0]:f1
+'WsOvsDef.mod': line 210--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 211--->	10u					Ovslist[1]:f1
+'WsOvsDef.mod': line 212--->	(OvsP0:sp53 ph0):f1										
+'WsOvsDef.mod': line 213--->	OvsD1	grad_ramp{  PVM_OvsTrim1, 0.0, 0.0 }					
+'WsOvsDef.mod': line 214--->	
+'WsOvsDef.mod': line 215--->	;pulses 3 + 4
+'WsOvsDef.mod': line 216--->	OvsD0 	grad_ramp{  0.0, PVM_OvsTrim0, 0.0 }	Ovslist[2]:f1		
+'WsOvsDef.mod': line 217--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 218--->	10u 					Ovslist[3]:f1
+'WsOvsDef.mod': line 219--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 220--->	OvsD1	grad_ramp{  0.0, PVM_OvsTrim2, 0.0 }
+'WsOvsDef.mod': line 221--->			
+'WsOvsDef.mod': line 222--->	;pulses 5 + 6
+'WsOvsDef.mod': line 223--->	OvsD0 	grad_ramp{  0.0, 0.0, PVM_OvsTrim0 }	Ovslist[4]:f1			
+'WsOvsDef.mod': line 224--->	(OvsP0:sp53 ph0):f1						
+'WsOvsDef.mod': line 225--->	10u 					Ovslist[5]:f1
+'WsOvsDef.mod': line 226--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 227--->	OvsD1	grad_ramp{  0.0, 0.0, PVM_OvsTrim3 }
+'WsOvsDef.mod': line 228--->	OvsD0 	grad_off
+'WsOvsDef.mod': line 229---> 
+'WsOvsDef.mod': line 230--->;EXEC_end   Ovs
+'WsOvsDef.mod': line 231--->;EXEC_begin Ovs Ovs(phase ph0)
+'WsOvsDef.mod': line 233---> 
+'WsOvsDef.mod': line 234--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 235--->;	delays		grads			rf/rec		comments
+'WsOvsDef.mod': line 236--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 237--->	;pulses 1 + 2	
+'WsOvsDef.mod': line 238--->	OvsD0 	grad_ramp{  PVM_OvsTrim0, 0.0, 0.0 }	Ovslist[0]:f1
+'WsOvsDef.mod': line 239--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 240--->	10u					Ovslist[1]:f1
+'WsOvsDef.mod': line 241--->	(OvsP0:sp53 ph0):f1										
+'WsOvsDef.mod': line 242--->	OvsD1	grad_ramp{  PVM_OvsTrim1, 0.0, 0.0 }					
+'WsOvsDef.mod': line 243--->	
+'WsOvsDef.mod': line 244--->	;pulses 3 + 4
+'WsOvsDef.mod': line 245--->	OvsD0 	grad_ramp{  0.0, PVM_OvsTrim0, 0.0 }	Ovslist[2]:f1		
+'WsOvsDef.mod': line 246--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 247--->	10u 					Ovslist[3]:f1
+'WsOvsDef.mod': line 248--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 249--->	OvsD1	grad_ramp{  0.0, PVM_OvsTrim2, 0.0 }
+'WsOvsDef.mod': line 250--->			
+'WsOvsDef.mod': line 251--->	;pulses 5 + 6
+'WsOvsDef.mod': line 252--->	OvsD0 	grad_ramp{  0.0, 0.0, PVM_OvsTrim0 }	Ovslist[4]:f1			
+'WsOvsDef.mod': line 253--->	(OvsP0:sp53 ph0):f1						
+'WsOvsDef.mod': line 254--->	10u 					Ovslist[5]:f1
+'WsOvsDef.mod': line 255--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 256--->	OvsD1	grad_ramp{  0.0, 0.0, PVM_OvsTrim3 }
+'WsOvsDef.mod': line 257--->	OvsD0 	grad_off
+'WsOvsDef.mod': line 258---> 
+'WsOvsDef.mod': line 259--->;EXEC_end   Ovs
+'WsOvsDef.mod': line 260--->}
+'WsOvsDef.mod': line 261--->
+'WsOvsDef.mod': line 262--->}
+'WsOvsDef.mod': line 263--->
+'WsOvsDef.mod': line 264--->
+'WsOvsDef.mod': line 265--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 266--->; CHESS scheme
+'WsOvsDef.mod': line 267--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 268--->if ( PVM_WsMode == 1 ) {
+'WsOvsDef.mod': line 269--->2u 	Wslist:f1
+'WsOvsDef.mod': line 270--->;first pulse
+'WsOvsDef.mod': line 271--->if ( PVM_WsOnOff == On ) {
+'WsOvsDef.mod': line 272--->	(WsP0:sp50 ph0):f1
+'WsOvsDef.mod': line 273--->}
+'WsOvsDef.mod': line 274--->if ( PVM_WsOnOff == Off ) {
+'WsOvsDef.mod': line 275--->	WsNp0
+'WsOvsDef.mod': line 276--->}
+'WsOvsDef.mod': line 277--->	ChD1[0] grad_ramp{ PVM_ChTrim[0], PVM_ChTrim[1], PVM_ChTrim[2] }
+'WsOvsDef.mod': line 278--->	ChD2[0] grad_off
+'WsOvsDef.mod': line 279--->if ( PVM_OvsOnOff == On ) {
+'WsOvsDef.mod': line 280--->;EXEC_begin Ovs Ovs(phase ph0)
+'WsOvsDef.mod': line 282---> 
+'WsOvsDef.mod': line 283--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 284--->;	delays		grads			rf/rec		comments
+'WsOvsDef.mod': line 285--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 286--->	;pulses 1 + 2	
+'WsOvsDef.mod': line 287--->	OvsD0 	grad_ramp{  PVM_OvsTrim0, 0.0, 0.0 }	Ovslist[0]:f1
+'WsOvsDef.mod': line 288--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 289--->	10u					Ovslist[1]:f1
+'WsOvsDef.mod': line 290--->	(OvsP0:sp53 ph0):f1										
+'WsOvsDef.mod': line 291--->	OvsD1	grad_ramp{  PVM_OvsTrim1, 0.0, 0.0 }					
+'WsOvsDef.mod': line 292--->	
+'WsOvsDef.mod': line 293--->	;pulses 3 + 4
+'WsOvsDef.mod': line 294--->	OvsD0 	grad_ramp{  0.0, PVM_OvsTrim0, 0.0 }	Ovslist[2]:f1		
+'WsOvsDef.mod': line 295--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 296--->	10u 					Ovslist[3]:f1
+'WsOvsDef.mod': line 297--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 298--->	OvsD1	grad_ramp{  0.0, PVM_OvsTrim2, 0.0 }
+'WsOvsDef.mod': line 299--->			
+'WsOvsDef.mod': line 300--->	;pulses 5 + 6
+'WsOvsDef.mod': line 301--->	OvsD0 	grad_ramp{  0.0, 0.0, PVM_OvsTrim0 }	Ovslist[4]:f1			
+'WsOvsDef.mod': line 302--->	(OvsP0:sp53 ph0):f1						
+'WsOvsDef.mod': line 303--->	10u 					Ovslist[5]:f1
+'WsOvsDef.mod': line 304--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 305--->	OvsD1	grad_ramp{  0.0, 0.0, PVM_OvsTrim3 }
+'WsOvsDef.mod': line 306--->	OvsD0 	grad_off
+'WsOvsDef.mod': line 307---> 
+'WsOvsDef.mod': line 308--->;EXEC_end   Ovs
+'WsOvsDef.mod': line 309--->2u 	Wslist:f1
+'WsOvsDef.mod': line 310--->}
+'WsOvsDef.mod': line 311--->
+'WsOvsDef.mod': line 312--->;second pulse
+'WsOvsDef.mod': line 313--->if ( PVM_WsOnOff == On ) {
+'WsOvsDef.mod': line 314--->	(WsP1:sp51 ph0):f1
+'WsOvsDef.mod': line 315--->}
+'WsOvsDef.mod': line 316--->if ( PVM_WsOnOff == Off ) {
+'WsOvsDef.mod': line 317--->	WsNp1
+'WsOvsDef.mod': line 318--->}
+'WsOvsDef.mod': line 319--->	ChD1[1] grad_ramp{ PVM_ChTrim[3], PVM_ChTrim[4], PVM_ChTrim[5] }
+'WsOvsDef.mod': line 320--->	ChD2[1] grad_off
+'WsOvsDef.mod': line 321--->if ( PVM_OvsOnOff == On ) {
+'WsOvsDef.mod': line 322--->;EXEC_begin Ovs Ovs(phase ph0)
+'WsOvsDef.mod': line 324---> 
+'WsOvsDef.mod': line 325--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 326--->;	delays		grads			rf/rec		comments
+'WsOvsDef.mod': line 327--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 328--->	;pulses 1 + 2	
+'WsOvsDef.mod': line 329--->	OvsD0 	grad_ramp{  PVM_OvsTrim0, 0.0, 0.0 }	Ovslist[0]:f1
+'WsOvsDef.mod': line 330--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 331--->	10u					Ovslist[1]:f1
+'WsOvsDef.mod': line 332--->	(OvsP0:sp53 ph0):f1										
+'WsOvsDef.mod': line 333--->	OvsD1	grad_ramp{  PVM_OvsTrim1, 0.0, 0.0 }					
+'WsOvsDef.mod': line 334--->	
+'WsOvsDef.mod': line 335--->	;pulses 3 + 4
+'WsOvsDef.mod': line 336--->	OvsD0 	grad_ramp{  0.0, PVM_OvsTrim0, 0.0 }	Ovslist[2]:f1		
+'WsOvsDef.mod': line 337--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 338--->	10u 					Ovslist[3]:f1
+'WsOvsDef.mod': line 339--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 340--->	OvsD1	grad_ramp{  0.0, PVM_OvsTrim2, 0.0 }
+'WsOvsDef.mod': line 341--->			
+'WsOvsDef.mod': line 342--->	;pulses 5 + 6
+dur34 == line 802
+fixdel(1000.000000 usec) channel 1: set O8 via ptr 0 
+
+'WsOvsDef.mod': line 343--->	OvsD0 	grad_ramp{  0.0, 0.0, PVM_OvsTrim0 }	Ovslist[4]:f1			
+'WsOvsDef.mod': line 344--->	(OvsP0:sp53 ph0):f1						
+'WsOvsDef.mod': line 345--->	10u 					Ovslist[5]:f1
+dur35 == line 1106
+fixdel(2.000000 usec) channel 1: set O1 from list via ptr 0 
+
+'WsOvsDef.mod': line 346--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 347--->	OvsD1	grad_ramp{  0.0, 0.0, PVM_OvsTrim3 }
+'WsOvsDef.mod': line 348--->	OvsD0 	grad_off
+'WsOvsDef.mod': line 349---> 
+'WsOvsDef.mod': line 350--->;EXEC_end   Ovs
+
+Begin of PTList: lalign
+{
+    dur36 == line 1109
+    WsP0 Shape Pulse SP50:f1 channel 1: shape pulse 50 via ptr -1 phase(0,0) 
+}
+End of PTList
+
+'WsOvsDef.mod': line 351--->2u 	Wslist:f1
+dur37 == line 1114
+fixdel(104839.000000 usec) Gradient statement # 0, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 352--->}
+'WsOvsDef.mod': line 353--->
+'WsOvsDef.mod': line 354--->;third pulse
+'WsOvsDef.mod': line 355--->if ( PVM_WsOnOff == On ) {
+'WsOvsDef.mod': line 356--->	(WsP2:sp52 ph0):f1
+dur38 == line 1115
+fixdel(161.000000 usec) Gradient statement # 1, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 357--->}
+'WsOvsDef.mod': line 358--->if ( PVM_WsOnOff == Off ) {
+'WsOvsDef.mod': line 359--->        WsNp2	
+'WsOvsDef.mod': line 360--->}
+'WsOvsDef.mod': line 361--->	ChD1[2] grad_ramp{ PVM_ChTrim[6], PVM_ChTrim[7], PVM_ChTrim[8] }
+
+Begin of PTList: lalign
+{
+    dur39 == line 1120
+    WsP0 Shape Pulse SP50:f1 channel 1: shape pulse 50 via ptr -1 phase(0,0) 
+}
+End of PTList
+
+'WsOvsDef.mod': line 362--->	ChD2[2] grad_off
+dur40 == line 1125
+fixdel(43089.000000 usec) Gradient statement # 2, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 363--->if ( PVM_OvsOnOff == On ) {
+'WsOvsDef.mod': line 364--->;EXEC_begin Ovs Ovs(phase ph0)
+'WsOvsDef.mod': line 366---> 
+'WsOvsDef.mod': line 367--->;-------------------------------------------------------------------------------
+dur41 == line 1126
+fixdel(161.000000 usec) Gradient statement # 3, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 368--->;	delays		grads			rf/rec		comments
+'WsOvsDef.mod': line 369--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 370--->	;pulses 1 + 2	
+'WsOvsDef.mod': line 371--->	OvsD0 	grad_ramp{  PVM_OvsTrim0, 0.0, 0.0 }	Ovslist[0]:f1
+'WsOvsDef.mod': line 372--->	(OvsP0:sp53 ph0):f1	
+
+Begin of PTList: lalign
+{
+    dur42 == line 1131
+    WsP1 Shape Pulse SP51:f1 channel 1: shape pulse 51 via ptr -1 phase(0,0) 
+}
+End of PTList
+
+'WsOvsDef.mod': line 373--->	10u					Ovslist[1]:f1
+dur43 == line 1136
+fixdel(123089.000000 usec) Gradient statement # 4, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 374--->	(OvsP0:sp53 ph0):f1										
+'WsOvsDef.mod': line 375--->	OvsD1	grad_ramp{  PVM_OvsTrim1, 0.0, 0.0 }					
+'WsOvsDef.mod': line 376--->	
+'WsOvsDef.mod': line 377--->	;pulses 3 + 4
+dur44 == line 1137
+fixdel(161.000000 usec) Gradient statement # 5, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 378--->	OvsD0 	grad_ramp{  0.0, PVM_OvsTrim0, 0.0 }	Ovslist[2]:f1		
+'WsOvsDef.mod': line 379--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 380--->	10u 					Ovslist[3]:f1
+'WsOvsDef.mod': line 381--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 382--->	OvsD1	grad_ramp{  0.0, PVM_OvsTrim2, 0.0 }
+'WsOvsDef.mod': line 383--->			
+'WsOvsDef.mod': line 384--->	;pulses 5 + 6
+'WsOvsDef.mod': line 385--->	OvsD0 	grad_ramp{  0.0, 0.0, PVM_OvsTrim0 }	Ovslist[4]:f1			
+'WsOvsDef.mod': line 386--->	(OvsP0:sp53 ph0):f1						
+'WsOvsDef.mod': line 387--->	10u 					Ovslist[5]:f1
+'WsOvsDef.mod': line 388--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 389--->	OvsD1	grad_ramp{  0.0, 0.0, PVM_OvsTrim3 }
+'WsOvsDef.mod': line 390--->	OvsD0 	grad_off
+'WsOvsDef.mod': line 391---> 
+'WsOvsDef.mod': line 392--->;EXEC_end   Ovs
+'WsOvsDef.mod': line 393--->2u
+'WsOvsDef.mod': line 394--->}
+'WsOvsDef.mod': line 395--->
+'WsOvsDef.mod': line 396--->};end of CHESS
+'WsOvsDef.mod': line 397--->
+'WsOvsDef.mod': line 398--->
+'WsOvsDef.mod': line 399--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 400--->; VAPOR scheme
+'WsOvsDef.mod': line 401--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 402--->if ( PVM_WsMode == 2 ) {
+'WsOvsDef.mod': line 403--->2u 	Wslist:f1
+'WsOvsDef.mod': line 404--->;first pulse
+'WsOvsDef.mod': line 405--->if ( PVM_WsOnOff == On ) {
+'WsOvsDef.mod': line 406--->	(WsP0:sp50 ph0):f1
+'WsOvsDef.mod': line 407--->}
+'WsOvsDef.mod': line 408--->if ( PVM_WsOnOff == Off ) {
+'WsOvsDef.mod': line 409--->	WsNp0
+'WsOvsDef.mod': line 410--->}
+'WsOvsDef.mod': line 411--->	VpD1[0] grad_ramp{ PVM_VpTrim[0], PVM_VpTrim[1], PVM_VpTrim[2] }
+'WsOvsDef.mod': line 412--->	VpD2[0] grad_off
+'WsOvsDef.mod': line 413--->
+'WsOvsDef.mod': line 414--->
+'WsOvsDef.mod': line 415--->;second pulse
+
+Begin of PTList: lalign
+{
+    dur45 == line 1141
+    WsP0 Shape Pulse SP50:f1 channel 1: shape pulse 50 via ptr -1 phase(0,0) 
+}
+End of PTList
+
+'WsOvsDef.mod': line 416--->if ( PVM_WsOnOff == On ) {
+dur46 == line 1179
+fixdel(43089.000000 usec) Gradient statement # 6, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 417--->	(WsP0:sp50 ph0):f1
+'WsOvsDef.mod': line 418--->}
+'WsOvsDef.mod': line 419--->if ( PVM_WsOnOff == Off ) {
+'WsOvsDef.mod': line 420--->        WsNp0	
+'WsOvsDef.mod': line 421--->}
+dur47 == line 1180
+fixdel(161.000000 usec) Gradient statement # 7, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 422--->	VpD1[1] grad_ramp{ PVM_VpTrim[3], PVM_VpTrim[4], PVM_VpTrim[5] }
+'WsOvsDef.mod': line 423--->	VpD2[1] grad_off
+'WsOvsDef.mod': line 424--->
+'WsOvsDef.mod': line 425--->
+'WsOvsDef.mod': line 426--->;third pulse
+
+Begin of PTList: lalign
+{
+    dur48 == line 1185
+    WsP1 Shape Pulse SP51:f1 channel 1: shape pulse 51 via ptr -1 phase(0,0) 
+}
+End of PTList
+
+'WsOvsDef.mod': line 427--->if ( PVM_WsOnOff == On ) {
+dur49 == line 1190
+fixdel(63089.000000 usec) Gradient statement # 8, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 428--->	(WsP1:sp51 ph0):f1
+'WsOvsDef.mod': line 429--->}
+'WsOvsDef.mod': line 430--->if ( PVM_WsOnOff == Off ) {
+'WsOvsDef.mod': line 431--->	WsNp1	
+'WsOvsDef.mod': line 432--->}
+'WsOvsDef.mod': line 433--->	VpD1[2] grad_ramp{ PVM_VpTrim[6], PVM_VpTrim[7], PVM_VpTrim[8] }
+'WsOvsDef.mod': line 434--->	VpD2[2] grad_off
+'WsOvsDef.mod': line 435--->
+'WsOvsDef.mod': line 436--->;fourth pulse
+'WsOvsDef.mod': line 437--->if ( PVM_WsOnOff == On ) {
+'WsOvsDef.mod': line 438--->	(WsP0:sp50 ph0):f1
+'WsOvsDef.mod': line 439--->}
+'WsOvsDef.mod': line 440--->if ( PVM_WsOnOff == Off ) {
+'WsOvsDef.mod': line 441--->	WsNp0
+'WsOvsDef.mod': line 442--->}
+'WsOvsDef.mod': line 443--->
+'WsOvsDef.mod': line 444--->if ( PVM_OvsOnOff == On ) {
+'WsOvsDef.mod': line 445--->;EXEC_begin Ovs Ovs(phase ph0)
+'WsOvsDef.mod': line 447---> 
+'WsOvsDef.mod': line 448--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 449--->;	delays		grads			rf/rec		comments
+'WsOvsDef.mod': line 450--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 451--->	;pulses 1 + 2	
+'WsOvsDef.mod': line 452--->	OvsD0 	grad_ramp{  PVM_OvsTrim0, 0.0, 0.0 }	Ovslist[0]:f1
+'WsOvsDef.mod': line 453--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 454--->	10u					Ovslist[1]:f1
+'WsOvsDef.mod': line 455--->	(OvsP0:sp53 ph0):f1										
+'WsOvsDef.mod': line 456--->	OvsD1	grad_ramp{  PVM_OvsTrim1, 0.0, 0.0 }					
+'WsOvsDef.mod': line 457--->	
+'WsOvsDef.mod': line 458--->	;pulses 3 + 4
+'WsOvsDef.mod': line 459--->	OvsD0 	grad_ramp{  0.0, PVM_OvsTrim0, 0.0 }	Ovslist[2]:f1		
+'WsOvsDef.mod': line 460--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 461--->	10u 					Ovslist[3]:f1
+'WsOvsDef.mod': line 462--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 463--->	OvsD1	grad_ramp{  0.0, PVM_OvsTrim2, 0.0 }
+'WsOvsDef.mod': line 464--->			
+dur50 == line 1191
+fixdel(161.000000 usec) Gradient statement # 9, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 465--->	;pulses 5 + 6
+'WsOvsDef.mod': line 466--->	OvsD0 	grad_ramp{  0.0, 0.0, PVM_OvsTrim0 }	Ovslist[4]:f1			
+'WsOvsDef.mod': line 467--->	(OvsP0:sp53 ph0):f1						
+'WsOvsDef.mod': line 468--->	10u 					Ovslist[5]:f1
+'WsOvsDef.mod': line 469--->	(OvsP0:sp53 ph0):f1
+
+Begin of PTList: lalign
+{
+    dur51 == line 1228
+    WsP0 Shape Pulse SP50:f1 channel 1: shape pulse 50 via ptr -1 phase(0,0) 
+}
+End of PTList
+
+'WsOvsDef.mod': line 470--->	OvsD1	grad_ramp{  0.0, 0.0, PVM_OvsTrim3 }
+dur52 == line 1233
+fixdel(161.000000 usec) Gradient statement # 10, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 471--->	OvsD0 	grad_off
+'WsOvsDef.mod': line 472---> 
+'WsOvsDef.mod': line 473--->;EXEC_end   Ovs
+'WsOvsDef.mod': line 474--->2u      Wslist:f1
+'WsOvsDef.mod': line 475--->}
+dur53 == line 1234
+fixdel(161.000000 usec) Gradient statement # 11, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 476--->	VpD1[3] grad_ramp{ PVM_VpTrim[9], PVM_VpTrim[10], PVM_VpTrim[11] }
+'WsOvsDef.mod': line 477--->	VpD2[3] grad_off
+'WsOvsDef.mod': line 478--->
+'WsOvsDef.mod': line 479--->
+'WsOvsDef.mod': line 480--->;5.th pulse
+
+Begin of PTList: lalign
+{
+    dur54 == line 1239
+    WsP1 Shape Pulse SP51:f1 channel 1: shape pulse 51 via ptr -1 phase(0,0) 
+}
+End of PTList
+
+'WsOvsDef.mod': line 481--->if ( PVM_WsOnOff == On ) {
+dur55 == line 1244
+fixdel(11589.000000 usec) Gradient statement # 12, type = 0x200 NEXTGRAD 
+
+'WsOvsDef.mod': line 482--->(	WsP1:sp51 ph0):f1
+'WsOvsDef.mod': line 483--->}
+'WsOvsDef.mod': line 484--->if ( PVM_WsOnOff == Off ) {
+'WsOvsDef.mod': line 485--->	WsNp1
+'WsOvsDef.mod': line 486--->}
+'WsOvsDef.mod': line 487--->	VpD1[4] grad_ramp{ PVM_VpTrim[12], PVM_VpTrim[13], PVM_VpTrim[14] }
+'WsOvsDef.mod': line 488--->	VpD2[4] grad_off
+'WsOvsDef.mod': line 489--->if ( PVM_OvsOnOff == On ) {
+'WsOvsDef.mod': line 490--->;EXEC_begin Ovs Ovs(phase ph0)
+'WsOvsDef.mod': line 492---> 
+'WsOvsDef.mod': line 493--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 494--->;	delays		grads			rf/rec		comments
+'WsOvsDef.mod': line 495--->;-------------------------------------------------------------------------------
+'WsOvsDef.mod': line 496--->	;pulses 1 + 2	
+'WsOvsDef.mod': line 497--->	OvsD0 	grad_ramp{  PVM_OvsTrim0, 0.0, 0.0 }	Ovslist[0]:f1
+'WsOvsDef.mod': line 498--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 499--->	10u					Ovslist[1]:f1
+'WsOvsDef.mod': line 500--->	(OvsP0:sp53 ph0):f1										
+'WsOvsDef.mod': line 501--->	OvsD1	grad_ramp{  PVM_OvsTrim1, 0.0, 0.0 }					
+'WsOvsDef.mod': line 502--->	
+'WsOvsDef.mod': line 503--->	;pulses 3 + 4
+'WsOvsDef.mod': line 504--->	OvsD0 	grad_ramp{  0.0, PVM_OvsTrim0, 0.0 }	Ovslist[2]:f1		
+'WsOvsDef.mod': line 505--->	(OvsP0:sp53 ph0):f1	
+'WsOvsDef.mod': line 506--->	10u 					Ovslist[3]:f1
+'WsOvsDef.mod': line 507--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 508--->	OvsD1	grad_ramp{  0.0, PVM_OvsTrim2, 0.0 }
+'WsOvsDef.mod': line 509--->			
+'WsOvsDef.mod': line 510--->	;pulses 5 + 6
+'WsOvsDef.mod': line 511--->	OvsD0 	grad_ramp{  0.0, 0.0, PVM_OvsTrim0 }	Ovslist[4]:f1			
+'WsOvsDef.mod': line 512--->	(OvsP0:sp53 ph0):f1						
+'WsOvsDef.mod': line 513--->	10u 					Ovslist[5]:f1
+'WsOvsDef.mod': line 514--->	(OvsP0:sp53 ph0):f1
+'WsOvsDef.mod': line 515--->	OvsD1	grad_ramp{  0.0, 0.0, PVM_OvsTrim3 }
+'WsOvsDef.mod': line 516--->	OvsD0 	grad_off
+'WsOvsDef.mod': line 517---> 
+'WsOvsDef.mod': line 518--->;EXEC_end   Ovs
+'WsOvsDef.mod': line 519--->2u 	Wslist:f1
+'WsOvsDef.mod': line 520--->}
+'comp_MRS_PRESS.ppg': line  73--->
+'comp_MRS_PRESS.ppg': line  75--->
+'comp_MRS_PRESS.ppg': line  76--->;6.th pulse
+'comp_MRS_PRESS.ppg': line  77--->if ( PVM_WsOnOff == On ) {
+dur56 == line 1245
+fixdel(161.000000 usec) Gradient statement # 13, type = 0x200 NEXTGRAD 
+
+'comp_MRS_PRESS.ppg': line  78--->	(WsP0:sp50 ph0):f1
+dur57 == line 1288
+d4 channel 1: set O1 via ptr 0 Gradient statement # 14, type = 0x200 NEXTGRAD 
+
+'comp_MRS_PRESS.ppg': line  79--->}
+dur58 == line 1289
+d6 setNmr1: 0x800000 
+
+'comp_MRS_PRESS.ppg': line  80--->if ( PVM_WsOnOff == Off ) {
+
+Begin of PTList: lalign
+{
+    dur59 == line 1290
+    p1 Shape Pulse SP1:f1 channel 1: shape pulse 1 via ptr -1 phase(1,0) 
+}
+End of PTList
+
+'comp_MRS_PRESS.ppg': line  81--->	WsNp0	
+dur60 == line 1291
+d6 
+
+'comp_MRS_PRESS.ppg': line  82--->}
+dur61 == line 1292
+d7 Gradient statement # 15, type = 0x200 NEXTGRAD 
+
+'comp_MRS_PRESS.ppg': line  83--->	VpD1[5] grad_ramp{ PVM_VpTrim[15], PVM_VpTrim[16], PVM_VpTrim[17] }
+dur62 == line 1293
+d8 Gradient statement # 16, type = 0x200 NEXTGRAD 
+
+'comp_MRS_PRESS.ppg': line  84--->	VpD2[5] grad_off
+dur63 == line 1294
+d4 channel 1: set O1 via ptr 0 Gradient statement # 17, type = 0x200 NEXTGRAD 
+
+'comp_MRS_PRESS.ppg': line  85--->
+dur64 == line 1295
+d6 setNmr1: 0x800000 
+
+'comp_MRS_PRESS.ppg': line  86--->
+
+Begin of PTList: lalign
+{
+    dur65 == line 1296
+    p2 Shape Pulse SP2:f1 channel 1: shape pulse 2 via ptr -1 phase(2,0) 
+}
+End of PTList
+
+'comp_MRS_PRESS.ppg': line  87--->;7.th pulse
+dur66 == line 1297
+d6 
+
+'comp_MRS_PRESS.ppg': line  88--->if ( PVM_WsOnOff == On ) {
+dur67 == line 1298
+d8 Gradient statement # 18, type = 0x200 NEXTGRAD 
+
+'comp_MRS_PRESS.ppg': line  89--->	(WsP1:sp51 ph0):f1
+'comp_MRS_PRESS.ppg': line  90--->}
+'comp_MRS_PRESS.ppg': line  91--->if ( PVM_WsOnOff == Off ) {
+'comp_MRS_PRESS.ppg': line  92--->	WsNp1
+'comp_MRS_PRESS.ppg': line  93--->}
+'comp_MRS_PRESS.ppg': line  94--->	VpD1[6] grad_ramp{ PVM_VpTrim[18], PVM_VpTrim[19], PVM_VpTrim[20] }
+'comp_MRS_PRESS.ppg': line  95--->	VpD2[6] grad_off
+'comp_MRS_PRESS.ppg': line  96--->if ( PVM_OvsOnOff == On ) {
+dur68 == line 1299
+d9 Gradient statement # 19, type = 0x200 NEXTGRAD 
+
+'comp_MRS_PRESS.ppg': line  97--->;EXEC_begin Ovs Ovs(phase ph0)
+dur69 == line 1307
+fixdel(20.000000 usec) 
+
+dur70 == line 1308
+d10 channel 1: set O1 via ptr 0 Gradient statement # 20, type = 0x200 NEXTGRAD 
+
+'comp_MRS_PRESS.ppg': line  99---> 
+dur71 == line 1309
+d4 Gradient statement # 21, type = 0x200 NEXTGRAD 
+
+'comp_MRS_PRESS.ppg': line 100--->;-------------------------------------------------------------------------------
+dur72 == line 1310
+d6 setNmr1: 0x800000 
+
+'comp_MRS_PRESS.ppg': line 101--->;	delays		grads			rf/rec		comments
+
+Begin of PTList: lalign
+{
+    dur73 == line 1311
+    p3 Shape Pulse SP3:f1 channel 1: shape pulse 3 via ptr -1 phase(3,0) 
+}
+End of PTList
+
+'comp_MRS_PRESS.ppg': line 102--->;-------------------------------------------------------------------------------
+dur74 == line 1312
+d6 
+
+'comp_MRS_PRESS.ppg': line 103--->	;pulses 1 + 2	
+dur75 == line 1313
+d10 Gradient statement # 22, type = 0x200 NEXTGRAD 
+
+'comp_MRS_PRESS.ppg': line 104--->	OvsD0 	grad_ramp{  PVM_OvsTrim0, 0.0, 0.0 }	Ovslist[0]:f1
+'comp_MRS_PRESS.ppg': line 105--->	(OvsP0:sp53 ph0):f1	
+'comp_MRS_PRESS.ppg': line 106--->	10u					Ovslist[1]:f1
+'comp_MRS_PRESS.ppg': line 107--->	(OvsP0:sp53 ph0):f1										
+'comp_MRS_PRESS.ppg': line 108--->	OvsD1	grad_ramp{  PVM_OvsTrim1, 0.0, 0.0 }					
+'comp_MRS_PRESS.ppg': line 109--->	
+'comp_MRS_PRESS.ppg': line 110--->	;pulses 3 + 4
+'comp_MRS_PRESS.ppg': line 111--->	OvsD0 	grad_ramp{  0.0, PVM_OvsTrim0, 0.0 }	Ovslist[2]:f1		
+'comp_MRS_PRESS.ppg': line 112--->	(OvsP0:sp53 ph0):f1	
+'comp_MRS_PRESS.ppg': line 113--->	10u 					Ovslist[3]:f1
+'comp_MRS_PRESS.ppg': line 114--->	(OvsP0:sp53 ph0):f1
+'comp_MRS_PRESS.ppg': line 115--->	OvsD1	grad_ramp{  0.0, PVM_OvsTrim2, 0.0 }
+'comp_MRS_PRESS.ppg': line 116--->			
+dur76 == line 1314
+d11 Gradient statement # 23, type = 0x200 NEXTGRAD 
+
+'comp_MRS_PRESS.ppg': line 117--->	;pulses 5 + 6
+'comp_MRS_PRESS.ppg': line 118--->	OvsD0 	grad_ramp{  0.0, 0.0, PVM_OvsTrim0 }	Ovslist[4]:f1			
+'comp_MRS_PRESS.ppg': line 119--->	(OvsP0:sp53 ph0):f1						
+'acqdec.mod': line  78--->	10u 					Ovslist[5]:f1
+'acqdec.mod': line  79--->	(OvsP0:sp53 ph0):f1
+'acqdec.mod': line  80--->	OvsD1	grad_ramp{  0.0, 0.0, PVM_OvsTrim3 }
+'acqdec.mod': line  81--->	OvsD0 	grad_off
+dur77 == line 1327
+fixdel(10.000000 usec) 
+
+'acqdec.mod': line  82---> 
+dur78 == line 1334
+durx 
+
+'acqdec.mod': line  83--->;EXEC_end   Ovs
+
+Begin of PTList: lalign
+{
+    dur79 == line 1335
+    rde1 SYNCRCU 
+    
+    dur80 == line 1335
+    de1 ADCGO RCU 1 channel 1: SY receive phase(0,8) receive 
+}
+
+
+{
+    dur81 == line 1335
+    fixdel(1.000000 usec) 
+    
+    dur82 == line 1335
+    fixdel(1.000000 usec) Pulse1 phase(31,0) PHADDO PHREF 
+}
+
+
+{
+    dur83 == line 1335
+    de 
+}
+End of PTList
+
+'acqdec.mod': line  84--->2u
+dur84 == line 1336
+fixdel(1.000000 usec) 
+
+'acqdec.mod': line  85--->}
+'acqdec.mod': line  86--->
+'acqdec.mod': line  87--->};end vapor
+'acqdec.mod': line  88---> ;end subr WsOvsMain
+'acqdec.mod': line  89--->;EXEC_end   WsOvsMain
+'acqdec.mod': line  90---> 
+'acqdec.mod': line  91--->;EXEC_end   WsOvs
+'acqdec.mod': line  94--->;---------localisation  module------------------------------------
+'acqdec.mod': line  95--->	
+'acqdec.mod': line  96--->	d4	grad_ramp{g1, 0.0, 0.0} 	fq1:f1
+'acqdec.mod': line  97--->	d6					gatepulse 1
+'acqdec.mod': line  98--->	(p1:sp1 ph1):f1
+'acqdec.mod': line  99--->	d6
+'acqdec.mod': line 100--->	d7	grad_off		
+'acqdec.mod': line 101--->	d8      grad_ramp{g4, g6, g7}
+'acqdec.mod': line 102--->	d4	grad_ramp{0.0, g2, 0.0}         fq1:f1
+'acqdec.mod': line 103--->	d6					gatepulse 1
+'acqdec.mod': line 104--->	(p2:sp2 ph2):f1
+'acqdec.mod': line 105--->	d6
+'acqdec.mod': line 106--->	d8	grad_ramp{g5, g6, g7}
+'acqdec.mod': line 107--->	d9	grad_off
+'comp_MRS_PRESS.ppg': line 117--->
+'comp_MRS_PRESS.ppg': line 118--->;-------pulse adjustments--------------------------------------
+dur85 == line 1337
+aqq channel 1: CPDSNG prog 16 (CPDPRG17)via ptr 0 
+
+'comp_MRS_PRESS.ppg': line 119--->	if ( PVM_ppgFlag3 == Yes ) {
+dur86 == line 1362
+fixdel(2000.000000 usec) Gradient statement # 24, type = 0x200 NEXTGRAD SYNCRCU 
+
+'comp_MRS_PRESS.ppg': line 120--->  	  d12	  grad_ramp{g11, g12, g13}
+dur87 == line 1363
+fixdel(500.000000 usec) channel 1: Dwell off channel 1: SY transmit  EVENT-EOSZ eos1 
+ AQBUS-WR RCU 1 wrif 0 
+
+'comp_MRS_PRESS.ppg': line 121--->	  d4	  groff	
+'comp_MRS_PRESS.ppg': line 122--->	}
+'comp_MRS_PRESS.ppg': line 123--->
+'comp_MRS_PRESS.ppg': line 124--->	20u        ;for symmetry with de4
+dur88 == line 1364
+fixdel(500.000000 usec) 
+
+'comp_MRS_PRESS.ppg': line 125--->	d10	grad_ramp{g8, g9, g10}	        fq1:f1
+dur89 == line 1368
+fixdel(10.000000 usec)  SWITCH to JOB 1 
+
+'comp_MRS_PRESS.pp': line 126, macro line 0--->	d4	grad_ramp{0.0, 0.0, g3}
+dur90 == line 1369
+fixdel(1.000000 usec) setNmr1: 0x200 
+
+'comp_MRS_PRESS.pp': line 126, macro line 1--->	d6					gatepulse 1
+dur91 == line 1370
+fixdel(9.000000 usec) clrNmr1: 0x200 
+
+'comp_MRS_PRESS.ppg': line 127--->	(p3:sp3 ph3):f1
+'comp_MRS_PRESS.ppg': line 128--->	d6
+'comp_MRS_PRESS.ppg': line 129--->	d10	grad_ramp{g8, g9, g10}
+'Navigator.mod': line 111--->	d11	grad_off				
+'Navigator.mod': line 113--->;---------data acquisition--------------------------------------------	
+'Navigator.mod': line 114--->	;pulse adjustments:
+dur92 == line 1371
+fixdel(20.000000 usec) Gradient statement # 2, type = 0xd00 NEXTGRAD 
+
+'Navigator.mod': line 115--->	if ( PVM_ppgFlag3 == Yes ) 
+dur93 == line 1378
+fixdel(10.000000 usec) channel 1: set O3 from list via ptr 0 
+
+'Navigator.mod': line 116--->	{
+dur94 == line 1379
+fixdel(5.000000 usec) channel 1: set O2 from list via ptr 0 
+
+'Navigator.mod': line 117--->	  d4	grad_ramp{g14, g15, g16}	
+dur95 == line 1380
+NAVD2 setNmr1: 0x800000 
+
+'Navigator.mod': line 118--->	  de4
+
+Begin of PTList: lalign
+{
+    dur96 == line 1381
+    NavP0 Shape Pulse SP0:f1 channel 1: shape pulse 0 via ptr -1 phase(31,0) 
+}
+End of PTList
+
+'Navigator.mod': line 119--->	   				        rdepa						 
+dur97 == line 1382
+fixdel(10.000000 usec) 
+
+'Navigator.mod': line 120---> deparx     adc ph0  syrec fqatofqb:f1 
+
+Begin of PTList: lalign
+{
+    dur98 == line 1383
+    rde1 SYNCRCU 
+    
+    dur99 == line 1383
+    de1 ADCGO RCU 2 channel 1: SY receive 
+}
+
+
+{
+    dur100 == line 1383
+    fixdel(1.000000 usec) 
+    
+    dur101 == line 1383
+    fixdel(1.000000 usec) Pulse1 phase(31,0) PHADDO PHREF 
+}
+
+
+{
+    dur102 == line 1383
+    de 
+}
+End of PTList
+
+'Navigator.mod': line 121---> derxadc     ph31:r  			 
+dur103 == line 1384
+NAVD4 channel 1: CPDSNG prog 17 (CPDPRG18)via ptr 0 
+
+'Navigator.mod': line 122---> deadc      
+dur104 == line 1385
+fixdel(169.000000 usec) SYNCRCU 
+
+'Navigator.mod': line 123--->	  aqq					cpdngs17:f1	
+'Navigator.mod': line 124--->	}
+'Navigator.mod': line 125--->	else 
+'Navigator.mod': line 126--->	{
+'comp_MRS_PRESS.ppg': line 129--->	  10u
+dur105 == line 1386
+fixdel(10.000000 usec) channel 1: Dwell off channel 1: SY transmit  EVENT-EOSZ eos1 
+ AQBUS-WR RCU 1 wrif 1 
+
+'comp_MRS_PRESS.ppg': line 130--->subr acqdec_jobs
+dur106 == line 1391
+fixdel(100.000000 usec) 
+
+'comp_MRS_PRESS.ppg': line 131--->;EXEC_begin acqdec_jobs acqdec_jobs(phase ph0, phase ph31)
+dur107 == line 1392
+fixdel(10.000000 usec)  SWITCH to JOB 0 
+
+dur108 == line 1393
+fixdel(3.000000 usec) setNmr1: 0x200 
+
+'comp_MRS_PRESS.pp': line 132, macro line 1---> 
+'comp_MRS_PRESS.ppg': line 133--->  if (PVM_DecOnOff == Off)
+dur109 == line 1394
+fixdel(7.000000 usec) clrNmr1: 0x200 
+
+'comp_MRS_PRESS.ppg': line 134--->  {
+'comp_MRS_PRESS.ppg': line 135--->      durx
+'comp_MRS_PRESS.ppg': line 136--->      (rde1 sync de1 adc1  ph0 syrec) (1u 1u  ph31:r):f1 (de)
+'comp_MRS_PRESS.ppg': line 137--->      1u
+dur110 == line 1396
+d1 
+
+'comp_MRS_PRESS.ppg': line 138--->      aqq        cpdngs17:f1
+'comp_MRS_PRESS.ppg': line 141--->  }
+'comp_MRS_PRESS.ppg': line 142--->  if (PVM_DecOnOff == On)
+'comp_MRS_PRESS.ppg': line 143--->  {
+dur111 == line 1400
+fixdel(0.000000 usec) goto 'comp_MRS_PRESS.ppg': line  69 
+
+'comp_MRS_PRESS.ppg': line 144--->     if (PVM_DecMode == Continuous_Wave)
+dur112 == line 1404
+fixdel(1.000000 usec) 
+inc phase (1) 
+
+'comp_MRS_PRESS.ppg': line 145--->     {
+dur113 == line 1405
+fixdel(1.000000 usec) 
+inc phase (2) 
+
+'comp_MRS_PRESS.ppg': line 146--->       durx pl2:f2
+dur114 == line 1406
+fixdel(1.000000 usec) 
+inc phase (3) 
+
+'comp_MRS_PRESS.ppg': line 147--->       (rde1 sync de1 adc1  ph0 syrec) (1u 1u  ph31:r):f1 (de)
+'comp_MRS_PRESS.ppg': line 148--->       1u        cpdngs17:f1		 
+'comp_MRS_PRESS.ppg': line 149--->       DecD0 cw:f2
+dur115 == line 1407
+fixdel(1.000000 usec) 
+inc phase (31) loop to 'comp_MRS_PRESS.ppg': line  69 times l1073741824 
+
+'comp_MRS_PRESS.ppg': line 150--->       DecD1 do:f2
+dur116 == line 1410
+fixdel(0.000000 usec) INC( unknown list - type 0) 
+
+'comp_MRS_PRESS.ppg': line 151--->     }
+dur117 == line 1411
+fixdel(1.000000 usec) 
+reset phase (1) 
+
+'comp_MRS_PRESS.ppg': line 152--->     if (PVM_DecMode == Composite_Pulse)
+dur118 == line 1412
+fixdel(1.000000 usec) 
+reset phase (2) 
+
+'comp_MRS_PRESS.ppg': line 153--->     {
+dur119 == line 1413
+fixdel(1.000000 usec) 
+reset phase (3) 
+
+'comp_MRS_PRESS.ppg': line 154--->       durx pl2:f2
+'comp_MRS_PRESS.ppg': line 155--->       (rde1 sync de1 adc1  ph0 syrec) (1u 1u  ph31:r):f1 (de)
+'comp_MRS_PRESS.ppg': line 156--->       1u        cpdngs17:f1		 
+'comp_MRS_PRESS.pp': line 157, macro line 0--->       DecD0 cpd2:f2
+'comp_MRS_PRESS.pp': line 157, macro line 1--->       DecD1 do:f2
+dur120 == line 1414
+fixdel(1.000000 usec) 
+reset phase (31) loop to 'comp_MRS_PRESS.ppg': line  69 times 1 
+
+'comp_MRS_PRESS.ppg': line 158--->     }
+'comp_MRS_PRESS.ppg': line 159--->  }
+dur121 == line 1419
+fixdel(50000.000000 usec) 
+
+dur122 == line 1419
+fixdel(10000.000000 usec)  EVENT-EOSZ esc0 
+
+dur123 == line 1419
+fixdel(10000.000000 usec) 
+
+
+phase program no. 65:
+Fraction:  4.000000 
+Increment:  0x4000 =  90.00 degrees
+  0:             0 =   0.00 degrees
+
+phase program no. 1: PHAUINC
+Fraction:  4.000000 
+Increment:  0x4000 =  90.00 degrees
+  0:             0 =   0.00 degrees
+  1:             0 =   0.00 degrees
+  2:             0 =   0.00 degrees
+  3:             0 =   0.00 degrees
+  4:             0 =   0.00 degrees
+  5:             0 =   0.00 degrees
+  6:             0 =   0.00 degrees
+  7:             0 =   0.00 degrees
+  8:             0 =   0.00 degrees
+  9:             0 =   0.00 degrees
+ 10:             0 =   0.00 degrees
+ 11:             0 =   0.00 degrees
+ 12:             0 =   0.00 degrees
+ 13:             0 =   0.00 degrees
+ 14:             0 =   0.00 degrees
+ 15:             0 =   0.00 degrees
+ 16:        0x8000 = 180.00 degrees
+ 17:        0x8000 = 180.00 degrees
+ 18:        0x8000 = 180.00 degrees
+ 19:        0x8000 = 180.00 degrees
+ 20:        0x8000 = 180.00 degrees
+ 21:        0x8000 = 180.00 degrees
+ 22:        0x8000 = 180.00 degrees
+ 23:        0x8000 = 180.00 degrees
+ 24:        0x8000 = 180.00 degrees
+ 25:        0x8000 = 180.00 degrees
+ 26:        0x8000 = 180.00 degrees
+ 27:        0x8000 = 180.00 degrees
+ 28:        0x8000 = 180.00 degrees
+ 29:        0x8000 = 180.00 degrees
+ 30:        0x8000 = 180.00 degrees
+ 31:        0x8000 = 180.00 degrees
+ 32:        0x4000 =  90.00 degrees
+ 33:        0x4000 =  90.00 degrees
+ 34:        0x4000 =  90.00 degrees
+ 35:        0x4000 =  90.00 degrees
+ 36:        0x4000 =  90.00 degrees
+ 37:        0x4000 =  90.00 degrees
+ 38:        0x4000 =  90.00 degrees
+ 39:        0x4000 =  90.00 degrees
+ 40:        0x4000 =  90.00 degrees
+ 41:        0x4000 =  90.00 degrees
+ 42:        0x4000 =  90.00 degrees
+ 43:        0x4000 =  90.00 degrees
+ 44:        0x4000 =  90.00 degrees
+ 45:        0x4000 =  90.00 degrees
+ 46:        0x4000 =  90.00 degrees
+ 47:        0x4000 =  90.00 degrees
+ 48:        0xc000 = 270.00 degrees
+ 49:        0xc000 = 270.00 degrees
+ 50:        0xc000 = 270.00 degrees
+ 51:        0xc000 = 270.00 degrees
+ 52:        0xc000 = 270.00 degrees
+ 53:        0xc000 = 270.00 degrees
+ 54:        0xc000 = 270.00 degrees
+ 55:        0xc000 = 270.00 degrees
+ 56:        0xc000 = 270.00 degrees
+ 57:        0xc000 = 270.00 degrees
+ 58:        0xc000 = 270.00 degrees
+ 59:        0xc000 = 270.00 degrees
+ 60:        0xc000 = 270.00 degrees
+ 61:        0xc000 = 270.00 degrees
+ 62:        0xc000 = 270.00 degrees
+ 63:        0xc000 = 270.00 degrees
+
+phase program no. 2: PHAUINC
+Fraction:  4.000000 
+Increment:  0x4000 =  90.00 degrees
+  0:             0 =   0.00 degrees
+  1:             0 =   0.00 degrees
+  2:        0x4000 =  90.00 degrees
+  3:        0x4000 =  90.00 degrees
+  4:             0 =   0.00 degrees
+  5:             0 =   0.00 degrees
+  6:        0x4000 =  90.00 degrees
+  7:        0x4000 =  90.00 degrees
+  8:        0x8000 = 180.00 degrees
+  9:        0x8000 = 180.00 degrees
+ 10:        0xc000 = 270.00 degrees
+ 11:        0xc000 = 270.00 degrees
+ 12:        0x8000 = 180.00 degrees
+ 13:        0x8000 = 180.00 degrees
+ 14:        0xc000 = 270.00 degrees
+ 15:        0xc000 = 270.00 degrees
+ 16:        0x8000 = 180.00 degrees
+ 17:        0x8000 = 180.00 degrees
+ 18:        0xc000 = 270.00 degrees
+ 19:        0xc000 = 270.00 degrees
+ 20:        0x8000 = 180.00 degrees
+ 21:        0x8000 = 180.00 degrees
+ 22:        0xc000 = 270.00 degrees
+ 23:        0xc000 = 270.00 degrees
+ 24:             0 =   0.00 degrees
+ 25:             0 =   0.00 degrees
+ 26:        0x4000 =  90.00 degrees
+ 27:        0x4000 =  90.00 degrees
+ 28:             0 =   0.00 degrees
+ 29:             0 =   0.00 degrees
+ 30:        0x4000 =  90.00 degrees
+ 31:        0x4000 =  90.00 degrees
+ 32:        0x4000 =  90.00 degrees
+ 33:        0x4000 =  90.00 degrees
+ 34:        0x8000 = 180.00 degrees
+ 35:        0x8000 = 180.00 degrees
+ 36:        0x4000 =  90.00 degrees
+ 37:        0x4000 =  90.00 degrees
+ 38:        0x8000 = 180.00 degrees
+ 39:        0x8000 = 180.00 degrees
+ 40:        0xc000 = 270.00 degrees
+ 41:        0xc000 = 270.00 degrees
+ 42:             0 =   0.00 degrees
+ 43:             0 =   0.00 degrees
+ 44:        0xc000 = 270.00 degrees
+ 45:        0xc000 = 270.00 degrees
+ 46:             0 =   0.00 degrees
+ 47:             0 =   0.00 degrees
+ 48:        0xc000 = 270.00 degrees
+ 49:        0xc000 = 270.00 degrees
+ 50:             0 =   0.00 degrees
+ 51:             0 =   0.00 degrees
+ 52:        0xc000 = 270.00 degrees
+ 53:        0xc000 = 270.00 degrees
+ 54:             0 =   0.00 degrees
+ 55:             0 =   0.00 degrees
+ 56:        0x4000 =  90.00 degrees
+ 57:        0x4000 =  90.00 degrees
+ 58:        0x8000 = 180.00 degrees
+ 59:        0x8000 = 180.00 degrees
+ 60:        0x4000 =  90.00 degrees
+ 61:        0x4000 =  90.00 degrees
+ 62:        0x8000 = 180.00 degrees
+ 63:        0x8000 = 180.00 degrees
+
+phase program no. 3: PHAUINC
+Fraction:  4.000000 
+Increment:  0x4000 =  90.00 degrees
+  0:             0 =   0.00 degrees
+  1:        0x8000 = 180.00 degrees
+  2:             0 =   0.00 degrees
+  3:        0x8000 = 180.00 degrees
+  4:        0x4000 =  90.00 degrees
+  5:        0xc000 = 270.00 degrees
+  6:        0x4000 =  90.00 degrees
+  7:        0xc000 = 270.00 degrees
+  8:             0 =   0.00 degrees
+  9:        0x8000 = 180.00 degrees
+ 10:             0 =   0.00 degrees
+ 11:        0x8000 = 180.00 degrees
+ 12:        0x4000 =  90.00 degrees
+ 13:        0xc000 = 270.00 degrees
+ 14:        0x4000 =  90.00 degrees
+ 15:        0xc000 = 270.00 degrees
+ 16:        0x8000 = 180.00 degrees
+ 17:             0 =   0.00 degrees
+ 18:        0x8000 = 180.00 degrees
+ 19:             0 =   0.00 degrees
+ 20:        0xc000 = 270.00 degrees
+ 21:        0x4000 =  90.00 degrees
+ 22:        0xc000 = 270.00 degrees
+ 23:        0x4000 =  90.00 degrees
+ 24:        0x8000 = 180.00 degrees
+ 25:             0 =   0.00 degrees
+ 26:        0x8000 = 180.00 degrees
+ 27:             0 =   0.00 degrees
+ 28:        0xc000 = 270.00 degrees
+ 29:        0x4000 =  90.00 degrees
+ 30:        0xc000 = 270.00 degrees
+ 31:        0x4000 =  90.00 degrees
+ 32:        0x4000 =  90.00 degrees
+ 33:        0xc000 = 270.00 degrees
+ 34:        0x4000 =  90.00 degrees
+ 35:        0xc000 = 270.00 degrees
+ 36:        0x8000 = 180.00 degrees
+ 37:             0 =   0.00 degrees
+ 38:        0x8000 = 180.00 degrees
+ 39:             0 =   0.00 degrees
+ 40:        0x4000 =  90.00 degrees
+ 41:        0xc000 = 270.00 degrees
+ 42:        0x4000 =  90.00 degrees
+ 43:        0xc000 = 270.00 degrees
+ 44:        0x8000 = 180.00 degrees
+ 45:             0 =   0.00 degrees
+ 46:        0x8000 = 180.00 degrees
+ 47:             0 =   0.00 degrees
+ 48:        0xc000 = 270.00 degrees
+ 49:        0x4000 =  90.00 degrees
+ 50:        0xc000 = 270.00 degrees
+ 51:        0x4000 =  90.00 degrees
+ 52:             0 =   0.00 degrees
+ 53:        0x8000 = 180.00 degrees
+ 54:             0 =   0.00 degrees
+ 55:        0x8000 = 180.00 degrees
+ 56:        0xc000 = 270.00 degrees
+ 57:        0x4000 =  90.00 degrees
+ 58:        0xc000 = 270.00 degrees
+ 59:        0x4000 =  90.00 degrees
+ 60:             0 =   0.00 degrees
+ 61:        0x8000 = 180.00 degrees
+ 62:             0 =   0.00 degrees
+ 63:        0x8000 = 180.00 degrees
+
+phase program no. 31: PHAUINC
+Fraction:  4.000000 
+Increment:  0x4000 =  90.00 degrees
+  0:             0 =   0.00 degrees
+  1:             0 =   0.00 degrees
+  2:        0x8000 = 180.00 degrees
+  3:        0x8000 = 180.00 degrees
+  4:        0x8000 = 180.00 degrees
+  5:        0x8000 = 180.00 degrees
+  6:             0 =   0.00 degrees
+  7:             0 =   0.00 degrees
+  8:             0 =   0.00 degrees
+  9:             0 =   0.00 degrees
+ 10:        0x8000 = 180.00 degrees
+ 11:        0x8000 = 180.00 degrees
+ 12:        0x8000 = 180.00 degrees
+ 13:        0x8000 = 180.00 degrees
+ 14:             0 =   0.00 degrees
+ 15:             0 =   0.00 degrees
+ 16:        0x8000 = 180.00 degrees
+ 17:        0x8000 = 180.00 degrees
+ 18:             0 =   0.00 degrees
+ 19:             0 =   0.00 degrees
+ 20:             0 =   0.00 degrees
+ 21:             0 =   0.00 degrees
+ 22:        0x8000 = 180.00 degrees
+ 23:        0x8000 = 180.00 degrees
+ 24:        0x8000 = 180.00 degrees
+ 25:        0x8000 = 180.00 degrees
+ 26:             0 =   0.00 degrees
+ 27:             0 =   0.00 degrees
+ 28:             0 =   0.00 degrees
+ 29:             0 =   0.00 degrees
+ 30:        0x8000 = 180.00 degrees
+ 31:        0x8000 = 180.00 degrees
+ 32:        0x4000 =  90.00 degrees
+ 33:        0x4000 =  90.00 degrees
+ 34:        0xc000 = 270.00 degrees
+ 35:        0xc000 = 270.00 degrees
+ 36:        0xc000 = 270.00 degrees
+ 37:        0xc000 = 270.00 degrees
+ 38:        0x4000 =  90.00 degrees
+ 39:        0x4000 =  90.00 degrees
+ 40:        0x4000 =  90.00 degrees
+ 41:        0x4000 =  90.00 degrees
+ 42:        0xc000 = 270.00 degrees
+ 43:        0xc000 = 270.00 degrees
+ 44:        0xc000 = 270.00 degrees
+ 45:        0xc000 = 270.00 degrees
+ 46:        0x4000 =  90.00 degrees
+ 47:        0x4000 =  90.00 degrees
+ 48:        0xc000 = 270.00 degrees
+ 49:        0xc000 = 270.00 degrees
+ 50:        0x4000 =  90.00 degrees
+ 51:        0x4000 =  90.00 degrees
+ 52:        0x4000 =  90.00 degrees
+ 53:        0x4000 =  90.00 degrees
+ 54:        0xc000 = 270.00 degrees
+ 55:        0xc000 = 270.00 degrees
+ 56:        0xc000 = 270.00 degrees
+ 57:        0xc000 = 270.00 degrees
+ 58:        0x4000 =  90.00 degrees
+ 59:        0x4000 =  90.00 degrees
+ 60:        0x4000 =  90.00 degrees
+ 61:        0x4000 =  90.00 degrees
+ 62:        0xc000 = 270.00 degrees
+ 63:        0xc000 = 270.00 degrees
+
+phase program no. 0:
+Fraction:  4.000000 
+Increment:  0x4000 =  90.00 degrees
+  0:             0 =   0.00 degrees
+file list:
+=================================================
+          filename              actlineno  offset
+=================================================
+     comp_MRS_PRESS.ppg        1            1
+            MRI.include       14           14
+            Avance.incl       28           28
+            Avance.incl       36         -132
+            MRI.include       38           25
+            MRI.include       45           25
+            MRI.include       55           25
+            MRI.include       59           16
+            MRI.include       63           -1
+            MRI.include       68           -5
+            MRI.include       72          -55
+            MRI.include       73          -55
+            MRI.include       77          -63
+     comp_MRS_PRESS.ppg       81           69
+    PrepModulesHead.mod       84           84
+    PrepModulesHead.mod      101           84
+          FatSupDef.mod      104          104
+    PrepModulesHead.mod      138          119
+         FlowSatDef.mod      142          142
+    PrepModulesHead.mod      175          152
+        InvPulseDef.mod      179          179
+    PrepModulesHead.mod      220          193
+        MagTransDef.mod      224          224
+    PrepModulesHead.mod      258          227
+        SatPulseDef.mod      262          262
+    PrepModulesHead.mod      332          297
+          FovSatDef.mod      336          336
+          FovSatDef.mod      372          320
+    PrepModulesHead.mod      377          338
+         BlBloodDef.mod      381          381
+    PrepModulesHead.mod      411          368
+         TriggerDef.mod      415          415
+    PrepModulesHead.mod      440          393
+      TriggerOutDef.mod      444          444
+    PrepModulesHead.mod      468          417
+           WsOvsDef.mod      472          472
+           WsOvsDef.mod      503          445
+           WsOvsDef.mod      523          445
+    PrepModulesHead.mod      530          475
+           WsSatDef.mod      534          534
+    PrepModulesHead.mod      557          498
+      SelSliceIrDef.mod      561          561
+    PrepModulesHead.mod      595          532
+             TagDef.mod      599          599
+    PrepModulesHead.mod      633          566
+             NoeDef.mod      637          637
+    PrepModulesHead.mod      662          591
+       EvolutionDef.mod      666          666
+    PrepModulesHead.mod      686          611
+     comp_MRS_PRESS.ppg      689          675
+     comp_MRS_PRESS.ppg      690          674
+             acqdec.mod      694          694
+             acqdec.mod      711          694
+     comp_MRS_PRESS.ppg      723          704
+          Navigator.mod      725          725
+     comp_MRS_PRESS.ppg      753          733
+     comp_MRS_PRESS.ppg      759          732
+macro-comp_MRS_PRESS.pp      762          732
+     comp_MRS_PRESS.ppg      783          752
+macro-comp_MRS_PRESS.pp      790          752
+     comp_MRS_PRESS.ppg      792          753
+     comp_MRS_PRESS.ppg      793          732
+         TriggerDef.mod      805          732
+         TriggerDef.mod      810          767
+     comp_MRS_PRESS.ppg      835          764
+             NoeDef.mod      838          794
+     comp_MRS_PRESS.ppg      859          787
+           WsOvsDef.mod      862          594
+           WsOvsDef.mod      865          763
+     comp_MRS_PRESS.ppg     1284         1211
+     comp_MRS_PRESS.ppg     1285         1210
+     comp_MRS_PRESS.ppg     1315         1210
+             acqdec.mod     1330         1252
+     comp_MRS_PRESS.ppg     1360         1243
+macro-comp_MRS_PRESS.pp     1369         1243
+     comp_MRS_PRESS.ppg     1371         1244
+          Navigator.mod     1374         1263
+     comp_MRS_PRESS.ppg     1390         1261
+macro-comp_MRS_PRESS.pp     1393         1261
+     comp_MRS_PRESS.ppg     1395         1262
+     comp_MRS_PRESS.ppg     1401         1260
+macro-comp_MRS_PRESS.pp     1417         1260
+     comp_MRS_PRESS.ppg     1419         1261

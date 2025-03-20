@@ -1,0 +1,12 @@
+##TITLE= Parameter file, TOPSPIN
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+$$ $Source: /pr/CvsTree/pr/gen/src/exp/meta/standard1D/outd,v $
+$$ $Id: outd,v 1.6 2011/02/28 07:00:10 wem Exp $
+##$CURPLOT= <>
+##$CURPRIN= <>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_H.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

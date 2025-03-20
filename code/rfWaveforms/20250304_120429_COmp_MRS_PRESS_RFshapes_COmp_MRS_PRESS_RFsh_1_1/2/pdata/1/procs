@@ -1,0 +1,11 @@
+##TITLE=Parameter List, ParaVision 6.0.1
+##JCAMPDX=4.24
+##DATATYPE=Parameter Values
+##ORIGIN=Bruker BioSpin MRI GmbH
+##OWNER=nmrsu
+$$ 2025-03-04 12:13:58.020 -0500  nmrsu@bruker3
+$$ /opt/nmrdata/PV6.0.1_data/nmrsu/20250304_120429_COmp_MRS_PRESS_RFshapes_COmp_MRS_PRESS_RFsh_1_1/2/pdata/1/procs
+$$ process /opt/PV6.0.1/prog/bin/parxserver
+##$OFFSET=14.7053052305413
+##$SF=300.32144177949
+##END=

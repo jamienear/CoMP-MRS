@@ -1,0 +1,20 @@
+##TITLE=Parameter List, ParaVision 360 V3.5
+##JCAMPDX=4.24
+##DATATYPE=Parameter Values
+##ORIGIN=Bruker BioSpin MRI GmbH
+##OWNER=cristina
+$$ Write Options: Symbolic Enums, RLE encoded arrays, symbol visibility
+$$ 2025-02-24 20:02:42.284 +0100  cristina@cibmsafe94t1
+$$ /opt/PV-360.3.5/data/cristina/20250224_133808_20250224_BDL811_ShamMale_6w_MRSI_SVS_20250224_BDL811_ShamMale_6w_MRSI_SVS_1_1/57/pdata/1/methreco
+$$ process /opt/PV-360.3.5/prog/bin/parxserver
+##$RetroFrequencyLock_OnOff=Off
+##$Edc_OnOff=On
+##$EdcManualFilter=No
+##$EdcFilterWidthHz=120
+##$CalcLineWidth=On
+##$LineWidth=( 1, 1, 1 )
+12.9687414750453
+$$ @vis= MethodRecoGroup RetroFrequencyLock_OnOff Edc_OnOff EdcManualFilter
+$$ @vis= CalcLineWidth LineWidth
+##END=
+$$ File finished by PARX at 2025-02-24 20:02:42.284 +0100
