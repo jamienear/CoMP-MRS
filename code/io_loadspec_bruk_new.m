@@ -55,7 +55,7 @@
 % isECCed    = Flag indicating whether processed data have been
 %              eddy-current-corrected (read out from EdcOnOff fields)
 
-function [out,ref,nav,coilcombos,isECCed]=io_loadspec_bruk_new(inDir, rawData)
+function [out,ref,nav,coilcombos,isECCed,isRFLed]=io_loadspec_bruk_new(inDir, rawData)
 
 %Allow the user to pass the input directory as either a string or an
 %integer.
@@ -83,10 +83,16 @@ if isfile(acqusFile)
     headerACQUS = parseBrukerFormat(acqusFile);
 end
 
-% Populate the header information from the RECO file
+% Populate the header information from the METHRECO file
 methRecoFile        = fullfile(inDir, 'pdata', '1', 'methreco');
 if isfile(methRecoFile)
     headerMETHRECO  = parseBrukerFormat(methRecoFile);
+end
+
+% Populate the header information from the RECO file
+recoFile        = fullfile(inDir, 'pdata', '1', 'reco');
+if isfile(recoFile)
+    headerRECO  = parseBrukerFormat(recoFile);
 end
 
 % Get a few important bits
@@ -140,7 +146,12 @@ end
 if Nrcvrs>1
     % If multi-phase, get coil phases
     multiRcvrs=true;
-    if isfield(headerMethod, 'PVM_ArrayPhase')
+
+    % Modified by Thanh (18.04.2025) in available, preferably get
+    % the parameters from the RECO file
+    if exist('headerRECO') && isfield(headerRECO, 'RecoPhaseChan')
+        rcvrPhases = headerRECO.RecoPhaseChan;
+    elseif isfield(headerMethod, 'PVM_ArrayPhase')
         rcvrPhases = headerMethod.PVM_ArrayPhase;
     else
         rcvrPhases = zeros(Nrcvrs,1);
@@ -267,9 +278,44 @@ elseif exist('headerMETHRECO', 'var')
         % Assume it's off
         isECCed = 0;
     end
+elseif isfield(headerMethod, 'PVM_RefScanYN')
+    % Added by Thanh 19.04.2025
+    % As last resort (some datasets have an empty proc folder therefore
+    % the file METHRECO is missing. We check whether a reference scan
+    % was acquired; if yes then let's assume the Scanner-processed data
+    % was probably ECCed.
+    if strcmpi(headerMethod.PVM_RefScanYN, 'No')
+        isECCed = 0;
+    else
+        isECCed = 1;
+    end
 else
     % Assume it's off
     isECCed = 0;
+end
+
+% Check whether retro-frequency lock was applied on scanner-processed data.
+if isfield(headerMethod, 'OPT_RFLOnOff') %PV 5
+    if strcmpi(headerMethod.OPT_RFLOnOff, 'Off')
+        isRFLed = 0;
+    else
+        isRFLed = 1;
+    end
+elseif exist('headerMETHRECO', 'var') && isfield(headerMETHRECO, 'RetroFrequencyLock_OnOff')%PV 6 and above, first we look in the METHRECO file
+    if strcmpi(headerMETHRECO.RetroFrequencyLock_OnOff, 'Off')
+        isRFLed = 0;
+    else
+        isRFLed = 1;
+    end
+elseif isfield(headerMethod, 'RetroFrequencyLock_OnOff') %PV 6 and above, if METHRECO is not available
+    if strcmpi(headerMethod.RetroFrequencyLock_OnOff, 'Off')
+        isRFLed = 0;
+    else
+        isRFLed = 1;
+    end
+else
+    % Assume it's off
+    isRFLed = 0;
 end
 
 
@@ -412,7 +458,7 @@ dims.extras=0; %so far, no data files with extra dimensions
 %As far as I am aware, the RF coils are only stored separately in PV360.
 if ~contains(version,'PV 5') && multiRcvrs && strcmpi(rawData,'y')
     %Coils dimension should normally be after the averages dimension,
-    %unless there are no averages, in which case the coild dimension will
+    %unless there are no averages, in which case the coils dimension will
     %be after the time dimension.  
     if rawAverages==1 && rawRepetitions==1
         dims.coils=2;
@@ -447,111 +493,225 @@ subspecs=rawRepetitions;
 rawSubspecs=rawRepetitions;
 
 
-%% NOW TRY LOADING IN THE REFERENCE SCAN DATA (IF IT EXISTS)
-% Reference data only exist for PV6 upwards
+%% NOW TRY LOADING IN THE RAW REFERENCE SCAN DATA (IF IT EXISTS)
+% Added by Thanh 18.04.2025, read the RefScan from method file
+
 isRef=false;
-if contains(version, ["PV 6", "PV 7", "PV-7", "PV-360.2"])
-    isRef=exist(fullfile(inDir, 'fid.refscan'));
-elseif contains(version,'PV-360.3')
-    isRef=exist(fullfile(inDir, 'pdata', '1', 'fid_refscan.64'));
-end
 
-if isRef
-    if contains(version, ["PV 6", "PV 7", "PV-7", "PV-360.2"])
-        fileRef     = fullfile(inDir, 'fid.refscan');
-        fids_ref    = readBrukerRaw(fileRef, 'int32');
-    elseif contains(version,'PV-360.3')
-        fileRef     = fullfile(inDir, 'pdata', '1', 'fid_refscan.64');
-        fids_ref    = readBrukerRaw(fileRef, 'float64');
-    end
+if rawData == 'y'
+	% This will only work for PV 6 and above 
+    if (isfield(headerMethod, 'PVM_RefScanYN') && headerMethod.PVM_RefScanYN=='Yes' && isfield(headerMethod, 'PVM_RefScan'))
+        isRef=true;
+        fids_ref=headerMethod.PVM_RefScan;
+        real_ref = fids_ref(1:2:length(fids_ref));
+        imag_ref = fids_ref(2:2:length(fids_ref));
+        fids_ref=complex(real_ref, imag_ref);
 
-    %Find the number of averages in the ref dataset:
-    if contains(version,'PV 5')
-        % These are navigator echoes acquired every TR
-        rawAverages_ref=rawAverages;
-        averages_ref=rawAverages_ref;
-        ref.flags.averaged=0;
-    else
-        % These are water reference scans that are averaged
-        rawAverages_ref = headerMethod.PVM_RefScanNA;
+        % Find the number of averages that were acquired
+        if isfield(headerMethod, 'PVM_RefScanNA')
+        	rawAverages_ref = headerMethod.PVM_RefScanNA;
+       	else
+        	rawAverages_ref=1;
+        end
+
+        % The data stored are already averaged.
         averages_ref=1;
         ref.flags.averaged=1;
+            
+        fids_ref=reshape(fids_ref,[], Nrcvrs);
+        fids_ref_trunc=fids_ref(leftshift+1:end,:,:);
+        reffids=padarray(fids_ref_trunc, [leftshift,0],'post');
+    
+        % Apply ref freq shift (the difference between txfrq and txfrq_ref)
+        % (but not if it's PV360)
+        sz_ref=size(fids_ref); %size of the array
+        if ~contains(version, ["PV-360"])
+            tmat=repmat(t',[1 sz_ref(2:end)]);
+            reffids=reffids.*exp(-1i*tmat*(txfrq_ref-txfrq)*2*pi);
+        end
+    
+        refspecs=fftshift(ifft(reffids,[],1),1);
+    
+        %specify the dims
+        refdims.t=1;
+        
+        % if averages_ref>1
+        %     refdims.averages=2;
+        %     refdims.coils=3;
+        % else
+            refdims.averages=0;
+            refdims.coils=2;
+        % end
+        refdims.subSpecs=0;
+        refdims.extras=0;
+    
+        %Specify the number of subspecs. For ref data, I think these are always
+        %1
+        subspecs_ref=1;
+        rawSubspecs_ref=1;
     end
+end
 
-    fids_ref=reshape(fids_ref,[],averages_ref);
-    fids_ref_trunc=fids_ref(leftshift+1:end,:);
-    reffids=padarray(fids_ref_trunc, [leftshift,0],'post');
 
-    % Apply ref freq shift (the difference between txfrq and txfrq_ref)
-    % (but not if it's PV360)
-    sz_ref=size(fids_ref); %size of the array
-    if ~contains(version, ["PV-360"])
-        tmat=repmat(t',[1 sz_ref(2:end)]);
-        reffids=reffids.*exp(-1i*tmat*(txfrq_ref-txfrq)*2*pi);
+
+%% NOW TRY LOADING IN THE (processed) REFERENCE SCAN DATA (IF IT EXISTS)
+% If we are loading scanner-processed data or if the uncombined data are not available.
+
+if ~isRef || rawData == 'n'
+    if contains(version, ["PV 5", "PV 6", "PV 7", "PV-7", "PV-360.1", "PV-360.2"])
+        isRef=exist(fullfile(inDir, 'fid.refscan'));
+    elseif contains(version,'PV-360.3')
+        isRef=exist(fullfile(inDir, 'pdata', '1', 'fid_refscan.64'));
     end
+    
+    if isRef
+    	if contains(version, ["PV 5"])
+    		fileRef     = fullfile(inDir, 'fid.refscan');
+            fids_ref    = readBrukerRaw(fileRef, 'int'); % Note: never tested for PV5 as we don't have datasets available
+        elseif contains(version, ["PV 6", "PV 7", "PV-7", "PV-360.1", "PV-360.2"])
+            fileRef     = fullfile(inDir, 'fid.refscan');
+            fids_ref    = readBrukerRaw(fileRef, 'int32');
+        elseif contains(version,'PV-360.3')
+            fileRef     = fullfile(inDir, 'pdata', '1', 'fid_refscan.64');
+            fids_ref    = readBrukerRaw(fileRef, 'float64');
+        end
+    	
+    	% The reference scan stored will be already combined and averaged
+    	averages_ref=1;
+        ref.flags.averaged=1;
+        
+        if isfield(headerMethod, 'PVM_RefScanNA')
+        	rawAverages_ref = headerMethod.PVM_RefScanNA;
+       	else
+        	rawAverages_ref=1;
+       	end
+    
+        fids_ref=reshape(fids_ref,[],averages_ref);
+        fids_ref_trunc=fids_ref(leftshift+1:end,:);
+        reffids=padarray(fids_ref_trunc, [leftshift,0],'post');
+    
+        % Apply ref freq shift (the difference between txfrq and txfrq_ref)
+        % (but not if it's PV360)
+        sz_ref=size(fids_ref); %size of the array
+        if ~contains(version, ["PV-360"])
+            tmat=repmat(t',[1 sz_ref(2:end)]);
+            reffids=reffids.*exp(-1i*tmat*(txfrq_ref-txfrq)*2*pi);
+        end
+    
+        refspecs=fftshift(ifft(reffids,[],1),1);
+    
+        %specify the dims
+        refdims.t=1;
+        % Data will already be averaged
+        %if averages_ref>1
+        %    refdims.averages=2;
+        %    refdims.coils=3;
+        %else
+            refdims.averages=0;
+            refdims.coils=2;
+        %end    
+        refdims.subSpecs=0;
+        refdims.extras=0;
+    
+        %Specify the number of subspecs. For ref data, I think these are always
+        %1
+        subspecs_ref=1;
+        rawSubspecs_ref=1;
 
-    refspecs=fftshift(ifft(reffids,[],1),1);
-
-    %specify the dims
-    refdims.t=1;
-    refdims.coils=0;
-    if averages_ref>1
-        refdims.averages=2;
-    else
-        refdims.averages=0;
-    end    
-    refdims.subSpecs=0;
-    refdims.extras=0;
-
-    %Specify the number of subspecs. For ref data, I think these are always
-    %1
-    subspecs_ref=1;
-    rawSubspecs_ref=1;
-
-else
+    end
+end
+    
+if ~isRef
     %Ref scans not found.  Print warning:
     disp('WARNING REFERENCE SCANS NOT FOUND.  RETURNING EMPTY REF STRUCTURE.');
 end
 
 %% Now load navigator scans
 % For now, I know they're exported in PV 5 in fid.ref, and also in
-% rawdata.job1 in the others, but I haven't figured out that format yet, so
-% I'll skip PV6+ for now
+% rawdata.job1 or rawdata.Navigator in the others.
+
 isNav = false;
 if contains(version,'PV 5')
-    isNav=exist(fullfile(inDir, 'fid.ref'));
-% elseif contains(version, ["PV 6", "PV 7", "PV-7", "PV-360"])
-%     isNav=exist(fullfile(inDir, 'rawdata.job1'));
+    if exist(fullfile(inDir, 'fid.ref'))
+        isNav=true;
+        fileNav     = fullfile(inDir, 'fid.ref');
+        fids_nav    = readBrukerRaw(fileNav, 'int');
+    end
+    
+    % From the PV5 manual: fid.ref: serially stored FID of each navigator
+    % scan, file-size = scan-size x NA
+elseif contains(version, ["PV 6", "PV 7", "PV-7", "PV-360"])
+    if exist(fullfile(inDir, 'rawdata.job1'));
+    	isNav=true;
+    	data = fopen(fullfile(inDir, 'rawdata.job1'));
+        fids_nav=fread(data,'int32');
+    elseif exist(fullfile(inDir, 'rawdata.Navigator'));
+    	isNav=true;
+    	data = fopen(fullfile(inDir, 'rawdata.Navigator'));
+        fids_nav=fread(data,'int32');
+    end
+    
+    % From the PV 6 manual: rawdata.job1: Contains serially stored FIDs of
+    % each navigator scan. File size = scan size x number of RX channels x 
+    % NA x NR. File exists if navigator acquisition is selected.
 end
 
 if isNav
     if contains(version,'PV 5')
-        fileNav     = fullfile(inDir, 'fid.ref');
-        fids_nav    = readBrukerRaw(fileNav, 'int');
+		% Nothing
 
-%     elseif contains(version,'PV 6') || contains(version,'PV 7') || contains(version,'PV-360.2')
-%         % Get TX freq of the reference, otherwise the reference ppm axis
-%         % will not be correct
-%         data = fopen(fullfile(inDir, 'fid.refscan'));
-%         ref_data=fread(data,'int32');
-%     elseif contains(version,'PV-360.3')
-%         data = fopen(fullfile(inDir, 'pdata', '1', 'fid_refscan.64'));
-%         ref_data=fread(data,'float64');
-
+    elseif contains(version, ["PV 6", "PV 7", "PV-7", "PV-360"])
+        real_nav = fids_nav(1:2:length(fids_nav));
+        imag_nav = fids_nav(2:2:length(fids_nav));
+        fids_nav=complex(real_nav, imag_nav);
     end
 
     %Find the number of averages in the ref dataset:
+    rawAverages_nav=rawAverages;
+    averages_nav=rawAverages_nav;
+    
     if contains(version,'PV 5')
-        rawAverages_nav=rawAverages;
-        averages_nav=rawAverages_nav;
-%     else
-%         rawAverages_ref = 1;
-%         averages_nav=rawAverages_nav;
+        fids_nav=reshape(fids_nav,[],rawAverages_nav);
+        fids_nav_trunc=fids_nav(leftshift+1:end,:);
+        navfids=padarray(fids_nav_trunc, [leftshift,0],'post');
+    else
+        navfids=reshape(fids_nav,headerMethod.PVM_NavPoints,Nrcvrs, rawAverages, rawRepetitions);
+        %Permute so that time is along 1st dimension, averages is along 2nd 
+        %dimension, and coils is along 3rd dimension:
+        navfids=permute(navfids,[1,3,2,4]); 
     end
+    
+    sz_nav=size(navfids); %size of the array
+    length_nav=sz_nav(1);
 
-    fids_nav=reshape(fids_nav,[],rawAverages_nav);
-    fids_nav_trunc=fids_nav(leftshift+1:end,:);
-    navfids=padarray(fids_nav_trunc, [leftshift,0],'post');
+    % Spectral width navigator
+    % For now for PV 5-7, I couldn't fin the right parameters, so we use the
+    % same as for the main scan
+    if contains(version, ["PV 5", "PV 6", "PV 7", "PV-7"])
+        spectralwidth_nav = headerMethod.PVM_DigSw;
+    elseif contains(version,'PV-360')
+        spectralwidth_nav = headerMethod.PVM_NavSWh;
+    end
+    
+    %calculate the dwelltime:
+    dwelltime_nav=1/spectralwidth_nav;
+    
+    %calculate the time scale
+    t_nav=[0:dwelltime_nav:(length_nav-1)*dwelltime_nav];
+    
+    %calculate the ppm scale
+    fmax_nav=spectralwidth_nav/2;
+    f_nav=[fmax_nav:-2*fmax_nav/(length_nav-1):-fmax_nav];
+    ppm_nav=f/(txfrq/1e6)+centerfreq;
+    
+    % Apply ref freq shift (the difference between txfrq and txfrq_ref)
+    if contains(version, ["PV-360"]) || (contains(version, ["PV 6", "PV-7"]) && strcmpi(rawData,'y'))
+        tmat_nav=repmat(t_nav',[1 length_nav(2:end)]);
+        navfids=navfids.*exp(-1i*tmat_nav*(txfrq_ref-txfrq)*2*pi);
+    end
+    
+    %Do the fourier transform
+    specs_nav=fftshift(ifft(navfids,[],1),1);
 
 %     % Apply ref freq shift (the difference between txfrq and txfrq_ref)
 %     % (but not if it's PV360)
@@ -560,16 +720,16 @@ if isNav
 %         navfids=navfids.*exp(-1i*tmat*(txfrq_ref-txfrq)*2*pi);
 %     end
 
-    navspecs=fftshift(ifft(navfids,[],1),1);
-    sz_nav=size(navspecs);
     nav.flags.averaged=0;
     %specify the dims
     navdims.t=1;
-    navdims.coils=0;
+    
     if rawAverages_nav>1
         navdims.averages=2;
+        navdims.coils=3;
     else
         navdims.averages=0;
+        navdims.coils=2;
     end    
     navdims.subSpecs=0;
     navdims.extras=0;
@@ -659,7 +819,13 @@ if isRef
     ref.flags.freqcorrected=0;
     ref.flags.phasecorrected=0;
     
-    ref.flags.addedrcvrs=1;
+    
+    if multiRcvrs && dims.coils
+        ref.flags.addedrcvrs=0;
+    else
+        ref.flags.addedrcvrs=1;
+    end
+
     ref.flags.subtracted=0;
     ref.flags.writtentotext=0;
     ref.flags.downsampled=0;
@@ -678,12 +844,12 @@ end
 if isNav
     %FILLING IN DATA STRUCTURE FOR THE FID.REF DATA
     nav.fids=navfids;
-    nav.specs=navspecs;
+    nav.specs=specs_nav;
     nav.sz=sz_nav;
-    nav.ppm=ppm;
-    nav.t=t;
-    nav.spectralwidth=spectralwidth;
-    nav.dwelltime=dwelltime;
+    nav.ppm=ppm_nav;
+    nav.t=t_nav;
+    nav.spectralwidth=spectralwidth_nav;
+    nav.dwelltime=dwelltime_nav;
     nav.txfrq=txfrq;
     nav.date=date;
     nav.dims=navdims;
@@ -708,7 +874,12 @@ if isNav
     nav.flags.freqcorrected=0;
     nav.flags.phasecorrected=0;
     
-    nav.flags.addedrcvrs=1;
+    if multiRcvrs && dims.coils
+        nav.flags.addedrcvrs=0;
+    else
+        nav.flags.addedrcvrs=1;
+    end
+
     nav.flags.subtracted=0;
     nav.flags.writtentotext=0;
     nav.flags.downsampled=0;
@@ -911,6 +1082,24 @@ while ~feof(fid)
                     % In this case, let's look for recurring parentheses
                     % again:
                     multiLine = erase(multiLine, newline); % remove new line characters
+
+
+                    % Sometimes recurring numbers in an array are
+                    % compressed: for example: @25*(1) is 25 ones in a row
+                    % Find all occurrences of the pattern @N*(X)
+                    pattern = '@(\d+)\*\((\d+)\)';
+                    tokRepet = regexp(multiLine, pattern, 'tokens');
+                
+                    % Replace each occurrence of @N*(X) with N copies of X
+                    for i = 1:length(tokRepet)
+                        N = str2double(tokRepet{i}{1});
+                        X = str2double(tokRepet{i}{2});
+                        replacement = repmat([num2str(X) ' '], 1, N);
+                        multiLine = regexprep(multiLine, ['@' tokRepet{i}{1} '\*\(' tokRepet{i}{2} '\)'], replacement, 'once');
+                    end
+
+
+
                     [tokensParentheses, ~] = regexp(multiLine,'\(([^\)]+)\)','tokens','match');
 
                     if ~isempty(tokensParentheses)
