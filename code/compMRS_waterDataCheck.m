@@ -1,5 +1,6 @@
 % compMRS_waterDataCheck.m
 % Emma Van Praagh, Columbia University & Medical University of Vienna, 2025
+% Diana Rotaru, Columbia University & Medical University of Vienna, 2025
 %
 % DESCRIPTION: 
 % Gathers an inventory of which water data formats are available in CoMP-MRS
