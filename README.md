@@ -4,6 +4,24 @@ Repository of processing tools and procedures for a multi-site preclinical MRS p
 
 ## Update Log (for our internal development)
 
+### Apr 21 2025
+
+Some progress these days: except for one dataset (DP14), all frequency shifts and phase differences between online and offline processing seem to be [resolved](/code/notes/graphics/20250421_Comparison_Processing.pdf).
+
+Here are the main observations:
+- Multi-channel data require ECC to be applied before coil combination (as brought up previously by Georg), using the **uncombined** reference scan (stored as parameter `PVM_RefScan` in the method file). Following that, the channels can be combined using their respective sensitivity factor, **without** any further phase adjustment. This improves DP04, DP18, DP24, DP25.
+- The differences previously observed in DP04 and DP09 were because the pdata folder was empty. The code thought that the scanner-processed data were not ECCed, and applied it again, causing the discrepancy.
+- The online reconstruction of DP1 (PV5.1) and DP20 (PV6.0.1) was performed with retro frequency lock, so it must be applied to our processing as well for the purpose of the comparison (as brought up previously by Georg). It is now implemented using the FID-A functions `op_freqAlignAverages` and `op_makeFreqDrift` (note that this feature still needs to be tested with PV7 and PV360 data).
+
+I updated `io_loadspec_bruk.m` and `processBrukerRaw.m` accordingly.
+
+Other observations:
+- A perfect match is always obtained only when scanner-processed-data were not ECCed.
+- DP01, DP05, DP10, DP15, DP16 have no ECC reference (the reference scan is performed in another acquisition (the `_mrsref` folder), so they are not phased for now.
+- There is a slight difference between the ECC algorithm used here and Bruker’s one, which is causing the noise-level differences. Bruker seems to use a filter, with a parameter `EdcFilterWidthHz` (in the methreco file). Description from the manual: "`EdcFilterWidthHz` - Specifies the width of the Gaussian filter for eddy current compensation.”
+- For DP14, there is a remaining hump around 2.9-3.6ppm, which I am not able to correct.
+
+
 ### Feb 07 2025
 
 Big progress today:
