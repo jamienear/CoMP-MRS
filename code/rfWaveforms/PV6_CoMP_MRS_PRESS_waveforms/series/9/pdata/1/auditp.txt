@@ -1,0 +1,18 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.1PV
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= nmrsu
+$$ /opt/nmrdata/PV6.0.1_data/nmrsu/20250919_102952_QA_Phantom_T10998_EPI_test_2_148/9/pdata/1/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2025-09-19 11:39:21.581 -0400>,<nmrsu>,<bruker3>,<proc1d>,<TOPSPIN 3.1PV>,
+      <ft FT_mod = 6 PKNL = 1 SI = 2K 
+       data hash MD5: 2K
+       19 4E C7 0F BE D8 87 F9 5C D0 8B 19 49 B6 A9 A8>)
+(   2,<2025-09-19 11:39:23.221 -0400>,<nmrsu>,<bruker3>,<proc1d>,<TOPSPIN 3.1PV>,
+      <apk 
+       data hash MD5: 2K
+       6A D1 85 FD 1A 24 33 EC 2E 1F E7 5D 33 63 3C BB>)
+##END=
+
+$$ hash MD5
+$$ 28 49 AE 4F 77 1B 26 4C 62 C6 70 D9 02 E5 E3 84

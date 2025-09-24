@@ -1,0 +1,84 @@
+##TITLE=Parameter List, ParaVision 6.0.1
+##JCAMPDX=4.24
+##DATATYPE=Parameter Values
+##ORIGIN=Bruker BioSpin MRI GmbH
+##OWNER=nmrsu
+$$ 2025-09-19 12:19:51.531 -0400  nmrsu@bruker3
+$$ /opt/nmrdata/PV6.0.1_data/nmrsu/20250919_102952_QA_Phantom_T10998_EPI_test_2_148/subject
+$$ process /opt/PV6.0.1/prog/bin/parxserver
+##$SUBJECT_version_nr=1
+##$SUBJECT_id=( 60 )
+<QA_Phantom_T10998>
+##$SUBJECT_instance_uid=( 65 )
+<2.16.756.5.5.100.1284424989.8323.1460579554.3>
+##$SUBJECT_instance_creation_date=(1460579554, 762, -240)
+$$ @vis= SUBJECT_version_nr SUBJECT_id SUBJECT_instance_uid
+##$SUBJECT_name_string=( 64 )
+<Blue Imaging Tube D030>
+##$SUBJECT_name=(<Blue Imaging Tube D030>, <>)
+##$SUBJECT_dbirth=( 12 )
+<24 May 2025>
+$$ @vis= SUBJECT_instance_creation_date SUBJECT_name_string SUBJECT_name
+##$SUBJECT_type=Other
+##$SUBJECT_sex=( 8 )
+<unknown>
+##$SUBJECT_sex_animal=UNDEFINED
+##$SUBJECT_remarks=( 2048 )
+<>
+##$SUBJECT_study_name=( 64 )
+<EPI_test>
+$$ @vis= SUBJECT_dbirth SUBJECT_type SUBJECT_sex SUBJECT_remarks
+##$SUBJECT_study_nr=148
+##$SUBJECT_study_instance_uid=( 65 )
+<2.16.756.5.5.100.8323328.48392.1758292192.9>
+##$SUBJECT_weight=0.001
+$$ @vis= SUBJECT_study_name SUBJECT_study_nr SUBJECT_study_instance_uid
+##$SUBJECT_referral=( 64 )
+<nmrsu>
+##$SUBJECT_purpose=( 2048 )
+<>
+##$SUBJECT_pos_valid=Yes
+##$SUBJECT_entry=SUBJ_ENTRY_HeadFirst
+$$ @vis= SUBJECT_weight SUBJECT_referral SUBJECT_purpose SUBJECT_pos_valid
+##$SUBJECT_position=SUBJ_POS_Supine
+##$SUBJECT_date=<2025-09-19T10:29:52,856-0400>
+##$SUBJECT_abs_date=(1758292192, 856, -240)
+##$SUBJECT_comment=( 2048 )
+<>
+$$ @vis= SUBJECT_entry SUBJECT_position SUBJECT_date SUBJECT_abs_date
+##$SUBJECT_study_adj_config=( <MRI_Default> , <MRI Default> )
+##$SUBJECT_study_gradient_system=( 10240 )
+<$Bis,1,20070906,2048,GRADSYS,1#$Production,W3307165,0008,00,03,BFR,
+20101214#$Name,B-GA12SHP INSERT FOR BGA20S BC70/30#$GradSystem,1.0,27,S116,0,,
+1#$GradCoil,1.0,B0,S,2500,1.4,,130,10,#$GradCoil,1.0,X,S,935,0.12,,500,300,
+2820#$GradCoil,1.0,Y,S,935,0.11,,500,300,2230#$GradCoil,1.0,Z,S,935,0.10,,500,
+300,2350#$EndBis,61,1a#>
+##$SUBJECT_study_shim_system=( 10240 )
+<$Bis,1,20090903,2048,SHIMSYS,1#$Production,W3307165,0008,00,03,BFR,
+20101214#$Name,B-GA12SHP INSERT FOR BGA20S BC70/30#$ShimSystem,1.0,26,S116,7,,
+#$ShimTempSensor,1.0,1,PTC,#$ShimCoil,1.0,1,3.2,150,10,#$ShimCoil,1.0,2,2.9,
+150,10,#$ShimCoil,1.0,3,2.9,150,10,#$ShimCoil,1.0,4,3.6,150,10,#$ShimCoil,1.0,
+5,3.6,150,10,#$ShimCoil,1.0,6,4.4,150,10,#$ShimCoil,1.0,7,1.0,150,10,
+#$ShimFunction,1.0,1,Z2,2,250#$ShimFunction,1.0,2,ZX,2,260#$ShimFunction,1.0,
+3,ZY,2,260#$ShimFunction,1.0,4,2XY,2,110#$ShimFunction,1.0,5,X2-Y2,2,
+110#$ShimFunction,1.0,6,Z3,3,10#$ShimFunction,1.0,7,Z4,4,1#$ShimMatrix,1.0,1,
+1,1.0#$ShimMatrix,1.0,2,2,1.0#$ShimMatrix,1.0,3,3,1.0#$ShimMatrix,1.0,4,4,
+1.0#$ShimMatrix,1.0,5,5,1.0#$ShimMatrix,1.0,6,6,1.0#$ShimMatrix,1.0,7,7,
+1.0#$EndBis,7c,a4#>
+##$SUBJECT_study_coil_configuration=( 65 )
+<2.16.756.5.5.100.8323328.17931.1682102726.3>
+##$SUBJECT_study_coil_table=( 10240 )
+<$Bis,1,20230421,2048,COILTABLE,1#$Name,RF RES 300 1H 112/086 QSN TO AD 
+(BMRIDE T12053V3/0062)#$Id,1.0,2.16.756.5.5.100.8323328.17931.1682102726.3,,
+320c#$PMap,1.0,1,RF RES 300 1H 112/086 QSN TO AD,BMRIDE,T12053V3,0062,H,1H 
+HP#$PCAuxInfo,1.0,1,1,,PreampProbe,1,PreampProbe,1,,,#$PCAuxInfo,1.0,1,2,,
+PreampProbe,1,PreampProbe,1,,,#$EndBis, C7, FA#>
+##$SUBJECT_study_coils=( 1, 10240 )
+<$Bis,1,20121117,2048,PICS,1#$Prd,T12053V3,0062,01.03,,BMRIDE,20121117#$Nam,
+RF RES 300 1H 112/086 QSN TO AD#$PComp,1.0,MRI,90,300#$PType,1.0,MRI#$PACoi,
+1.0,2#$PMRI,1.0,Volume,1,1,,SN#$PChan,1.0,1H,,,20,2000,28,3.0,5,FALSE#$PCoil,
+1.0,1,55,1,1H#$PCoil,1.0,2,55,1,1H#$PCConn,1.0,1,T/R,2,1,RX1,,,1-3,0#$PCConn,
+1.0,2,T/R,1,1,RX2#$PAdmCtl,1.0,1,1,V,ActHi,-36#$EndBis,93,6b#>
+$$ @vis= SUBJECT_comment SUBJECT
+##END=
+$$ File finished by PARX at 2025-09-19 12:19:51.531 -0400

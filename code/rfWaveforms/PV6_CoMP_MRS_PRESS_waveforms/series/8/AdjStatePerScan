@@ -1,0 +1,27 @@
+##TITLE=Parameter List, ParaVision 6.0.1
+##JCAMPDX=4.24
+##DATATYPE=Parameter Values
+##ORIGIN=Bruker BioSpin MRI GmbH
+##OWNER=nmrsu
+$$ 2025-09-19 11:31:23.025 -0400  nmrsu@bruker3
+$$ /opt/nmrdata/PV6.0.1_data/nmrsu/20250919_102952_QA_Phantom_T10998_EPI_test_2_148/8/AdjStatePerScan
+$$ process /opt/PV6.0.1/prog/mod/pipe
+##$AdjScanStateCompleted=Yes
+##$AdjScanStateAdjName=( 3, 128 )
+<SHIM_Scan> <ReferenceScan> <RCVR_Standard>
+##$AdjScanStateCategory=( 3 )
+SHIM OTHERADJ RCVR
+##$AdjScanStateTime=( 3 )
+<2025-09-19T11:30:27,433-0400> <2025-09-19T11:30:56,030-0400> 
+<2025-09-19T11:31:06,656-0400>
+##$AdjScanStateExpno=( 3 )
+8 8 8
+##$AdjScanStateState=( 3 )
+adj_successful adj_successful adj_successful
+##$AdjScanStateResultId=( 3, 65 )
+<2.16.756.5.5.100.8323328.2513.1758295826.14> <> 
+<2.16.756.5.5.100.8323328.2513.1758295826.16>
+##$AdjScanStateMethod=( 3, 128 )
+<Bruker:AdjShim> <Bruker:STEAM> <Bruker:STEAM>
+##END=
+$$ File finished by PARX at 2025-09-19 11:31:23.025 -0400
