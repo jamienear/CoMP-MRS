@@ -46,8 +46,10 @@ while ~feof(fid)
     else
 
         % If not a match, get the parameters with a $
-        [tokens, ~] = regexp(tline,'##\$([\w\[\].]*)\s*=\s*([-\(\w\s.\"\\:\.,\)]*)','tokens','match');
-
+        %[tokens, ~] = regexp(tline,'##\$([\w\[\].]*)\s*=\s*([-\(\w\s.\"\\:\.,\)]*)','tokens','match');
+        [tokens, ~] = regexp(tline, ...
+    '##\$([\w\[\].]*)\s*=\s*([<>\-\(\w\s.\"\\:\.,\)]*)', ...
+    'tokens','match');  %ChatGPT mod suggestion:
 
         % When a matching string is found, parse the results into a struct
         if length(tokens) == 1
