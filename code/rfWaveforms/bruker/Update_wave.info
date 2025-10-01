@@ -1,0 +1,416 @@
+;Update_wave.info
+;avance-version (23/03/23)
+;
+;difference to previous versions
+;
+
+********************************************************************
+differences to (23/03/23)
+
+added           Crp32,1.25,10.1
+                Crp32,2.5,10.1
+                Crp32.1.20.1
+                Crp32comp.4                
+
+********************************************************************
+differences to (22/07/01)
+
+added            SURBOP90,24,0.333.1
+                 SURBOP180,24,0.333.1
+                 
+********************************************************************
+differences to (20/08/14)
+
+added            Bip1382,250,15.1000
+                 Ram-COOP1_100.300
+                 Ram-COOP2_100.300
+
+********************************************************************
+differences to (20/07/30)
+
+changed          Eburp2.1000            TOTROT, BWFAC
+                 Eburp2tr.1000
+                 Reburp.1000
+
+********************************************************************
+differences to (19/08/14)
+
+added            Reburp_cpmg_500        modified Reburp shapes for cpmg
+                 Reburp_cpmg_600           Ref:
+                 Reburp_cpmg_800           P. Lundstrom, D.F. Hansen & L.E. Kay,
+                                           J.Biomol.NMR. 42, 35-47 (2008)
+
+corrected        Crp54,1.5.20.2         -> Crp54,1.5,20.2
+                 Crp64,1.5.20.2         -> Crp64,1.5,20.2
+
+********************************************************************
+differences to (19/08/14)
+
+
+added            Buss_dec               shape for BUSS decoupling
+                                           length 123.2 msec, power level
+                                           corresponding to a 90degree
+                                           pulse of 17.8 usec (14042 Hz)
+                                           Ref.:
+                                           F. Schilling, L.R. Warner, 
+                                           N.I. Gershenzon, T.E. Skinner,
+                                           M. Sattler & S.J. Glaser
+                                           Angew. Chem. 126, 4564-4568 (2014)
+
+********************************************************************
+differences to (19/08/13)
+
+corrected        Esnob.1000             totrot -> 270
+
+********************************************************************
+differences to (19/03/05)
+
+corrected        Crp100,0.5,20.1        totrot -> 180
+
+********************************************************************
+differences to (19/02/08)
+
+corrected        Crp25,1.25,25.4        integfac
+                 Crp25,2.5,25.4
+                 Crp38,1.25,25.4
+                 Crp38,2.5,25.4
+
+********************************************************************
+differences to (19/02/01)
+
+added            Crp120,1,20.2          smoothed chirp (120kHz sweepw.,
+                                           1msec, 20% smoothing,
+					   2000 points, Q=5)
+                                           requires a powerlevel corres-
+                                           ponding to a 90degree pulse of
+                                           25.4 usec
+
+
+********************************************************************
+differences to (19/01/01)
+
+added            BadCop1                Ca/CO decoupling pulses
+                 BadCop2
+                 BadCop3
+                 GoodCop
+
+		 according to:
+		 P.W. Coote, S.A. Robson, A. Dubey, A. Boeszoermenyi, M. Zhao, 
+		    G. Wagner & H. Arthanari, Nat. Commun. 9, 3014 (2018)
+
+********************************************************************
+differences to (16/11/11)
+
+added            Crp100,0.5,20.1        smoothed chirp (100kHz sweepw.,
+                 Crp100comp.4              500usec, 20% smoothing,
+                                           1000 points, Q=5)
+                                           requires a powerlevel corres-
+                                           ponding to a 90degree pulse of
+                                           19.8 usec
+
+
+                 Crp54,1.5,20.2          shapes for decoupling (Q=3)
+                 Crp64,1.5,20.2
+                 Crp120,1.5,30.4
+
+                 Crp32,0.75,20.2         shapes of half the duation for 
+                 Crp42,0.75,20.2            bilev decoupling (Q=3)
+                 Crp48,0.75,20.2           
+                 Crp54,0.75,20.2
+                 Crp64,0.75,20.2
+                 Crp120,0.75,30.4
+
+
+                 G3.1000                  shapes with 1000 points
+                 G4.1000
+                 G4tr.1000
+
+                 Crp25,2.5,25.4           low power adiabatic decoulping (Q=2)
+                 Crp38,2.5,25.4            
+
+                 Crp25,1.25,25.4          shapes of half the duation for
+                 Crp38,1.25,25.4             low power bilev decoupling (Q=2)
+
+********************************************************************
+differences to (16/11/04)
+
+added            Mpf9.1000              Mpf9 shape to be used with 
+                 Mpf9.500                  mpf9 cpd-program
+                                           500 and 1000 points respectively
+
+********************************************************************
+differences to (15/09/23)
+
+added           Tanhtan,300,50,P5.1250  Tanhtan pulse using a P5 supercycle
+                                           (basic element: Tanhtan,300,50.250)
+                                              for adiabatic TOCSY 
+                                              requires RF fieldstrength 
+                                              of 10.5kHz
+                                              (corresponding to a 90degree
+                                              pulse of 23.8usec)
+
+********************************************************************
+differences to (15/03/02)
+
+added           CaWu40,2,20.1           shape for N-15 inverson
+                                           Total Sweep-Width [Hz] 40000
+                                           Length of Pulse [usec] 2000
+                                           power index 20
+
+********************************************************************
+differences to (14/08/18)
+
+added           Crp_psyche.20           shape for psyche homodecoupling
+                                           Total Sweep-Width [Hz] 10000.0
+                                           Length of Pulse [usec] 30000
+                                           20% smoothing
+                                           sum of high to low/low to high 
+                                           and low to high/high to low
+
+********************************************************************
+differences to (10/02/01)
+
+added           Esnob.1000
+
+********************************************************************
+differences to (10/01/26)
+
+added           Iburp2.1000
+
+********************************************************************
+differences to 08/01/17
+
+changed         Crp32,1.5,20.2          integral factor changed so that
+                Crp42,1.5,20.2             power level matches Q=3
+                Crp48,1.5,20.2             (instead of Q=5) this reduces
+                                           the calculated power by 2.22dB
+
+added           Gaussramp-down.1        shapes for roesyadjsphpr (EASY ROESY) 
+                Gaussramp+down.1           positive (+) or negative (-) offset
+                Gaussramp-up.1             rotating the magetisation from z to
+                Gaussramp+up.1             the spinlock axis (down) or back to 
+                                           the z-axis (up)
+
+
+                Q3_surbop.1 *           optimised pulse based on Q3 with minimised
+                                           phase error across bandwidth
+                                           270usec @ 600MHz (gB1max 15.37kHz)
+                                           to be scaled for other field strength
+
+                Q5_sebop.1 *            optimised pulse based on Q5 with minimised
+                Q5tr_sebop.1 *             phase error across bandwidth
+                                           350usec @ 600MHz (gB1max 15.09kHz)
+                                           to be scaled for other field strength
+
+
+                Burbop-180.1 *          optimised pulse with minimised phase error 
+                                           across the range of B1 tolerance
+                                           2msec, (bandwidth 50kHz, gB1max 15kHz,
+                                           B1 tolerance  +-10%)
+
+
+* N.I. Gershenzon, T.E. Skinner, W. Bermel, M. Nimbalkar, B. Luy, S.J. Glaser, ENC 2009
+
+********************************************************************
+differences to 07/10/02
+
+added           Crp60,20,20.10          sm. Chirp: 60kHz, 20ms
+                                           to be used in ZQ filter
+
+
+********************************************************************
+differences to 06/01/23
+________________________
+
+added           Bip720,100,10.1         BIP pulse:
+                                           for length tp
+                                           RF Field (Hz):  1/(tp/2)
+                                           bandwidth +/- 100% of RF Field
+                                           B1 tolerance 10%
+
+
+********************************************************************
+differences to 06/01/23
+________________________
+
+added           Bip720,50,20.1          BIP pulse:
+                                           for length tp
+                                           RF Field (Hz):  1/(tp/2)
+                                           bandwidth +/- 50% of RF Field
+                                           B1 tolerance 20%
+
+                Eburp2.1000
+                Eburp2tr.1000
+
+                Pc9_4_90.1000           for 90o flipangle
+                Pc9_4_120.1000          for 120o flipangle
+
+                Rsnob.1000
+
+
+********************************************************************
+differences to 05/12/05
+________________________
+
+added           Crp20,1,40.1            sm. Chirp: 20kHz, 1ms to cover 
+                                           10kHz(15N) @ 600MHz
+
+                Q3_rna_c68c1.1          Q3 RNA: twofold modulated pulse
+                                           C68 + C1' off res 
+                                           (+/- 4kHz, 2.6ms @ 600Mhz)
+
+                Crp60_xfilt.2           sm. Chirp for matched sweep: 
+                                           150 to 0 ppm, seq. pulses, 
+                                           60kHz, 1730us, (for 600MHz),
+                                           scale with sqrt(600/x)
+
+********************************************************************
+differences to 05/09/22
+________________________
+
+added           Crp48,1.5,20.2          adiabatic pulses for decoupling
+                Crp42,1.5,20.2
+                Crp32,1.5,20.2
+
+                Q3Ca_CaCO.1000          twofold modulated pulse
+                                           (on-res. Ca off-res. CO)
+                                           768us @ 600MHz
+
+********************************************************************
+differences to 04/11/22
+________________________
+
+changed         all shapes              recreated with latest
+                                           Shapetool version
+
+********************************************************************
+differences to 03/03/13
+________________________
+
+added           Gaus1_90.1000           gaussian shapes for different
+                Gaus1_180i.1000            flip angle/applications
+                Gaus1_180r.1000            with appropriate header
+                Gaus1_270.1000             information
+
+                Reburp.1000
+
+                Crp80comp.4             composite sm. chirp
+                                        (basic element: 80kHz sweepw.,
+                                        500usec, 20% smoothing, 
+                                        total: 4000 points)
+                                        total pulse length 2ms
+                                        requires a powerlevel corres-
+                                        ponding to a 90degree pulse of
+                                        22.2 usec
+
+
+********************************************************************
+differences to 01/09/10
+________________________
+
+added           Tanhtan,300,50.250      Tanhtan pulse (300kHz sweepw.,
+                                           50usec, zeta:10, tan(kappa):20
+                                           250 points)
+                                           for adiabatic TOCSY 
+                                           requires RF fieldstrength 
+                                           of 10.5kHz
+                                           (corresponding to a 90degree
+                                           pulse of 23.8usec)
+
+********************************************************************
+differences to 01/05/08
+________________________
+
+added           Crp80,0.5,20.1          smoothed chirp (80kHz sweepw.,
+                                           500usec, 20% smoothing,
+                                           1000 points)
+                                           requires a powerlevel corres-
+                                           ponding to a 90degree pulse of
+                                           22.2 usec
+
+********************************************************************
+differences to 00/04/27
+________________________
+
+changed         all shapes              recreated with latest
+                                           Shapetool version
+
+********************************************************************
+differences to 00/02/07
+________________________
+
+changed         all shapes              SHAPE_MODE -> 0
+
+********************************************************************
+differences to 99/10/14
+________________________
+
+********************************************************************
+differences to 99/02/23
+________________________
+
+changed         Mpf7                    converted to Jcamp
+                Squaramp,20.1
+
+
+renamed         Squaramp,20.1000 ->     Squaramp,20.1
+
+********************************************************************
+differences to 98/07/10
+________________________
+
+added           G3.256
+                G4.256
+                G4tr.256
+
+                Q3.1000
+                Q5.1000
+                Q5tr.1000
+
+
+changed         Crp60comp.4             constant phase added so that
+                                           pulse behaves like an x pulse
+
+********************************************************************
+differences to 97/05/15
+________________________
+
+added           Crp60,0.5,20.1          smoothed chirp (60kHz sweepw.,
+                                           500usec, 20% smoothing, 
+                                           1000 points)
+                                           requires a powerlevel corres-
+                                           ponding to a 90degree pulse of
+                                           25.5 usec
+
+                Crp60comp.4             composite sm. chirp
+                                           (basic element: 60kHz sweepw.,
+                                           500usec, 20% smoothing, 
+                                           total: 4000 points)
+                                           total pulse length 2ms
+                                           requires a powerlevel corres-
+                                           ponding to a 90degree pulse of
+                                           25.5 usec
+
+
+added           Gaus1.1000              gaussian shape, 1% truncation
+
+                Seduce.100              seduce shape
+
+                Sinc1.1000              sinc shape, 1 cycle
+
+                Squa100.1000            square shape, 100% amplitude
+
+********************************************************************
+differences to 97/04/18
+________________________
+
+********************************************************************
+differences to 96/05/01
+________________________
+
+renamed         mpf7            ->      Mpf7
+
+added           Squaramp,20.1000        square with 20 point ramped
+                                           from 0 to 100 on either side
+
+********************************************************************
