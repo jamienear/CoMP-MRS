@@ -20,6 +20,7 @@
 %               -nSes:  Number of sessions per subject
 %               -vendor:  What vendor did this DP come from 
 %               -version: What vendor software version was the DP generated with
+%               -seq:  What pulse sequence was the DP generated with
 %               -allSame:  Boolian (True/False) to check if all subjects and sessions in the Data 
 %               Packet are using the same MRI vendor and software version.  
 
@@ -32,26 +33,32 @@ check.nSubj=length(subs);
 
 %Check the number of sessions per subject
 for n=1:check.nSubj;
-    ses=dir([DPid '/' subs(n).name '/ses-*']);
+    ses=dir([DPid filesep subs(n).name filesep 'ses-*']);
     check.nSes(n)=length(ses);
     for m=1:check.nSes(n)
-        svsDir=dir([DPid '/' subs(n).name '/' ses(m).name '/mrs/*_svs']);
-        if exist([DPid '/' subs(n).name '/' ses(m).name '/mrs/' svsDir.name '/fid']) && exist([DPid '/' subs(n).name '/' ses(m).name '/mrs/' svsDir.name '/procpar'])
+        svsDir=dir([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep '*_svs']);
+        if exist([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir.name filesep 'fid']) && exist([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir.name filesep 'procpar'])
+            %Fill in the vendor and version fields (VARIAN DATA):
             check.vendor{n,m}='VARIAN';
-            par=readprocpar([DPid '/' subs(n).name '/' ses(m).name '/mrs/' svsDir.name '/procpar']);
+            par=readprocpar([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir.name filesep 'procpar']);
             check.version{n,m}=par.parversion;
+            check.seq{n,m}=par.seqfil;
 
-        elseif exist([DPid '/' subs(n).name '/' ses(m).name '/mrs/' svsDir.name '/method']) && exist([DPid '/' subs(n).name '/' ses(m).name '/mrs/' svsDir.name '/acqp'])
+        elseif exist([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir.name filesep 'method']) && exist([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir.name filesep 'acqp'])
+            %Fill in the vendor and version fields (BRUKER DATA):
             check.vendor{n,m}='BRUKER';
-            headerAcqp = parseBrukerFormat([DPid '/' subs(n).name '/' ses(m).name '/mrs/' svsDir.name '/acqp']);
+            headerAcqp = parseBrukerFormat([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir.name filesep 'acqp']);
             check.version{n,m}=headerAcqp.ACQ_sw_version;
+            check.seq{n,m}=headerAcqp.PULPROG;
+            
 
         end
         
     end
 end
 
-check.allSame = isequal(check.vendor{:}) && isequal(check.version{:});
+%Check that all scans within the DP have the same vendor and version:
+check.allSame = isequal(check.vendor{:}) && isequal(check.version{:}) && isequal(check.seq{:});
 
 end
 
