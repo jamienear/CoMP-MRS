@@ -37,17 +37,17 @@ for n=1:check.nSubj;
     check.nSes(n)=length(ses);
     for m=1:check.nSes(n)
         svsDir=dir([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep '*_svs']);
-        if exist([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir.name filesep 'fid']) && exist([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir.name filesep 'procpar'])
+        if exist([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir(length(svsDir)).name filesep 'fid']) && exist([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir(length(svsDir)).name filesep 'procpar'])
             %Fill in the vendor and version fields (VARIAN DATA):
             check.vendor{n,m}='VARIAN';
-            par=readprocpar([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir.name filesep 'procpar']);
+            par=readprocpar([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir(length(svsDir)).name filesep 'procpar']);
             check.version{n,m}=par.parversion;
             check.seq{n,m}=par.seqfil;
 
-        elseif exist([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir.name filesep 'method']) && exist([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir.name filesep 'acqp'])
+        elseif exist([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir(length(svsDir)).name filesep 'method']) && exist([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir(length(svsDir)).name filesep 'acqp'])
             %Fill in the vendor and version fields (BRUKER DATA):
             check.vendor{n,m}='BRUKER';
-            headerAcqp = parseBrukerFormat([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir.name filesep 'acqp']);
+            headerAcqp = parseBrukerFormat([DPid filesep subs(n).name filesep ses(m).name filesep 'mrs' filesep svsDir(length(svsDir)).name filesep 'acqp']);
             check.version{n,m}=headerAcqp.ACQ_sw_version;
             check.seq{n,m}=headerAcqp.PULPROG;
             
