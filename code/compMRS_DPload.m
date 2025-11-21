@@ -61,7 +61,7 @@ if strcmp(check.vendor(1),'BRUKER')
             %If PV5, then the water reference scans must be collected
             %separately:
             elseif str2num(extractBetween(check.version{m,n}, 'PV ', '.')) == 5
-                if exist([svspath.folder filesep svspath(length(svspath)).name]) && exist([refpath.folder filesep refpath(length(refpath)).name]) % refscan acquired separately
+                if exist([svspath(length(svspath)).folder filesep svspath(length(svspath)).name]) && exist([refpath(length(refpath)).folder filesep refpath(length(refpath)).name]) % refscan acquired separately
                     [out{m,n}]=io_loadspec_bruk_new([svspath(length(svspath)).folder filesep svspath(length(svspath)).name],'y');
                     [outw{m,n}]=io_loadspec_bruk_new([refpath(length(refpath)).folder filesep refpath(length(refpath)).name],'y');
                

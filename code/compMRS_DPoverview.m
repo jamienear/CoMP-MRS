@@ -106,8 +106,13 @@ for k = 1:numel(DPidPath)
                             acq_w_svs_fidrefscan = 'y';
                         end
 
-                        if (exist([allDPs_parentfolder filesep DP filesep subj filesep ses filesep 'mrs' filesep '*mrsref' filesep 'fid']) > 0 ) || (exist(fullfile(allDPs_parentfolder,DP,subj,ses, 'mrs', '*mrsref', 'rawdata.job0'),'file') > 0 )
+                        try
+                        mrsref_dir = dir([allDPs_parentfolder filesep DP filesep subj filesep ses filesep 'mrs' filesep '*mrsref']);
+                        if (exist([mrsref_dir(length(mrsref_dir)).name filesep 'fid']) > 0 ) || (exist([mrsref_dir(length(mrsref_dir)).name filesep 'rawdata.job0']) > 0 )
                             acq_w_mrsref = 'y';
+                        end
+                        catch me
+                           acq_w_mrsref = 'doesn''t exist';
                         end
 
                         try
