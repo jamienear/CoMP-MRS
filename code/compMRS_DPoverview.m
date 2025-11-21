@@ -1,6 +1,7 @@
 % compMRS_DPoverview.m
 % Diana Rotaru, Columbia University & Medical University of Vienna, 2025
 % Emma Van Praagh, Columbia University & Medical University of Vienna, 2025
+% Mark Mikkelsen, Weill Cornell Medicine, 2025
 %
 % USAGE:
 % [out]=compMRS_DPoverview(allDPs_parentfolder)
