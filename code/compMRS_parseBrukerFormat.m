@@ -1,7 +1,28 @@
-function header = parseBrukerFormat(inputFile)
+%compMRS_parseBrukerFormat.m
+%Georg Oeltzschner, Johns Hopkins University 2025
+%
+% USAGE:
+% [header] = compMRS_parseBrukerFormat(inputFile);
+%
+% DESCRIPTION:
 % This subroutine uses regular expressions and case differentiations to
 % extract all relevant information from a Bruker-formatted header file
-% (acqp, method, etc.)
+% (acqp, method, etc.), similarly to readprocpar function from the mrTools
+% package
+%
+% The function returns a scructure called 'header', which contains all the 
+% acquisition parameters stored in header files like 'method' or 'acqp'
+%
+% INPUTS:
+% inputFile:     File path of Bruker 'method' and 'acqp' files
+% 
+% OUTPUTS:
+% header:    Structure with individual fields for each parameter stored in 
+%               the header file provided as input:
+%               sequence, TE, TR, number of averages, spectral width,
+%               pulses information, etc.
+
+function [header] = compMRS_parseBrukerFormat(inputFile)
 
 % Open file
 fid = fopen(inputFile);
