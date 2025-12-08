@@ -1,7 +1,8 @@
 %compMRS_DPload.m
 %Jamie Near, Sunnybrook Research Institute, 2025
 %Diana Rotaru, Columbia University, 2025
-%
+%20251121 updates made to accommodate Windows (i.e. filepaths) and to use only
+%individually saved functions (i.e. compMRS_parseBrukerFormat)
 % USAGE:
 % [out,outw]=compMRS_DPload(DPid);
 %
@@ -21,22 +22,28 @@
 % outw:     m x n cell array where m is the number of subjects in the DP,
 %           and n is the number of sessions in the DP.  Each element of the
 %           cell array is a water unsuppressed FID-A data struct. 
-
+% Both of these include the following structure fields:
+%           - flags
+%           - fids, specs, sz, ppm, t, averages, subSpecs
+%           - spectralwidth, dwelltime, txfrq, dims, BO, pointsToLeftshift
+%           - seq, te, tr
+%           - date, version, filepath
+%
 
 function [out, outw]=compMRS_DPload(DPid)
 
-%First check the vendor using DPcheck:
+%First check the vendor to be the same for all subj using DPcheck:
 check = compMRS_DPcheck(DPid);
 
-%Loop through subjs and sess.  If bruker, load using io_loadspec_bruk_new.m.  
-% If varian, load using io_loadspec_varian.m
+%Loop through subjs and sess.  If bruker, load using compMRS_loadspecBruker (initially, io_loadspec_bruk_new.m).  
+% If varian, load using compMRS_loadspecVarian (initially,
+% io_loadspec_varian.m).
 if strcmp(check.vendor(1),'BRUKER')
 
     for m = 1:check.nSubj
         subjs=dir([DPid filesep 'sub*']);
         for n = 1:check.nSes(m)
             sess=dir([DPid filesep subjs(m).name filesep 'ses*']);
-            
             
             %Find the MRS data path and the REF data path:
             svspath = dir([DPid filesep subjs(m).name filesep sess(n).name filesep 'mrs' filesep '*svs']);
@@ -50,26 +57,22 @@ if strcmp(check.vendor(1),'BRUKER')
             if str2num(extractBetween(check.version{m,n}, 'PV ', '.')) >= 6 
 
                 if ~isempty(svspath) && ~isempty(refpath) % refscan acquired separately
-                    [out{m,n}]=io_loadspec_bruk_new([svspath.folder filesep svspath(length(svspath)).name],'y');
-                    [outw{m,n}]=io_loadspec_bruk_new([refpath.folder filesep refpath(length(refpath)).name],'y');
+                    [out{m,n}]=compMRS_loadspecBruker([svspath.folder filesep svspath(length(svspath)).name],'y');
+                    [outw{m,n}]=compMRS_loadspecBruker([refpath.folder filesep refpath(length(refpath)).name],'y');
                
                 elseif ~isempty(svspath) && isempty(refpath) % refscan acquired automatically
-                    [out{m,n},outw{m,n}]=io_loadspec_bruk_new([svspath(length(svspath)).folder filesep svspath(length(svspath)).name],'y');
-                
+                    [out{m,n},outw{m,n}]=compMRS_loadspecBruker([svspath(length(svspath)).folder filesep svspath(length(svspath)).name],'y');
                 end
 
             %If PV5, then the water reference scans must be collected
             %separately:
             elseif str2num(extractBetween(check.version{m,n}, 'PV ', '.')) == 5
                 if exist([svspath(length(svspath)).folder filesep svspath(length(svspath)).name]) && exist([refpath(length(refpath)).folder filesep refpath(length(refpath)).name]) % refscan acquired separately
-                    [out{m,n}]=io_loadspec_bruk_new([svspath(length(svspath)).folder filesep svspath(length(svspath)).name],'y');
-                    [outw{m,n}]=io_loadspec_bruk_new([refpath(length(refpath)).folder filesep refpath(length(refpath)).name],'y');
-               
+                    [out{m,n}]=compMRS_loadspecBruker([svspath(length(svspath)).folder filesep svspath(length(svspath)).name],'y');
+                    [outw{m,n}]=compMRS_loadspecBruker([refpath(length(refpath)).folder filesep refpath(length(refpath)).name],'y');
                 else 
                     error(['ERROR:  For PV5, must have both svs and ref directories!! Aborting!! '])
-                
                 end
-
             end
         end
     end
@@ -83,8 +86,8 @@ elseif strcmp(check.vendor(1),'VARIAN')
             svspath = dir([DPid filesep subjs(m).name filesep sess(n).name filesep 'mrs' filesep '*svs']);
             refpath = dir([DPid filesep subjs(m).name filesep sess(n).name filesep 'mrs' filesep '*mrsref']);
 
-            [out{m,n}]=io_loadspec_varian([svspath.folder filesep svspath.name]);
-            [outw{m,n}]=io_loadspec_varian([refpath.folder filesep refpath.name]);
+            [out{m,n}]=compMRS_loadspecVarian([svspath(length(svspath)).folder filesep svspath(length(svspath)).name]);
+            [outw{m,n}]=compMRS_loadspecVarian([refpath(length(refpath)).folder filesep refpath(length(refpath)).name]);
         end
     end
 end

@@ -1,28 +1,28 @@
-%compMRS_DPloadBruker.m
+%compMRS_loadspecBruker.m
 %based on io_loadspec_bruk.m
-%Jamie Near, Sunnybrook Research Institute, 2023
+%Chathura Kumaragamage, McGill University 2016
 %Wendy Oakden, Sunnybrook Research Institute, 2020
-%Chathura Kumaragamage, McGill University 2016.
+%Jamie Near, Sunnybrook Research Institute, 2023
 %Georg Oeltzschner, Johns Hopkins University 2025
+%Thanh Phong Le, EPFL, 2025
+%Diana Rotaru, Medical University of Vienna, 2025
 %
 % USAGE:
-% [out,ref]=compMRS_loadspecBruker(inDir, rawData);
+% [out,ref,nav,coilcombos,isECCed,isRFLed]=compMRS_loadspecBruker(inDir, rawData)
 %
 % DESCRIPTION:
-% Reads in Bruker MRS data (fid.raw, fid.ref).
-%
-% io_loadspec_bruk_new reads a Bruker data file and outputs a data structure in
-% FID-A format (with fields corresponding to time scale, fids, frequency
-% scale, spectra, and header fields containing information about the
-% acquisition.  The resulting matlab structure can be operated on by the
-% other FID-A functions.
+% Reads in Bruker MRS data (fid.raw, fid.ref, rawdata.job0) and outputs a 
+% data structure in FID-A format (with fields corresponding to time scale, 
+% fids, frequency scale, spectra, and header fields containing information 
+% about the acquisition. The resulting matlab structure can be operated on 
+% by the other FID-A functions.
 %
 % This function gives you the option to read in either the raw data (with
 % individual averages stored separately), or the combined data.
 %
 % For Bruker versions PV5 and earlier, the water suppressed and water
-% unsuppressed data were acquired separately.  In such cases,
-% io_loadspec_bruk would need to be run separately on the water suppressed
+% unsuppressed data were acquired separately. In such cases,this function 
+% would need to be run separately on the water suppressed
 % and water unsuppressed scan folders. When run on the water-suppressed 
 % folders, the 2nd output 'ref' will be empty, and the 3rd output 'nav'
 % will contain the acquired navigator echoes.  
@@ -56,7 +56,7 @@
 % isECCed    = Flag indicating whether processed data have been
 %              eddy-current-corrected (read out from EdcOnOff fields)
 
-function [out,ref,nav,coilcombos,isECCed,isRFLed]=compMRS_DPloadBruker(inDir, rawData)
+function [out,ref,nav,coilcombos,isECCed,isRFLed]=compMRS_loadspecBruker(inDir, rawData)
 
 %Allow the user to pass the input directory as either a string or an
 %integer.
@@ -72,28 +72,28 @@ end
 
 % Populate the header information from the ACQP file
 acqpFile        = fullfile(inDir, 'acqp');
-headerACQP      = parseBrukerFormat(acqpFile);
+headerACQP      = compMRS_parseBrukerFormat(acqpFile);
 
 % Populate the header information from the Method file
 methodFile      = fullfile(inDir, 'method');
-headerMethod    = parseBrukerFormat(methodFile);
+headerMethod    = compMRS_parseBrukerFormat(methodFile);
 
 % Populate the header information from the ACQUS file
 acqusFile       = fullfile(inDir, 'acqus');
 if isfile(acqusFile)
-    headerACQUS = parseBrukerFormat(acqusFile);
+    headerACQUS = compMRS_parseBrukerFormat(acqusFile);
 end
 
 % Populate the header information from the METHRECO file
 methRecoFile        = fullfile(inDir, 'pdata', '1', 'methreco');
 if isfile(methRecoFile)
-    headerMETHRECO  = parseBrukerFormat(methRecoFile);
+    headerMETHRECO  = compMRS_parseBrukerFormat(methRecoFile);
 end
 
 % Populate the header information from the RECO file
 recoFile        = fullfile(inDir, 'pdata', '1', 'reco');
 if isfile(recoFile)
-    headerRECO  = parseBrukerFormat(recoFile);
+    headerRECO  = compMRS_parseBrukerFormat(recoFile);
 end
 
 % Get a few important bits
@@ -327,17 +327,17 @@ end
 if strcmpi(rawData,'y')
     if contains(version, ["PV 6", "PV 7", "PV-7", "PV-360"])
         fileRaw     = fullfile(inDir, 'rawdata.job0');
-        fids_raw    = readBrukerRaw(fileRaw, 'int32');
+        fids_raw    = compMRS_readBrukerRaw(fileRaw, 'int32');
     elseif contains(version,'PV 5')
         fileRaw     = fullfile(inDir, 'fid.raw');
-        fids_raw    = readBrukerRaw(fileRaw, 'int');
+        fids_raw    = compMRS_readBrukerRaw(fileRaw, 'int');
     end
 
     averages=rawAverages;  %since these data are uncombined;
     out.flags.averaged=0; %make the flags structure
 
     %If there are multiple receivers *I think* that these always get stored
-    %separately by default in the fid.raw file.  Therefore, at this stage, 
+    %separately by default in the fid.raw file. Therefore, at this stage, 
     %if this is a PV360 dataset with multiple receivers, we need to reshape 
     %the dataset again:
     if ~contains(version,'PV 5') && multiRcvrs
@@ -386,11 +386,11 @@ elseif strcmpi(rawData,'n')
             else
                 % set a series flag
                 serFileFlag = 1;
-                fids_raw    = readBrukerRaw(fileRaw, 'int');
+                fids_raw    = compMRS_readBrukerRaw(fileRaw, 'int');
             end
         else
             serFileFlag = 0;
-            fids_raw    = readBrukerRaw(fileRaw, 'float64');
+            fids_raw    = compMRS_readBrukerRaw(fileRaw, 'float64');
         end
         
     else
@@ -398,7 +398,7 @@ elseif strcmpi(rawData,'n')
         % further corrected on the scanner
         fileRaw     = fullfile(inDir, 'fid');
         serFileFlag = 0;
-        fids_raw    = readBrukerRaw(fileRaw, 'int');
+        fids_raw    = compMRS_readBrukerRaw(fileRaw, 'int');
     end
 
     % Combined data have the averages combined, but the repetitions separate
@@ -414,8 +414,6 @@ elseif strcmpi(rawData,'n')
 
     % Remove singletons
     fids_raw = squeeze(fids_raw);
-
-
 
 else
     error('ERROR:  rawData variable not recognized.  Options are ''y'' or ''n''.');
@@ -568,13 +566,13 @@ if ~isRef || rawData == 'n'
     if isRef
     	if contains(version, ["PV 5"])
     		fileRef     = fullfile(inDir, 'fid.refscan');
-            fids_ref    = readBrukerRaw(fileRef, 'int'); % Note: never tested for PV5 as we don't have datasets available
+            fids_ref    = compMRS_readBrukerRaw(fileRef, 'int'); % Note: never tested for PV5 as we don't have datasets available
         elseif contains(version, ["PV 6", "PV 7", "PV-7", "PV-360.1", "PV-360.2"])
             fileRef     = fullfile(inDir, 'fid.refscan');
-            fids_ref    = readBrukerRaw(fileRef, 'int32');
+            fids_ref    = compMRS_readBrukerRaw(fileRef, 'int32');
         elseif contains(version,'PV-360.3')
             fileRef     = fullfile(inDir, 'pdata', '1', 'fid_refscan.64');
-            fids_ref    = readBrukerRaw(fileRef, 'float64');
+            fids_ref    = compMRS_readBrukerRaw(fileRef, 'float64');
         end
     	
     	% The reference scan stored will be already combined and averaged
@@ -636,7 +634,7 @@ if contains(version,'PV 5')
     if exist(fullfile(inDir, 'fid.ref'))
         isNav=true;
         fileNav     = fullfile(inDir, 'fid.ref');
-        fids_nav    = readBrukerRaw(fileNav, 'int');
+        fids_nav    = compMRS_readBrukerRaw(fileNav, 'int');
     end
     
     % From the PV5 manual: fid.ref: serially stored FID of each navigator
@@ -739,7 +737,7 @@ else
     disp('WARNING NAVIGATOR SCANS NOT FOUND.  RETURNING EMPTY NAV STRUCTURE.');
 end
 
-%FILLING IN DATA STRUCTURE FOR THE FID.RAW DATA
+%FILLING IN DATA STRUCTURE FOR THE RAW DATA
 out.fids=fids;
 out.specs=specs;
 out.sz=sz;
@@ -760,9 +758,10 @@ out.te=te;
 out.tr=tr;
 out.pointsToLeftshift=0;
 out.version=version;
+out.filepath=fileRaw;
 
 
-%FILLING IN THE FLAGS FOR THE FID.RAW DATA
+%FILLING IN THE FLAGS FOR THE RAW DATA
 out.flags.writtentostruct=1;
 out.flags.gotparams=1;
 out.flags.leftshifted=1;
@@ -786,9 +785,11 @@ else
     out.flags.isFourSteps=(out.sz(out.dims.subSpecs)==4);
 end
 
+out.flags.ref=isRef;
+out.flags.nav=isNav;
 
 if isRef
-    %FILLING IN DATA STRUCTURE FOR THE FID.REF DATA
+    %FILLING IN DATA STRUCTURE FOR THE REF DATA
     ref.fids=reffids;
     ref.specs=refspecs;
     ref.sz=sz_ref;
@@ -809,9 +810,17 @@ if isRef
     ref.tr=tr;
     ref.pointsToLeftshift=0;
     ref.version=version;
+    % DGR added file path to FID-A structure; 
+    % when no separate water scan is acquired (a reference scan)
+    % the Refscan stored either as an individual file or in the method 
+    % file will be used 
+    try
+    ref.filepath=fileRef;
+    catch
+    ref.filepath=fileRaw;
+    end
     
-    
-    %FILLING IN THE FLAGS FOR THE FID.REF DATA
+    %FILLING IN THE FLAGS FOR THE REF DATA
     ref.flags.writtentostruct=1;
     ref.flags.gotparams=1;
     ref.flags.leftshifted=1;
@@ -819,7 +828,6 @@ if isRef
     ref.flags.zeropadded=0;
     ref.flags.freqcorrected=0;
     ref.flags.phasecorrected=0;
-    
     
     if multiRcvrs && dims.coils
         ref.flags.addedrcvrs=0;
@@ -841,9 +849,8 @@ else
     ref = [];
 end
 
-
 if isNav
-    %FILLING IN DATA STRUCTURE FOR THE FID.REF DATA
+    %FILLING IN DATA STRUCTURE FOR THE NAV DATA
     nav.fids=navfids;
     nav.specs=specs_nav;
     nav.sz=sz_nav;
@@ -864,7 +871,6 @@ if isNav
     nav.tr=tr;
     nav.pointsToLeftshift=0;
     nav.version=version;
-    
     
     %FILLING IN THE FLAGS FOR THE NAV DATA
     nav.flags.writtentostruct=1;
@@ -927,27 +933,36 @@ else
     coilcombos.sig  = 1;
 end
 
+
+%FILLING IN DATA STRUCTURE FOR THE RAW DATA
+
+out.ref=ref;
+out.nav=nav;
+out.coilcombos=coilcombos;
+out.isECCed=isECCed;
+out.isRFLed=isRFLed;
 end
 
+% THE FUNCTION BELOW WAS COMMENTED OUT AS A SEPARATE FUNCTION FILE NAMED
+% 'compMRS_readBrukerRaw' IS USED INSTEAD
 
-
-function fids_raw = readBrukerRaw(fileRaw, formatRaw)
-% This subroutine reads the complex data from 'fileRaw' in the format 
-% 'formatRaw' and returns a complex time-domain FID array
-
-% Open and read
-data     = fopen(fileRaw);
-fid_data = fread(data, formatRaw);
-
-% Make complex
-real_fid = fid_data(1:2:length(fid_data));
-imag_fid = fid_data(2:2:length(fid_data));
-fids_raw = (real_fid+1i*imag_fid);
-
-% Close
-fclose(data);
-
-end
+% function fids_raw = compMRS_readBrukerRaw(fileRaw, formatRaw)
+% % This subroutine reads the complex data from 'fileRaw' in the format 
+% % 'formatRaw' and returns a complex time-domain FID array
+% 
+% % Open and read
+% data     = fopen(fileRaw);
+% fid_data = fread(data, formatRaw);
+% 
+% % Make complex
+% real_fid = fid_data(1:2:length(fid_data));
+% imag_fid = fid_data(2:2:length(fid_data));
+% fids_raw = (real_fid+1i*imag_fid);
+% 
+% % Close
+% fclose(data);
+% 
+% end
 
 function coilcombos_emp = getCoilCombos(in, mode)
 % This subroutine empirically calculates the coil combination coefficients
@@ -977,205 +992,207 @@ coilcombos_emp.sig=coilcombos_emp.sig/max(coilcombos_emp.sig);
 
 end
 
+% THE FUNCTION BELOW WAS COMMENTED OUT AS A SEPARATE FUNCTION FILE NAMED
+% 'compMRS_parseBrukerFormat' IS USED INSTEAD
 
-function header = parseBrukerFormat(inputFile)
-% This subroutine uses regular expressions and case differentiations to
-% extract all relevant information from a Bruker-formatted header file
-% (acqp, method, etc.)
-
-% Open file
-fid = fopen(inputFile);
-
-% Get first line
-tline = fgets(fid);
-
-% Loop over subsequent lines
-while ~feof(fid)
-
-    % First, get the parameters without a $
-    [tokens, matches] = regexp(tline,'##([\w\[\].]*)\s*=\s*([-\(\w\s.\"\\:\.,\)]*)','tokens','match');
-
-    % When a matching string is found, parse the results into a struct
-    if length(tokens) == 1
-
-        fieldname = regexprep(tokens{1}{1}, '\[|\]',''); % delete invalid characters
-
-        % Convert numbers to doubles, leave strings & empty lines alone
-        if ~isnan(str2double(tokens{1}{2}))
-            value = str2double(tokens{1}{2});
-        else
-            value = strtrim(tokens{1}{2});
-        end
-
-        % Convert char to string
-        if ischar(value)
-            value = string(value);
-        end
-
-        % Store
-        header.(fieldname) = value;
-
-        % Get next line
-        tline = fgets(fid);
-        continue
-
-    else
-
-        % If not a match, get the parameters with a $
-        [tokens, ~] = regexp(tline,'##\$([\w\[\].]*)\s*=\s*([-\(\w\s.\"\\:\.,\)]*)','tokens','match');
-
-
-        % When a matching string is found, parse the results into a struct
-        if length(tokens) == 1
-
-            fieldname = regexprep(tokens{1}{1}, '\[|\]',''); % delete invalid characters
-
-            % Determine if the value indexes an array (signaled by a number
-            % inside a double bracket, e.g. ##$PULPROG=( 32 )), or a single
-            % value (signaled by just a string, e.g. ##$ACQ_user_filter_mode=Special)
-            [tokensValue, ~] = regexp(tokens{1}{2},'\( (.*) \)','tokens','match');
-
-            % If there's a match, we need to parse the subsequent lines
-            % which contain the array
-            if length(tokensValue) == 1
-
-                % Arrays can span more than one line, unfortunately, so we
-                % need to do some clever pattern matching - basically, we
-                % want to extract lines until they lead with ## or $$
-                % again:
-                endOfBlock = 0;
-                multiLine  = '';
-                while endOfBlock ~=1
-
-                    % Get next line
-                    tline = fgets(fid);
-
-                    if contains(string(tline), ["$$", "##"])
-                        endOfBlock = 1;
-                    else
-                        multiLine = [multiLine, tline];
-                    end
-
-                end
-
-                % If the line is bracketed by <>, store that contents as
-                % one
-                contents = {};
-                [tokensBrackets, ~] = regexp(multiLine,'<(.*)>\n','tokens','match');
-                if length(tokensBrackets) == 1
-                    contents{1} = tokensBrackets{1}{1};
-
-                    % Convert numbers to doubles, leave strings & empty lines alone
-                    if ~isnan(str2double(contents{1}))
-                        value = str2double(contents{1});
-                    else
-                        value = strtrim(contents{1});
-                    end
-
-                    % Convert char to string
-                    if ischar(value)
-                        value = string(value);
-                    end
-
-                else
-                    % If not, it's an array.
-                    % Sometimes this array can even contain vectors, for example TPQQ
-                    % In this case, let's look for recurring parentheses
-                    % again:
-                    multiLine = erase(multiLine, newline); % remove new line characters
-
-
-                    % Sometimes recurring numbers in an array are
-                    % compressed: for example: @25*(1) is 25 ones in a row
-                    % Find all occurrences of the pattern @N*(X)
-                    pattern = '@(\d+)\*\((\d+)\)';
-                    tokRepet = regexp(multiLine, pattern, 'tokens');
-                
-                    % Replace each occurrence of @N*(X) with N copies of X
-                    for i = 1:length(tokRepet)
-                        N = str2double(tokRepet{i}{1});
-                        X = str2double(tokRepet{i}{2});
-                        replacement = repmat([num2str(X) ' '], 1, N);
-                        multiLine = regexprep(multiLine, ['@' tokRepet{i}{1} '\*\(' tokRepet{i}{2} '\)'], replacement, 'once');
-                    end
-
-
-
-                    [tokensParentheses, ~] = regexp(multiLine,'\(([^\)]+)\)','tokens','match');
-
-                    if ~isempty(tokensParentheses)
-                        for rr = 1:length(tokensParentheses)
-                            test = textscan(tokensParentheses{1,rr}{1}, '%s', 'Delimiter', ',');
-                            contents{rr} = test{1};
-                        end
-                    else
-                        % use textscan to convert space-delimited vectors to cell array
-                        test = textscan(multiLine, '%s');
-                        contents = test{1};
-                    end
-
-                    % Convert numbers to doubles, leave strings & empty lines alone
-                    if ~isnan(str2double(contents))
-                        value = str2double(contents);
-                    else
-                        value = strtrim(contents);
-                    end
-                    
-                    % Convert char to string
-                    if ischar(value)
-                        value = string(value);
-                    end
-
-                    if iscell(value) && length(value) == 1
-                        value = value{1};
-                    end
-
-                end
-
-                % Store
-                header.(fieldname) = value;
-
-                continue
-
-            else
-
-                % Convert numbers to doubles, leave strings & empty lines alone
-                if ~isnan(str2double(tokens{1}{2}))
-                    value = str2double(tokens{1}{2});
-                else
-                    value = strtrim(tokens{1}{2});
-                end
-
-                % Convert char to string
-                if ischar(value)
-                    value = string(value);
-                end
-
-                if iscell(value) && length(value) == 1
-                    value = value{1};
-                end
-
-                % Store
-                header.(fieldname) = value;
-
-            end
-
-            % Get next line
-            tline = fgets(fid);
-            continue
-
-        else
-
-            % Get next line
-            tline = fgets(fid);
-            continue
-
-        end
-
-    end
-
-end
-
-fclose(fid);
-
-end
+% function header = parseBrukerFormat(inputFile)
+% % This subroutine uses regular expressions and case differentiations to
+% % extract all relevant information from a Bruker-formatted header file
+% % (acqp, method, etc.)
+% 
+% % Open file
+% fid = fopen(inputFile);
+% 
+% % Get first line
+% tline = fgets(fid);
+% 
+% % Loop over subsequent lines
+% while ~feof(fid)
+% 
+%     % First, get the parameters without a $
+%     [tokens, matches] = regexp(tline,'##([\w\[\].]*)\s*=\s*([-\(\w\s.\"\\:\.,\)]*)','tokens','match');
+% 
+%     % When a matching string is found, parse the results into a struct
+%     if length(tokens) == 1
+% 
+%         fieldname = regexprep(tokens{1}{1}, '\[|\]',''); % delete invalid characters
+% 
+%         % Convert numbers to doubles, leave strings & empty lines alone
+%         if ~isnan(str2double(tokens{1}{2}))
+%             value = str2double(tokens{1}{2});
+%         else
+%             value = strtrim(tokens{1}{2});
+%         end
+% 
+%         % Convert char to string
+%         if ischar(value)
+%             value = string(value);
+%         end
+% 
+%         % Store
+%         header.(fieldname) = value;
+% 
+%         % Get next line
+%         tline = fgets(fid);
+%         continue
+% 
+%     else
+% 
+%         % If not a match, get the parameters with a $
+%         [tokens, ~] = regexp(tline,'##\$([\w\[\].]*)\s*=\s*([-\(\w\s.\"\\:\.,\)]*)','tokens','match');
+% 
+% 
+%         % When a matching string is found, parse the results into a struct
+%         if length(tokens) == 1
+% 
+%             fieldname = regexprep(tokens{1}{1}, '\[|\]',''); % delete invalid characters
+% 
+%             % Determine if the value indexes an array (signaled by a number
+%             % inside a double bracket, e.g. ##$PULPROG=( 32 )), or a single
+%             % value (signaled by just a string, e.g. ##$ACQ_user_filter_mode=Special)
+%             [tokensValue, ~] = regexp(tokens{1}{2},'\( (.*) \)','tokens','match');
+% 
+%             % If there's a match, we need to parse the subsequent lines
+%             % which contain the array
+%             if length(tokensValue) == 1
+% 
+%                 % Arrays can span more than one line, unfortunately, so we
+%                 % need to do some clever pattern matching - basically, we
+%                 % want to extract lines until they lead with ## or $$
+%                 % again:
+%                 endOfBlock = 0;
+%                 multiLine  = '';
+%                 while endOfBlock ~=1
+% 
+%                     % Get next line
+%                     tline = fgets(fid);
+% 
+%                     if contains(string(tline), ["$$", "##"])
+%                         endOfBlock = 1;
+%                     else
+%                         multiLine = [multiLine, tline];
+%                     end
+% 
+%                 end
+% 
+%                 % If the line is bracketed by <>, store that contents as
+%                 % one
+%                 contents = {};
+%                 [tokensBrackets, ~] = regexp(multiLine,'<(.*)>\n','tokens','match');
+%                 if length(tokensBrackets) == 1
+%                     contents{1} = tokensBrackets{1}{1};
+% 
+%                     % Convert numbers to doubles, leave strings & empty lines alone
+%                     if ~isnan(str2double(contents{1}))
+%                         value = str2double(contents{1});
+%                     else
+%                         value = strtrim(contents{1});
+%                     end
+% 
+%                     % Convert char to string
+%                     if ischar(value)
+%                         value = string(value);
+%                     end
+% 
+%                 else
+%                     % If not, it's an array.
+%                     % Sometimes this array can even contain vectors, for example TPQQ
+%                     % In this case, let's look for recurring parentheses
+%                     % again:
+%                     multiLine = erase(multiLine, newline); % remove new line characters
+% 
+% 
+%                     % Sometimes recurring numbers in an array are
+%                     % compressed: for example: @25*(1) is 25 ones in a row
+%                     % Find all occurrences of the pattern @N*(X)
+%                     pattern = '@(\d+)\*\((\d+)\)';
+%                     tokRepet = regexp(multiLine, pattern, 'tokens');
+% 
+%                     % Replace each occurrence of @N*(X) with N copies of X
+%                     for i = 1:length(tokRepet)
+%                         N = str2double(tokRepet{i}{1});
+%                         X = str2double(tokRepet{i}{2});
+%                         replacement = repmat([num2str(X) ' '], 1, N);
+%                         multiLine = regexprep(multiLine, ['@' tokRepet{i}{1} '\*\(' tokRepet{i}{2} '\)'], replacement, 'once');
+%                     end
+% 
+% 
+% 
+%                     [tokensParentheses, ~] = regexp(multiLine,'\(([^\)]+)\)','tokens','match');
+% 
+%                     if ~isempty(tokensParentheses)
+%                         for rr = 1:length(tokensParentheses)
+%                             test = textscan(tokensParentheses{1,rr}{1}, '%s', 'Delimiter', ',');
+%                             contents{rr} = test{1};
+%                         end
+%                     else
+%                         % use textscan to convert space-delimited vectors to cell array
+%                         test = textscan(multiLine, '%s');
+%                         contents = test{1};
+%                     end
+% 
+%                     % Convert numbers to doubles, leave strings & empty lines alone
+%                     if ~isnan(str2double(contents))
+%                         value = str2double(contents);
+%                     else
+%                         value = strtrim(contents);
+%                     end
+% 
+%                     % Convert char to string
+%                     if ischar(value)
+%                         value = string(value);
+%                     end
+% 
+%                     if iscell(value) && length(value) == 1
+%                         value = value{1};
+%                     end
+% 
+%                 end
+% 
+%                 % Store
+%                 header.(fieldname) = value;
+% 
+%                 continue
+% 
+%             else
+% 
+%                 % Convert numbers to doubles, leave strings & empty lines alone
+%                 if ~isnan(str2double(tokens{1}{2}))
+%                     value = str2double(tokens{1}{2});
+%                 else
+%                     value = strtrim(tokens{1}{2});
+%                 end
+% 
+%                 % Convert char to string
+%                 if ischar(value)
+%                     value = string(value);
+%                 end
+% 
+%                 if iscell(value) && length(value) == 1
+%                     value = value{1};
+%                 end
+% 
+%                 % Store
+%                 header.(fieldname) = value;
+% 
+%             end
+% 
+%             % Get next line
+%             tline = fgets(fid);
+%             continue
+% 
+%         else
+% 
+%             % Get next line
+%             tline = fgets(fid);
+%             continue
+% 
+%         end
+% 
+%     end
+% 
+% end
+% 
+% fclose(fid);
+% 
+% end
