@@ -18,6 +18,8 @@
 
 
 function out = compMRS_DPoverview(allDPs_parentfolder)
+clc
+close all
 
 % initialize storage
 DPoverview = {};
@@ -69,10 +71,8 @@ for k = 1:numel(DPidPath)
                     acq_NAvg = '';
                     acq_voxel_size = '';
                     acq_voxel_volume = '';
-                    acq_w_svs_fidref = '';
-                    acq_w_svs_fidrefscan = '';
-                    acq_w_mrsref = '';
-                    acq_w_svs_fidrefscanmethod = '';
+                    acq_w = '';
+                    acq_files = '';
 
                     % for every mrs scan, get acquisition information and
                     % metabolite and unsuppressed water folders
@@ -91,7 +91,7 @@ for k = 1:numel(DPidPath)
                         % Bruker dataset
                         acq_vendor = 'Bruker';
 
-                        % Get header info
+                        %% Get header info
                         try
                             headerMethod = compMRS_parseBrukerFormat(methodPath);
                             headerAcqp = compMRS_parseBrukerFormat(acqpPath);
@@ -99,31 +99,44 @@ for k = 1:numel(DPidPath)
                             disp('method or acqp not found')
                         end
 
-                        % Identify water scans
-                        if exist(fullfile(allDPs_parentfolder,DP,subj,ses, scan, acq,'fid.ref'),'file') > 0
-                            acq_w_svs_fidref = 'y';
-                        end
-                        if exist(fullfile(allDPs_parentfolder,DP,subj,ses, scan, acq,'fid.refscan'),'file') > 0
-                            acq_w_svs_fidrefscan = 'y';
-                        end
-
+                        %% Get  folder contents
                         try
-                        mrsref_dir = dir([allDPs_parentfolder filesep DP filesep subj filesep ses filesep 'mrs' filesep '*mrsref']);
-                        if (exist([mrsref_dir(length(mrsref_dir)).name filesep 'fid']) > 0 ) || (exist([mrsref_dir(length(mrsref_dir)).name filesep 'rawdata.job0']) > 0 )
-                            acq_w_mrsref = 'y';
-                        end
+                            acq_path=dir(fullfile(allDPs_parentfolder,DP,subj,ses, scan, acq));
+                            if acq_path(1).name == '.'
+                                fileName={acq_path(2:end).name}';
+                            end
+                            if acq_path(1).name == '..'
+                                fileName={acq_path(3:end).name}';
+                            end
+                            fileexclusion=cellfun(@findstr,fileName,repmat({'._'},length(fileName),1),'UniformOutput',false);
+                            fileretention=fileName(cellfun(@isempty,fileexclusion));
+                            filelist=[fileretention,[repmat({', '},numel(fileretention)-1,1);{[]}]]';
+                            filesall=[filelist{:}];
+                            acq_files = filesall;
                         catch me
-                           acq_w_mrsref = 'doesn''t exist';
+                            acq_files = 'error';
                         end
 
+                        %% Get  water scans
                         try
-                            if exist(headerMethod.PVM_RefScan,'var')
-                            acq_svs_fidrefscanmethod = 'y';
+                            mrsref_dir = dir([allDPs_parentfolder filesep DP filesep subj filesep ses filesep 'mrs' filesep '*mrsref']);
+                            if isempty(char(mrsref_dir.name))
+                                if (exist([allDPs_parentfolder filesep DP filesep subj filesep ses filesep 'mrs' filesep 'wat'],'dir'))
+                                    mrsref_dir = dir([allDPs_parentfolder filesep DP filesep subj filesep ses filesep 'mrs' filesep 'wat']); % for DP22
+                                end
+                            elseif (exist([mrsref_dir(length(mrsref_dir)).folder filesep mrsref_dir(length(mrsref_dir)).name filesep 'fid']) > 0 ) || (exist([mrsref_dir(length(mrsref_dir)).folder filesep mrsref_dir(length(mrsref_dir)).name filesep 'rawdata.job0']) > 0 )
+                                acq_w = 'separate';
+                            end
+                            if ismember('PVM_RefScan', fieldnames(headerMethod))
+                                if isempty(acq_w)
+                                    acq_w = 'auto';
+                                else
+                                    acq_w = 'separate and auto';
+                                end
                             end
                         catch me
-                           acq_svs_fidrefscanmethod = 'doesn''t exist';
+                            acq_w = 'water data not found';
                         end
-
 
                         %% Get field strength
                         if ~isempty(headerAcqp.SFO1)
@@ -134,29 +147,6 @@ for k = 1:numel(DPidPath)
                         else
                             acq_B0 = 'reference frequency not found';
                         end
-                        % Obsolete
-                        % methodString = fileread(methodPath);
-                        % if contains(methodString,'##$PVM_FrqRef=')
-                        %     startIdx = strfind(methodString, '##$PVM_FrqRef=');
-                        %     endIdx = strfind(methodString, '##$PVM_FrqWorkOffset=');
-                        %     ref_freq = methodString(startIdx:endIdx(1));
-                        %     ref_freq = str2double(extractBefore(extractBetween(ref_freq, '##$PVM_FrqRef=( 8 )',' 0 0 0 0 0 0 0'),'.'));
-                        %     acq_B0 = str2num(char(string(round(ref_freq / 42.577,1))));
-                        % else
-                        %     % For DP1, DP3, DP36 which use PV5 that doesnt
-                        %     % store the reference frequency in the method
-                        %     % file
-                        %     acqpString = fileread(fullfile(allDPs_parentfolder,DP,subj,ses, scan, acq,'acqp'));
-                        %     if contains(acqpString,'##$SFO1=')
-                        %         startIdx = strfind(acqpString, '##$SFO1=');
-                        %         endIdx = strfind(acqpString, '##$O1');
-                        %         ref_freq = acqpString(startIdx:endIdx(1));
-                        %         ref_freq = str2double(extractBetween(ref_freq, '=','.'));
-                        %         acq_B0 = str2num(char(string(round(ref_freq / 42.577,1))));
-                        %     else
-                        %         acq_B0 = 'reference frequency not found';
-                        %     end
-                        % end
 
                         %% Get PV version
                         if ~isempty(headerAcqp.ACQ_sw_version)
@@ -164,22 +154,6 @@ for k = 1:numel(DPidPath)
                         else
                             acq_SWversion = 'PV version not found';
                         end
-                        % Obsolete
-                        % methodString = fileread(methodPath);
-                        % if contains(methodString,'$$ /opt/PV')
-                        %     startIdx = strfind(methodString, '$$ /opt/PV');
-                        %     endIdx = strfind(methodString, '/data/');
-                        %     acq_PVversion = methodString(startIdx:endIdx(1));
-                        %     acq_PVversion = extractAfter(acq_PVversion, '/opt/');
-                        %     acq_PVversion = acq_PVversion(1:end-1);
-                        % elseif contains(methodString,'$$ process /opt/')
-                        %     startIdx = strfind(methodString, '$$ process /opt/');
-                        %     endIdx = strfind(methodString, '##$Method=');
-                        %     acq_PVversion = methodString(startIdx:endIdx);
-                        %     acq_PVversion = char(extractBetween(acq_PVversion, '/opt/', '/prog/'));
-                        % else
-                        %     acq_PVversion = 'PV version not found';
-                        % end
 
                         %% Get pulse sequence name
                         if ~isempty(headerMethod.Method)
@@ -187,19 +161,6 @@ for k = 1:numel(DPidPath)
                         else
                             acq_seq = 'sequence not found';
                         end
-                        % Obsolete
-                        % methodString = fileread(methodPath);
-                        % if contains(methodString,'##$Method=')
-                        %     startIdx = strfind(methodString, '##$Method=');
-                        %     endIdx = strfind(methodString, '##$PVM');
-                        %     acq_seq = methodString(startIdx:endIdx(1)-2);
-                        %     acq_seq = extractAfter(acq_seq,'##$Method=');
-                        %     if contains (acq_seq,'<')
-                        %         acq_seq = extractBetween(acq_seq,'<Bruker:','>');
-                        %     end
-                        % else
-                        %     acq_seq = 'sequence not found';
-                        % end
 
                         %% Get voxel location (as per folder naming) for
                         % both svs and mrsref
@@ -226,16 +187,6 @@ for k = 1:numel(DPidPath)
                             else
                                 acq_TE = 'TE not found';
                             end
-                            % Obsolete
-                            % methodString = fileread(methodPath);
-                            % if contains(methodString,'##$PVM_EchoTime=')
-                            %     startIdx = strfind(methodString, '##$PVM_EchoTime=');
-                            %     endIdx = strfind(methodString, '##$PVM_RepetitionTime=');
-                            %     acq_TE = methodString(startIdx:endIdx(1));
-                            %     acq_TE = round(str2num(char(string(extractBetween(acq_TE,'##$PVM_EchoTime=', '#')))),2);
-                            % else
-                            %     acq_TE = 'TE not found';
-                            % end
 
                             %% Get TR
                             if ~isempty(headerMethod.PVM_RepetitionTime)
@@ -243,16 +194,6 @@ for k = 1:numel(DPidPath)
                             else
                                 acq_TR = 'TR not found';
                             end
-                            % Obsolete
-                            % methodString = fileread(methodPath);
-                            % if contains(methodString,'##$PVM_RepetitionTime=')
-                            %     startIdx = strfind(methodString, '##$PVM_RepetitionTime=');
-                            %     endIdx = strfind(methodString, '##$PVM_NAverages=');
-                            %     acq_TR = methodString(startIdx:endIdx(1));
-                            %     acq_TR = char(string(extractBetween(acq_TR,'##$PVM_RepetitionTime=','#')));
-                            % else
-                            %     acq_TR = 'TR not found';
-                            % end
 
                             %% Get number of averages
                             try
@@ -264,22 +205,6 @@ for k = 1:numel(DPidPath)
                             catch me
                                 acq_NAvg = headerMethod.PVM_NAverages;
                             end
-                            % Obsolete
-                            % methodString = fileread(methodPath);
-                            % if contains(methodString,'##$PVM_NAverages=')
-                            %     startIdx = strfind(methodString, '##$PVM_NAverages=');
-                            %     endIdx = strfind(methodString, '##$PVM_ScanTime'); % ##$PVM_ScanTime takes care of DP08>sub-01>ses-01>mrs>svs which has fieldmap info saved in the method file
-                            %     if sum(endIdx) == 0
-                            %         endIdx = strfind(methodString, '##$AverageList=');
-                            %     end
-                            %     acq_NAvg = methodString(startIdx:endIdx(1));
-                            %     acq_NAvg = char(string(extractBetween(acq_NAvg,'##$PVM_NAverages=','#')));
-                            %     if contains(['DP14', 'DP20', 'DP24'],DP) % handle DP14, DP20, DP24 differently
-                            %         acq_NAvg = char(string(extractBefore(acq_NAvg,'$$ @vis=')));
-                            %     end
-                            % else
-                            %     acq_NAvg = 'averages number not found';
-                            % end
 
                             %% Get voxel size and volume
                             methodString = fileread(methodPath);
@@ -299,18 +224,18 @@ for k = 1:numel(DPidPath)
                             acq_voxel_volume = round(str2num(extractBefore(acq_voxel_size_temp,' ')) * str2num(char(string(extractBetween(acq_voxel_size_temp,' ',' ')))) * str2num(extractAfter(extractAfter(acq_voxel_size_temp,' '),' ')),1);
 
 
-
                             %% Update spreadsheet info
                             DPoverview = [DPoverview; {
-                                DP,subj, ses, scan, acq,...
+                                DP,subj, ses, scan, acq, acq_files ...
                                 acq_vendor, acq_B0, acq_SWversion, acq_voxel, ...
                                 acq_dataformat, acq_seq, acq_TE, acq_TR, acq_NAvg, acq_voxel_size, acq_voxel_volume, ...
-                                acq_w_svs_fidref, acq_w_svs_fidrefscan, acq_w_mrsref, acq_w_svs_fidrefscanmethod;}];
+                                acq_w}];
 
                         end
                     else
                         %%------------------------------------------------------------------------------------------------------------------------
                         % Varian dataset
+                        %% Get header info
                         try
                             procparPath = fullfile(allDPs_parentfolder,DP,subj,ses, scan, acq, 'procpar');
                             headerProcpar=readprocpar(procparPath);
@@ -318,70 +243,99 @@ for k = 1:numel(DPidPath)
                             disp ('no procpar file')
                         end
 
-                        acq_w_svs_fidref = '';
-                        acq_w_svs_fidrefscan = '';
-                        acq_w_mrsref = '';
-                        acq_w_svs_fidrefscanmethod = '';
-
-                        % Varian
-                        if exist(procparPath, 'file')
-                            disp(procparPath)
-                            acq_vendor = 'Varian';
-
-                            %% Get field strength
-                            acq_B0_temp=sprintf('%.2f',(headerProcpar.sfrq/42.577)); % or check round(headerProcpar.B0)
-                            acq_B0 = acq_B0_temp(1:end-1);
-
-                            %% Get PV version
-                            acq_SWversion = '';
-
-                            %% Get pulse sequence name
-                            acq_seq = headerProcpar.seqfil;
-
-                            %% Get voxel location (as per folder naming) for
-                            % both svs and mrsref
-                            if isequal(SCANid(kkkk).name, 'mrs')
-                                if contains(lower(methodPath), 'hipp')
-                                    acq_voxel = 'hippocampus';
-                                elseif contains(lower(methodPath), 'str')
-                                    acq_voxel = 'striatum';
+                        if exist('headerProcpar')
+                            %% Get  folder contents
+                            try
+                                acq_path=dir(fullfile(allDPs_parentfolder,DP,subj,ses, scan, acq));
+                                if acq_path(1).name == '.'
+                                    fileName={acq_path(2:end).name}';
                                 end
-
-                                %% Get data format (rawdata.job0 or fid)
-                                fidPath = fullfile(acqPath, 'fid');
-                                if exist(fidPath, 'file')
-                                    acq_dataformat = 'fid';
-                                else
-                                    acq_dataformat = 'not found';
+                                if acq_path(1).name == '..'
+                                    fileName={acq_path(3:end).name}';
                                 end
-
-                                %% Get TE
-                                acq_TE = headerProcpar.te*1000;
-
-                                %% Get TR
-                                acq_TR = headerProcpar.tr*1000;
-
-                                %% Get number of averages
-                                acq_NAvg = sum(headerProcpar.nt); % TO CONFIRM
-
-                                %% Get voxel size and volume
-                                if ~isempty(headerProcpar.vox1) && ~isempty(headerProcpar.vox2) && ~isempty(headerProcpar.vox3)
-                                    acq_voxel_size = [headerProcpar.vox1 ' x ' headerProcpar.vox2 ' x ' headerProcpar.vox3];
-                                else
-                                    acq_voxel_size = 'voxel size not found';
-                                end
-                                acq_voxel_volume = headerProcpar.vox1*headerProcpar.vox2*headerProcpar.vox3;
-
+                                fileexclusion=cellfun(@findstr,fileName,repmat({'._'},length(fileName),1),'UniformOutput',false);
+                                fileretention=fileName(cellfun(@isempty,fileexclusion));
+                                filelist=[fileretention,[repmat({', '},numel(fileretention)-1,1);{[]}]]';
+                                filesall=[filelist{:}];
+                                acq_files = filesall;
+                            catch me
+                                acq_files = 'error';
                             end
 
-                            % Update spreadsheet info
-                            DPoverview = [DPoverview; {
-                                DP,subj, ses, scan, acq,...
-                                acq_vendor, acq_B0, acq_SWversion, acq_voxel, ...
-                                acq_dataformat, acq_seq, acq_TE, acq_TR, acq_NAvg, acq_voxel_size, acq_voxel_volume ...
-                                acq_w_svs_fidref, acq_w_svs_fidrefscan, acq_w_mrsref, acq_w_svs_fidrefscanmethod;}];
-                        end
+                            %% Get  water scans
+                            try
+                                acq_w = '';
+                                mrsref_dir = dir([allDPs_parentfolder filesep DP filesep subj filesep ses filesep 'mrs' filesep '*mrsref']);
+                                if (exist([mrsref_dir(length(mrsref_dir)).folder filesep mrsref_dir(length(mrsref_dir)).name filesep 'fid']) > 0 ) || (exist([mrsref_dir(length(mrsref_dir)).folder filesep mrsref_dir(length(mrsref_dir)).name filesep 'rawdata.job0']) > 0 )
+                                    acq_w = 'separate';
+                                end
+                            catch me
+                                acq_w = 'error'
+                            end
 
+                            % Varian
+                            if exist(procparPath, 'file')
+                                disp(procparPath)
+                                acq_vendor = 'Varian';
+
+                                %% Get field strength
+                                acq_B0_temp=sprintf('%.2f',(headerProcpar.sfrq/42.577)); % or check round(headerProcpar.B0)
+                                acq_B0 = acq_B0_temp(1:end-1);
+
+                                %% Get PV version
+                                acq_SWversion = '';
+
+                                %% Get pulse sequence name
+                                acq_seq = headerProcpar.seqfil;
+
+                                %% Get voxel location (as per folder naming) for
+                                % both svs and mrsref
+                                if isequal(SCANid(kkkk).name, 'mrs')
+                                    if contains(lower(methodPath), 'hipp')
+                                        acq_voxel = 'hippocampus';
+                                    elseif contains(lower(methodPath), 'str')
+                                        acq_voxel = 'striatum';
+                                    end
+
+                                    %% Get data format (rawdata.job0 or fid)
+                                    fidPath = fullfile(acqPath, 'fid');
+                                    if exist(fidPath, 'file')
+                                        acq_dataformat = 'fid';
+                                    else
+                                        acq_dataformat = 'not found';
+                                    end
+
+                                    %% Get TE
+                                    acq_TE = headerProcpar.te*1000;
+
+                                    %% Get TR
+                                    acq_TR = headerProcpar.tr*1000;
+
+                                    %% Get number of averages
+                                    acq_NAvg = sum(headerProcpar.nt); % TO CONFIRM
+
+                                    %% Get voxel size and volume
+                                    try
+                                        if (~isempty(str2double(headerProcpar.vox1))) && (~isempty(str2double(headerProcpar.vox2))) && (~isempty(str2double(headerProcpar.vox3)))
+                                            acq_voxel_size = [char(string(headerProcpar.vox1)) ' x ' char(string(headerProcpar.vox2)) ' x ' char(string(headerProcpar.vox3))];
+                                        else
+                                            acq_voxel_size = 'voxel size not found';
+                                        end
+                                        acq_voxel_volume = headerProcpar.vox1*headerProcpar.vox2*headerProcpar.vox3;
+                                    catch me
+                                        acq_voxel_size = 'voxel size not found';
+                                    end
+                                else
+                                    disp('no procpar')
+                                end
+                            end
+                        end
+                        % Update spreadsheet info
+                        DPoverview = [DPoverview; {
+                            DP,subj, ses, scan, acq, acq_files ...
+                            acq_vendor, acq_B0, acq_SWversion, acq_voxel, ...
+                            acq_dataformat, acq_seq, acq_TE, acq_TR, acq_NAvg, acq_voxel_size, acq_voxel_volume ...
+                            acq_w}];
                     end
                 end
             end
@@ -390,10 +344,10 @@ for k = 1:numel(DPidPath)
 
     % Create spreadsheet
     excelFile = cell2table(DPoverview, 'VariableNames', { ...
-        'DP','subj','ses', 'acq', 'scan', 'vendor', 'B0', 'PV version', 'region', 'data format', ...
+        'DP','subj','ses', 'acq', 'scan', 'fles', 'vendor', 'B0', 'SW version', 'region', 'data format', ...
         'sequence', 'TE', 'TR', 'nr. averages', 'voxel size', 'voxel volume'...
-        'water-svs-fidref', 'water-svs-fidrefscan', 'water-mrsref', 'water-svs-fidrefscanmethod'});
-    excelFileName = fullfile('A:\CoMP-MRS\sourcecode\code', 'DPoverview.xlsx');
+        'water'});
+    excelFileName = fullfile([allDPs_parentfolder filesep], 'DPoverview.xlsx');
     writetable(excelFile, excelFileName, 'FileType', 'spreadsheet');
 
     out = excelFile;
