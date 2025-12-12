@@ -44,7 +44,15 @@ inph=unwrap(angle(inw.fids));
 out=in;
 out.phase_ecc = inph;
 if in.te == inw.te
-    out.fids=out.fids.*exp(1i*-inph);
+    % Modification for the case the data is not averaged Thanh 20251120
+    if length(size(out.fids))>2
+        tmpinph = repmat(inph, [1 1 size(in.fids, 2)]);
+        tmpinph = permute(tmpinph, [1 3 2]);
+        out.fids=out.fids.*exp(1i*-tmpinph);
+    else
+        out.fids=out.fids.*exp(1i*-inph);
+    end
+
     out.specs=fftshift(ifft(out.fids,[],1),1);
 end
 
