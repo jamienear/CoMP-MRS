@@ -320,19 +320,43 @@ if (show_model_diagnostics) {
     names(random_effects),
     function(model_name) {
       model <- LMEM_MODELS[[model_name]]
+      perf  <- performance::model_performance(model)
+      
+      # safely extract conditional R2 as a single numeric value
+      r2c <- tryCatch(
+        {
+          val <- perf$r2_conditional
+          if (length(val) == 0 || is.null(val)) NA_real_ else as.numeric(val[[1]])
+        },
+        error = function(e) NA_real_
+      )
+      
       diagnostics <- list(
         random_effects      = ranef(model, condVar = TRUE),
         random_effects.plot = dotplot(ranef(model, condVar = TRUE), scales = "free"),
-        model_performance   = model_performance(model),
+        model_performance   = perf,
+        r2_conditional      = r2c,
         check_model         = check_model(model),
         check_singularity   = check_singularity(model)
       )
+      
       return(diagnostics)
     }
   )
   
   names(LMEM_MODELS.diagnostics) <- names(random_effects)
   
+  # extract conditional R2 for all models
+  LMEM_r2_conditional_df <- tibble::tibble(
+    model = names(LMEM_MODELS.diagnostics),
+    r2_conditional = vapply(
+      LMEM_MODELS.diagnostics,
+      function(x) x$r2_conditional,
+      numeric(1)
+    )
+  )
+  
+  print(LMEM_r2_conditional_df)
 }
 
 ### Variance partitioning -----------------------------------------------------
@@ -373,7 +397,7 @@ if (run_LRTs || run_pbkrtest) {
 
 ### Export LMEM model comparison table to Word --------------------------------
 
-source(file.path(base_dir, "scripts", "ExportModelTable_old.R"))
+#source(file.path(base_dir, "scripts", "ExportModelTable_old.R"))
 source(file.path(base_dir, "scripts", "ExportModelTable.R"))
 
 if (export_model_table) {
@@ -383,6 +407,14 @@ if (export_model_table) {
   #   vpcs = if (calc_VPCs) VPCs else NULL,
   #   out_dir = deriv_dir
   # )
+  
+  if (export_model_table) {
+    MODEL_TABLE <- ExportModelTable(
+      models = LMEM_MODELS,
+      vpcs = if (calc_VPCs) VPCs else NULL,
+      out_dir = deriv_dir
+    )
+  }
   
   MODEL_TABLE <- ExportModelTable(
     # models = c(list(M.null = M.null), LMEM_MODELS),

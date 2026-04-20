@@ -159,11 +159,12 @@ PlotBoxPlots <- function(data, out_dir, y_vars, x_vars) {
   standardize_plot_for_panel <- function(p) {
     p +
       theme(
-        plot.title = element_text(size = 8, face = "bold", hjust = 0.5),
+        plot.title = element_text(size = 10, face = "bold", hjust = 0.5),
         plot.margin = margin(3, 3, 3, 3),
         axis.title = element_text(size = 8),
         axis.text = element_text(size = 7),
-        axis.text.x = element_text(size = 6),
+        axis.text.x = element_text(size = 8, face = "bold"),
+        axis.text.y = element_text(size = 8, face = "bold"),
         legend.position = "none",
         panel.background = element_rect(fill = "transparent", color = NA),
         plot.background  = element_rect(fill = "transparent", color = NA),
