@@ -78,7 +78,7 @@ PlotDotPlots <- function(data, data_orig, out_dir) {
     y_label = "Normalized SNR/LW ratio before outlier removal",
     group_var = "DP",
     out_dir = out_dir,
-    file_name = "dotplot_SNR_LW_Ratio_norm_by_Subj_orig.pdf"
+    file_name = "dotplot_SNR_LW_Ratio_norm_by_Subj_orig.png"
   )
   
   dotplot <- make_dot_plot(
@@ -88,7 +88,7 @@ PlotDotPlots <- function(data, data_orig, out_dir) {
     y_label = "Normalized SNR/LW ratio after outlier removal",
     group_var = "DP",
     out_dir = out_dir,
-    file_name = "dotplot_SNR_LW_Ratio_norm_by_Subj.pdf"
+    file_name = "dotplot_SNR_LW_Ratio_norm_by_Subj.png"
   )
   
 }

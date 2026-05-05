@@ -1,5 +1,10 @@
 # Set in-line functions here to avoid cluttering the main analysis script
 
+cv <- function(x, na.rm = FALSE) {
+  sd(x, na.rm = na.rm) / mean(x, na.rm = na.rm)
+}
+
+
 # Common theme for plots ------------------------------------------------------
 
 theme_comp <- function() {
