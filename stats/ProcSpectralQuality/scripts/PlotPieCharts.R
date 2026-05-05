@@ -59,7 +59,7 @@ PlotPieCharts <- function(data, out_dir, plots_dir, show_pie_charts = TRUE, show
     }
     
     if (is.null(plot_title)) plot_title <- paste(var, "distribution")
-    if (is.null(file_name)) file_name <- paste0(var, "_piechart.pdf")
+    if (is.null(file_name)) file_name <- paste0(var, "_piechart.png")
     
     fill_vals <- rep(pie_palette, length.out = nrow(plot_data))
     
@@ -149,7 +149,7 @@ PlotPieCharts <- function(data, out_dir, plots_dir, show_pie_charts = TRUE, show
         data = data,
         var = x$var,
         plot_title = x$title,
-        file_name = paste0(x$var, "_piechart.pdf"),
+        file_name = paste0(x$var, "_piechart.png"),
         output_dir = out_dir
       )
     })
@@ -160,7 +160,7 @@ PlotPieCharts <- function(data, out_dir, plots_dir, show_pie_charts = TRUE, show
     
     combined_pies <- patchwork::wrap_plots(pie_plots, ncol = 3)
     ggsave(
-      filename = file.path(plots_dir, "all_piecharts_combined.pdf"),
+      filename = file.path(plots_dir, "all_piecharts_combined.png"),
       plot = combined_pies,
       width = 16,
       height = 18,
