@@ -63,8 +63,8 @@ source(file.path(base_dir, "scripts", "PlotFacetBoxPlots.R"))
 # Analysis options ------------------------------------------------------------
 
 save_csv               <- FALSE # Set to TRUE to save descriptive statistics tables as CSV files in the derivatives directory
-show_pie_charts        <- FALSE # Set to TRUE to create pie charts of categorical variables (e.g., species
-show_amcharts          <- FALSE # Set to TRUE to create interactive 3D pie charts using amCharts4
+show_pie_charts        <- TRUE # Set to TRUE to create pie charts of categorical variables (e.g., species
+show_amcharts          <- TRUE # Set to TRUE to create interactive 3D pie charts using amCharts4
 show_dot_plots         <- TRUE # Set to TRUE to create dot plots of spectral quality metrics by different grouping variables
 show_box_plots         <- TRUE # Set to TRUE to create box plots of spectral quality metrics by different grouping variables
 show_facet_plots       <- TRUE # Set to TRUE to create facet plots of spectral quality metrics by different grouping variables

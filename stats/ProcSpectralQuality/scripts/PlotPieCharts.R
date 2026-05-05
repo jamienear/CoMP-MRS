@@ -132,15 +132,17 @@ PlotPieCharts <- function(data, out_dir, plots_dir, show_pie_charts = TRUE, show
   
   pie_specs <- list(
     list(var = "SiteID",         title = "Site (#DPs)"),
-    list(var = "AnimalSpecies",  title = "Species (#DPs)"),
-    list(var = "AnimalStrain",   title = "Animal strain (#DPs)"),
-    list(var = "AnimalSex",      title = "Sex (#animals)"),
-    list(var = "MRvendor",       title = "Vendor (#DPs)"),
-    list(var = "MRfield",        title = "Field strength (#DPs)"),
-    list(var = "MRsequence",     title = "Pulse sequence (#DPs)"),
-    list(var = "MRbrainregion",  title = "Voxel location (#DPs)"),
-    list(var = "MRaverages",     title = "Nr. of averages (#DPs)")
-  )
+    list(var = "Species",  title = "Species (#DPs)"),
+    list(var = "Strain",   title = "Animal strain (#DPs)"),
+    list(var = "Sex",      title = "Sex (#animals)"),
+    list(var = "Vendor",       title = "Vendor (#DPs)"),
+    list(var = "FieldStrength",        title = "Field strength (#DPs)"),
+    list(var = "Sequence",     title = "Pulse sequence (#DPs)"),
+    list(var = "VOI",  title = "Voxel location (#DPs)"),
+    list(var = "Averages",     title = "Nr. of averages (#DPs)"),
+    list(var = "Cryoprobe",     title = "Cryoprobe (#DPs)"),
+    list(var = "ShimMethod",     title = "Shim method (#DPs)")
+      )
   
   if (show_pie_charts) {
     
@@ -206,14 +208,14 @@ PlotPieCharts <- function(data, out_dir, plots_dir, show_pie_charts = TRUE, show
     
     vars <- c(
       "SiteID",
-      "AnimalSpecies",
-      "AnimalStrain",
-      "AnimalSex",
-      "MRvendor",
-      "MRfield",
-      "MRsequence",
-      "MRbrainregion",
-      "MRaverages"
+      "Species",
+      "Strain",
+      "Sex",
+      "Vendor",
+      "FieldStrength",
+      "Sequence",
+      "VOI",
+      "Averages"
     )
     
     charts <- list()
