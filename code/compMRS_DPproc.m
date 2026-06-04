@@ -3,6 +3,7 @@
 %Jamie Near, Sunnybrook Research Institute, 2025
 %Diana Rotaru, Columbia University, 2025
 %Thanh Phong Lê, CIBM Center for Biomedical Imaging and École polytechnique fédérale de Lausanne, 2025
+%Eloise Mougel, CIBM, EPFL 2026
 %
 % USAGE:
 % [out,outw]=compMRS_DPproc(DPid);
@@ -36,11 +37,21 @@ if ~exist('opt','var')
     opt.rmBadAvg            = 1;
     opt.doBlockAveraging    = 0;
     opt.doDriftCorrection   = 1;
+    opt.doCompDriftCorrOnOff= 1;
     opt.iterin              = 20;
     opt.tmaxin              = 0.2;
     opt.aaDomain            = 'f';
     opt.autophase           = 1;
     opt.compFracGroupDelay  = 1;
+    % *** EM: handle special cases (07.04.2026)
+    opt.exception.extWaterOff.ListDPsub     =   [22,4,1; 22,7,1;... % (DPid, idsubject, idses)
+                                                 19,1,1; 19,2,1; 19,3,1; 19,4,1; 19,5,1; 19,6,1; 19,7,1; 19,8,1;...% (DPid, idsubject, idses)
+                                                 14,1,1; 14,2,1; 14,3,1; 14,4,1; 14,5,1; 14,6,1; 14,7,1; 14,8,1] ;% EM: handle special cases (07.04.2026) (DPid, idsubject, idses): remove separated water
+    opt.exception.discardData.ListDPsub     =   [5,2,1; 16,2,1;...
+                                                 17,1,1; 17,2,1; 17,3,1; 17,4,1; 17,5,1; 17,6,1; 17,7,1; 17,8,1] ;% EM: handle special cases (07.04.2026) (DPid, idsubject, idses): remove data (corrupted dataset or poor data quality)
+    opt.exception.manualRephase.listIdent     =   {['DP30_sub-8_ses-1'  '_sepWater']}; % % EM: handle special cases (07.04.2026)
+    opt.exception.manualRephase.listPhase     =   [-70,1.5, 2 ]; % % EM: handle special cases (07.04.2026) (ph0(°), ph1, ppm0) for each DPid, idsubject in opt.exception.manuallyRephase.ListDPsub 
+    % *** EM: handle special cases (07.04.2026)
 end
 
 
@@ -53,44 +64,76 @@ end
         if ~isfolder([pwd filesep 'plots' filesep DPid])
                mkdir(['plots' filesep DPid])
         end
+
+        %---EM 27.02.2026-----
+        opt.debug_path = [pwd filesep 'plots' filesep 'debug' ];
+        mkdir([opt.debug_path])
+        date_ana = char(string(datetime('now'),"yyyy-MM-dd_HH-mm-ss"));
+        opt.debug_FileName = ['debug_' num2str(DPid) '_' char(date_ana) '.log'];
+        debug_id = fopen([opt.debug_path filesep opt.debug_FileName ], 'w');
+        fprintf(debug_id,['Processing ' num2str(DPid)]);
+        fclose(debug_id);
+        %---EM 27.02.2026 (end)-----
+
+        % --- EM: handle special case (EM 07.04.2026)----
+        for ii = 1 : size(opt.exception.extWaterOff.ListDPsub,1)
+            opt.exception.extWaterOff.listIdent{ii} = (['DP' num2str(opt.exception.extWaterOff.ListDPsub(ii,1)) '_sub-' num2str(opt.exception.extWaterOff.ListDPsub(ii,2)) '_ses-' num2str(opt.exception.extWaterOff.ListDPsub(ii,3))]);
+        end
+
+        for ii = 1 : size(opt.exception.discardData.ListDPsub,1)
+            opt.exception.discardData.listIdent{ii} = (['DP' num2str(opt.exception.discardData.ListDPsub(ii,1)) '_sub-' num2str(opt.exception.discardData.ListDPsub(ii,2)) '_ses-' num2str(opt.exception.discardData.ListDPsub(ii,3))]);
+        end
+
+        % for ii = 1 : size(opt.exception.manualRephase.ListDPsub,1)
+        %     opt.exception.manualRephase.listIdent{ii} = (['DP' num2str(opt.exception.manualRephase.ListDPsub(ii,1)) '_sub-' num2str(opt.exception.manualRephase.ListDPsub(ii,2)) '_ses-' num2str(opt.exception.manualRephase.ListDPsub(ii,3))]);
+        % end
+
+        %  --- EM: handle special case (end) (EM 07.04.2026)----
+    
         
         [in, inw, inw_auto] = compMRS_DPload(DPid);
         autoWaterExists=~isempty(inw_auto);
 
         %Loop through subjects and sessions.
 
-        out         = cell(check.nSubj,1);
-        outw        = cell(check.nSubj,1);
-        out_auto    = cell(check.nSubj,1);
-        outw_auto   = cell(check.nSubj,1);
+        out         = cell(check.nSubj, max(check.nSes));
+        outw        = cell(check.nSubj, max(check.nSes));
+        out_auto    = cell(check.nSubj, max(check.nSes));
+        outw_auto   = cell(check.nSubj, max(check.nSes));
 
         for m = 1:check.nSubj
             for n = 1:check.nSes(m)
-                disp(['Processing ' DPid ' sub-' num2str(m) ' ses-' num2str(n)])
+                % disp(['Processing ' DPid ' sub-' num2str(m) ' ses-' num2str(n)]) % <--- EM 27.02.2026-----
+                disp_writelog_v26(opt.debug_path, opt.debug_FileName,['Processing ' DPid ' sub-' num2str(m) ' ses-' num2str(n)])  % ---> EM 27.02.2026-----
+
                 nsubj = string(extractBetween(in{m,n}.filepath,[filesep 'sub-0'],[filesep 'ses-']));
                 ident = ([DPid '_sub-' nsubj '_ses-' num2str(n)]);
                 ident = char(join(ident,""));
                 %ident = [DPid '_sub-' num2str(m) '_ses-' num2str(n)];
                 % If separate water scan is available
-                if ~isempty(inw) && ~isempty(inw{m, n})
-                    
+                % if ~isempty(inw) && ~isempty(inw{m, n}) 
+                if ~isempty(inw) && ~isempty(inw{m, n}) && sum(contains(opt.exception.extWaterOff.listIdent,ident))==0 && sum(contains(opt.exception.discardData.listIdent,ident))==0  % EM: handle special cases (07.04.2026)
+                    disp_writelog_v26(opt.debug_path, opt.debug_FileName,['*** Processing water sep'])  % ---> EM 27.02.2026-----
                     [out{m}{n}, outw{m}{n}] = compMRS_DPproc_sub(in{m, n}, inw{m, n}, [ident  '_sepWater'], check, opt);
                 end
                 % If automatic water scan is available
-                if autoWaterExists && ~isempty(inw_auto{m, n})
+                if autoWaterExists && ~isempty(inw_auto{m, n}) && sum(contains(opt.exception.discardData.listIdent,ident))==0  % EM: handle special cases (07.04.2026)
+                    disp_writelog_v26(opt.debug_path, opt.debug_FileName,['*** Processing water auto'])  % ---> EM 27.02.2026-----
                     [out_auto{m}{n}, outw_auto{m}{n}] = compMRS_DPproc_sub(in{m, n}, inw_auto{m, n}, [ident  '_autoWater'], check, opt);
                 end
             end
         end
     end
 catch
-    disp([DPid ' error'])
+    % disp([DPid ' error']) % <--- EM 27.02.2026-----
+    disp_writelog_v26(opt.debug_path, opt.debug_FileName,[DPid ' error'])  % ---> EM 27.02.2026-----
+
 end
 save(['plots/' DPid])
 end
 
 function [out, outw] = compMRS_DPproc_sub(in_mn, inw_mn, ident, check, opt)
-
+   
     % Get number of points to be left-shifted
     ls = in_mn.pointsToLeftshift;
     frac_ls = ls-floor(ls); % On Bruker datasets, this number is not an integer. The fractional part should be corrected as a 1st order phase.
@@ -170,6 +213,8 @@ function [out, outw] = compMRS_DPproc_sub(in_mn, inw_mn, ident, check, opt)
         out_mn=op_combinesubspecs(out_mn,"diff");
     end
 
+
+    numAveragesPerBlock = out_mn.rawAverages/out_mn.averages;
     % do bad averages removal, if applicable (code from Jamie)
     if opt.rmBadAvg
         out_mn=subBadAveragesRemoval(out_mn, ident, opt);
@@ -183,25 +228,34 @@ function [out, outw] = compMRS_DPproc_sub(in_mn, inw_mn, ident, check, opt)
         av_block_sizes = divisors(out_mn.averages);
         
         % Some data are already partially averaged (Varian datasets)
-        av_eff_block_sizes = av_block_sizes*out_mn.rawAverages/out_mn.averages;
+        av_eff_block_sizes = av_block_sizes*numAveragesPerBlock;
     
         % Remove effective block sizes bigger than 32 (does not really make
         % sense to go higher than that)
         av_block_sizes    =av_block_sizes(av_eff_block_sizes<=32);
         av_eff_block_sizes=av_eff_block_sizes(av_eff_block_sizes<=32);
+    
+    elseif opt.doCompDriftCorrOnOff
+        %Compare with (block size 1) and without (block size = number of
+        %avg) drift correction
+        av_block_sizes    = [1 out_mn.averages];
+
+        % Some data are already partially averaged (Varian datasets)
+        av_eff_block_sizes = av_block_sizes*numAveragesPerBlock;
+    
     else
         % Do not perform block averaging
         av_block_sizes    = 1;
-        av_eff_block_sizes= out_mn.rawAverages/out_mn.averages;
+        av_eff_block_sizes= numAveragesPerBlock;
     end
     
     % Iterate along the list of block sizes, if applicable
 
     for kk=1:length(av_block_sizes)
-        out_part_avg = op_blockAvg(out_mn,av_block_sizes(kk));
+        out_part_avg = op_blockAvg(out_mn, av_block_sizes(kk));
         
         % do drift correction (if applicable) (code from Jamie)
-        if opt.doDriftCorrection
+        if opt.doDriftCorrection && out_part_avg.averages>1
             out_part_avg = subDriftCorrection(out_part_avg, ident, opt);
         end
 
@@ -224,17 +278,23 @@ function [out, outw] = compMRS_DPproc_sub(in_mn, inw_mn, ident, check, opt)
         %out_part_avg=op_addphase(out_part_avg, -in_mn.rp, -(in_mn.lp/360.0*in_mn.dwelltime), max(in_mn.ppm), 1);  
 
         % Final phasing (0-order phase)
-        if opt.autophase
+        if opt.autophase && sum(contains(opt.exception.manualRephase.listIdent,ident))==0
             out_part_avg = op_autophase(out_part_avg, 1.8, 2.2);
+             % out_part_avg = op_autophase(out_part_avg, 0.4, 4.1); % EM Test 27.02.2026
+        elseif sum(contains(opt.exception.manualRephase.listIdent,ident))==1
+            idxTmp = find(contains(opt.exception.manualRephase.listIdent,ident));
+            out_part_avg=op_addphase(out_part_avg, opt.exception.manualRephase.listPhase(idxTmp,1), (opt.exception.manualRephase.listPhase(idxTmp,2).*in_mn.dwelltime), opt.exception.manualRephase.listPhase(idxTmp,3), 1);  
         end
         
         % Compute the quality metrics
         % Get LW (of NAA) and SNR
-        [FWHM_NAA] = op_getLW(out_part_avg, 1.8, 2.2, 8, 1);
-        [SNR]=op_getSNR(out_part_avg,1.8,2.2,-2, 0, 1);
+        [~,f_NAA]=op_getPeakHeight(out_part_avg,1.8,2.2);
+        [FWHM_NAA,FWHM_NAA_hz] = op_getLW(out_part_avg, f_NAA-0.1, f_NAA+0.1, 8, 1);
+        [SNR]=op_getSNR(out_part_avg,f_NAA-0.1,f_NAA+0.1,-2, 0, 1);
         
         out_part_avg.SNR = SNR;
         out_part_avg.LW = FWHM_NAA;
+        out_part_avg.LW_hz = FWHM_NAA_hz;
         out_part_avg.SNR_LW_ratio = SNR/FWHM_NAA;
         out_part_avg.block_size = av_eff_block_sizes(kk);
         out_all{kk}=out_part_avg;
@@ -249,18 +309,20 @@ function [out, outw] = compMRS_DPproc_sub(in_mn, inw_mn, ident, check, opt)
     
     [~, index] = max(SNR_LW_ratios);
 
-    if opt.doBlockAveraging
-        disp(['The best result is with block size ' num2str(av_eff_block_sizes(index)) '.'])
+    if opt.doBlockAveraging || opt.doCompDriftCorrOnOff
+        % disp(['The best result is with block size ' num2str(av_eff_block_sizes(index)) '.']) % <--- EM 27.02.2026-----
+        disp_writelog_v26(opt.debug_path, opt.debug_FileName,['The best result is with block size ' num2str(av_eff_block_sizes(index)) '.'])  % ---> EM 27.02.2026-----
+ 
     end
 
     % Output the output with best SNR/LW
-    out = out_all{kk};
+    out = out_all{index};
     outw= outw_mn;
 
     % Plot and save the result to check
     plotlegend = {};
     for ii=1:length(out_all)
-        %plotlegend{ii} = [num2str(out_all{ii}.block_size) ' avg/block'];
+        plotlegend{ii} = [num2str(out_all{ii}.block_size) ' avg/block'];
     end
     
     f=figure ('name', ident);
@@ -280,11 +342,12 @@ function [out, outw] = compMRS_DPproc_sub(in_mn, inw_mn, ident, check, opt)
     saveas(f, ['plots' filesep ident(1:4) filesep ident], 'fig')
     saveas(f, ['plots' filesep ident(1:4) filesep ident], 'png')
     %print(f, ['plots' filesep plots filesep ident], '-dpng', '-r300');
-
+ 
 end
 
 
 function output = subBadAveragesRemoval(input, ident, opt)
+ 
     nBadAvgTotal=0;
     nBadAverages=1;
 
@@ -345,6 +408,7 @@ function output = subBadAveragesRemoval(input, ident, opt)
         %sat1=input('are you satisfied with the removal of bad averages? ','s');
         sat='y';
     end
+
 end
 
 

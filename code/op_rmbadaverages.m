@@ -124,7 +124,7 @@ out=in;
 out.fids=fids;
 out.specs=specs;
 out.sz=sz;
-out.averages=length(goodAverages) * in.rawSubspecs;
+out.averages=length(goodAverages) * in.subspecs; % 20260407 Modified to work with SPECIAL.
 
 %FILLING IN THE FLAGS
 out.flags=in.flags;
