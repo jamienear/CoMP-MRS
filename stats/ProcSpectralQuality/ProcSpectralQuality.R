@@ -138,6 +138,7 @@ if (show_box_plots) {
     "Vendor",
     "FieldStrength",
     "Sequence",
+    "Sequence_collapsed",
     "VOI",
     "Cryoprobe",
     "ShimMethod"
