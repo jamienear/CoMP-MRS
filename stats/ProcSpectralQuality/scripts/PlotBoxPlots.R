@@ -54,8 +54,8 @@ PlotBoxPlots <- function(data, out_dir, y_vars, x_vars) {
       j <- 0.5
     }
     
-    # Override specifically for Sequence and ShimMethod
-    if (x_var %in% c("Sequence")) {
+    # Override specifically for Sequence_collapsed and ShimMethod
+    if (x_var %in% c("Sequence_collapsed")) {
       a <- 30
       j <- 1
     }
@@ -192,7 +192,7 @@ PlotBoxPlots <- function(data, out_dir, y_vars, x_vars) {
     
     p_vendor      <- get_plot(all_boxplots, paste(y$var, "Vendor", sep = "_by_"))
     p_field       <- get_plot(all_boxplots, paste(y$var, "FieldStrength", sep = "_by_"))
-    p_sequence    <- get_plot(all_boxplots, paste(y$var, "Sequence", sep = "_by_"))
+    p_sequence    <- get_plot(all_boxplots, paste(y$var, "Sequence_collapsed", sep = "_by_"))
     p_cryoprobe   <- get_plot(all_boxplots, paste(y$var, "Cryoprobe", sep = "_by_"))
     p_shim        <- get_plot(all_boxplots, paste(y$var, "ShimMethod", sep = "_by_"))
     

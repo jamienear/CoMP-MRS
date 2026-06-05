@@ -67,13 +67,13 @@ DescripStats <- function(data) {
     Product = make_stats(data, "FieldStrength", "SNR_LW_Product_norm", "Product")
   )
   
-  ### Sequence --------------------------------------------------------------
+  ### Sequence_collapsed --------------------------------------------------------------
   
-  STATS$Sequence <- list(
-    LW      = make_stats(data, "Sequence", "LW_norm", "LW"),
-    SNR     = make_stats(data, "Sequence", "SNR_norm", "SNR"),
-    Ratio   = make_stats(data, "Sequence", "SNR_LW_Ratio_norm", "Ratio"),
-    Product = make_stats(data, "Sequence", "SNR_LW_Product_norm", "Product")
+  STATS$Sequence_collapsed <- list(
+    LW      = make_stats(data, "Sequence_collapsed", "LW_norm", "LW"),
+    SNR     = make_stats(data, "Sequence_collapsed", "SNR_norm", "SNR"),
+    Ratio   = make_stats(data, "Sequence_collapsed", "SNR_LW_Ratio_norm", "Ratio"),
+    Product = make_stats(data, "Sequence_collapsed", "SNR_LW_Product_norm", "Product")
   )
   
   ### VOI -----------------------------------------------------------
