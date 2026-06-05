@@ -107,9 +107,32 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
       )
     ) %>%
     mutate(Cryoprobe = factor(Cryoprobe, levels = c(TRUE, FALSE)))
-
+  
+  
+  # Create a new variable where similar sequences are collapsed ---------------
+  
+  lookup <- tibble::tribble(
+    ~from,      ~to,
+    "sLASER",   "LASER",
+    "sSPECIAL", "SPECIAL"
+  )
+  
+  DATA <- DATA %>%
+    mutate(
+      Sequence_collapsed = factor(recode_values(
+        Sequence,
+        from = lookup$from,
+        to = lookup$to,
+        default = Sequence
+      ))
+    ) %>%
+    relocate(
+      Sequence_collapsed,
+      .after = Sequence
+    )
+  
   # Spectral quality metrics and normalization --------------------------------
-
+  
   DATA <- DATA %>%
     mutate(
       SNR_LW_Ratio_norm = SNR_LW_Ratio / (sqrt(Averages) * VoxelVolume),
@@ -155,6 +178,7 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
       Vendor,
       FieldStrength,
       Sequence,
+      Sequence_collapsed,
       VOI
     ) %>%
     dplyr::summarise(
