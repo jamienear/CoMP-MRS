@@ -264,13 +264,19 @@ random_effects <- list(
     Cryoprobe = "1",
     ShimMethod = "1"
   ),
-  M.1 = list(
+  M.1.a = list(
     Vendor = "1",
     Species = "1",
     VOI = "1",
     Sequence = "1",
     Cryoprobe = "1",
     ShimMethod = "1"
+  ),
+  M.1.b = list(
+    Vendor = "1",
+    VOI = "1",
+    Sequence = "1",
+    Cryoprobe = "1"
   )
 )
 
@@ -278,7 +284,8 @@ fixed_effects <- list(
   M.0.f = c("FieldStrength"),
   M.0.g = c("Age"),
   M.0.h = c("Sex"),
-  M.1 = c("FieldStrength", "Age", "Sex")
+  M.1.a = c("FieldStrength", "Age", "Sex"),
+  M.1.b = c("FieldStrength", "Age")
 )
 
 # # Null model with no random effects
