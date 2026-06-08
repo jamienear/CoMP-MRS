@@ -54,8 +54,8 @@ PlotBoxPlots <- function(data, out_dir, y_vars, x_vars) {
       j <- 0.5
     }
     
-    # Override specifically for Sequence and ShimMethod
-    if (x_var %in% c("Sequence")) {
+    # Override specifically for Sequence_collapsed and ShimMethod
+    if (x_var %in% c("Sequence_collapsed")) {
       a <- 30
       j <- 1
     }
@@ -159,11 +159,12 @@ PlotBoxPlots <- function(data, out_dir, y_vars, x_vars) {
   standardize_plot_for_panel <- function(p) {
     p +
       theme(
-        plot.title = element_text(size = 8, face = "bold", hjust = 0.5),
+        plot.title = element_text(size = 10, face = "bold", hjust = 0.5),
         plot.margin = margin(3, 3, 3, 3),
         axis.title = element_text(size = 8),
         axis.text = element_text(size = 7),
-        axis.text.x = element_text(size = 6),
+        axis.text.x = element_text(size = 8, face = "bold"),
+        axis.text.y = element_text(size = 8, face = "bold"),
         legend.position = "none",
         panel.background = element_rect(fill = "transparent", color = NA),
         plot.background  = element_rect(fill = "transparent", color = NA),
@@ -191,7 +192,7 @@ PlotBoxPlots <- function(data, out_dir, y_vars, x_vars) {
     
     p_vendor      <- get_plot(all_boxplots, paste(y$var, "Vendor", sep = "_by_"))
     p_field       <- get_plot(all_boxplots, paste(y$var, "FieldStrength", sep = "_by_"))
-    p_sequence    <- get_plot(all_boxplots, paste(y$var, "Sequence", sep = "_by_"))
+    p_sequence    <- get_plot(all_boxplots, paste(y$var, "Sequence_collapsed", sep = "_by_"))
     p_cryoprobe   <- get_plot(all_boxplots, paste(y$var, "Cryoprobe", sep = "_by_"))
     p_shim        <- get_plot(all_boxplots, paste(y$var, "ShimMethod", sep = "_by_"))
     

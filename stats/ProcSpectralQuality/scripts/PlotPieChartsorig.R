@@ -71,7 +71,7 @@ PlotPieCharts <- function(data, out_dir, plots_dir, show_pie_charts = TRUE, show
       ) +
       geom_text(
         aes(x = 1.3, label = perc_label), # aes(label = count_label),
-        position = position_stack(vjust = 0.2),
+        position = position_stack(vjust = 0.5),
         color = "white",
         size = 5,
         fontface = "bold",
@@ -88,9 +88,9 @@ PlotPieCharts <- function(data, out_dir, plots_dir, show_pie_charts = TRUE, show
       theme(
         plot.title = element_text(
           family = "serif",
-          face = "bold",
-          size = 24,
-          hjust = 0.5,
+          face = "plain",
+          size = 18,
+          hjust = 0.2,
           color = "#4D4D4D"
         ),
         plot.background = element_rect(fill = "white", color = NA),
@@ -99,35 +99,19 @@ PlotPieCharts <- function(data, out_dir, plots_dir, show_pie_charts = TRUE, show
         legend.direction = "horizontal",
         legend.text = element_text(
           family = "serif",
-          face = "bold",
-          size = 12,
+          size = 8,
           color = "#4D4D4D"
         ),
         legend.key.size = unit(0.35, "cm"),
-        legend.spacing.x = unit(0.2, "cm"),
+        legend.spacing.x = unit(0.1, "cm"),
         plot.margin = margin(8, 8, 8, 8)
-      ) 
-    # If the legend has exactly two elements, stack them vertically.
-    # Otherwise, keep your original legend arrangement.
-    if (nrow(plot_data) <= 4) {
-      p <- p +
-        guides(
-          fill = guide_legend(
-            nrow = nrow(plot_data),
-            ncol = 1,
-            byrow = TRUE
-          )
+      ) +
+      guides(
+        fill = guide_legend(
+          nrow = ceiling(nrow(plot_data) / 2),
+          byrow = TRUE
         )
-    } else {
-      p <- p +
-        guides(
-          fill = guide_legend(
-            nrow = ceiling(nrow(plot_data) / 2),
-            byrow = TRUE
-          )
-        )
-    }
-    
+      )
     
     print(p)
     
@@ -158,7 +142,7 @@ PlotPieCharts <- function(data, out_dir, plots_dir, show_pie_charts = TRUE, show
     list(var = "Averages",     title = "Nr. of averages (#DPs)"),
     list(var = "Cryoprobe",     title = "Cryoprobe (#DPs)"),
     list(var = "ShimMethod",     title = "Shim method (#DPs)")
-  )
+      )
   
   if (show_pie_charts) {
     
@@ -180,8 +164,8 @@ PlotPieCharts <- function(data, out_dir, plots_dir, show_pie_charts = TRUE, show
     ggsave(
       filename = file.path(plots_dir, "all_piecharts_combined.png"),
       plot = combined_pies,
-      width = 20,
-      height = 16,
+      width = 16,
+      height = 9,
       units = "in",
       dpi = 300
     )

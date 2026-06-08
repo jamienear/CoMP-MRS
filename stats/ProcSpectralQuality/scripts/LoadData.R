@@ -79,7 +79,7 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
       ShimMethod = as.factor(if_else(ShimMethod == "Other", "MAPSHIM", ShimMethod))
     ) %>%
     mutate(
-      ShimMethod = as.factor(if_else(ShimMethod == "FASTMAP-FASTESTMAP", "FASTESTMAP", ShimMethod))
+      ShimMethod = as.factor(if_else(ShimMethod == "FASTMAP-FASTESTMAP", "FAST(EST)MAP", ShimMethod))
     )
   
   # Reorder all factors alphabetically / numerically ascending ----------------
