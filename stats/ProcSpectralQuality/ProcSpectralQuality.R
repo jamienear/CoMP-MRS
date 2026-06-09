@@ -136,9 +136,11 @@ if (show_box_plots) {
     "Species",
     "Sex",
     "Vendor",
+    "FieldStrength_orig",
     "FieldStrength",
+    "Sequence_orig",
     "Sequence",
-    "Sequence_collapsed",
+    "VOI_orig",
     "VOI",
     "Cryoprobe",
     "ShimMethod"
@@ -186,7 +188,7 @@ if (show_facet_plots) {
   )
   
   facet_vars <- list(
-    list(var = "Sequence_collapsed", label = "MRS sequence")
+    list(var = "Sequence", label = "MRS sequence")
   )
   
   facet_plots <- PlotFacetBoxPlots(
@@ -265,27 +267,68 @@ random_effects <- list(
     ShimMethod = "1"
   ),
   M.1.a = list(
-    Vendor = "1",
-    Species = "1",
-    VOI = "1",
     Sequence = "1",
     Cryoprobe = "1",
+    Vendor = "1",
+    VOI = "1",
+    Species = "1",
     ShimMethod = "1"
   ),
   M.1.b = list(
+    Sequence = "1",
+    Cryoprobe = "1",
     Vendor = "1",
     VOI = "1",
+    Species = "1",
+    ShimMethod = "1"
+  ),
+  M.1.c = list(
+    Sequence = "1",
+    Cryoprobe = "1",
+    Vendor = "1",
+    VOI = "1",
+    Species = "1",
+    ShimMethod = "1"
+  ),
+  M.1.d = list(
+    Sequence = "1",
+    Cryoprobe = "1",
+    Vendor = "1",
+    VOI = "1",
+    Species = "1"
+  ),
+  M.1.e = list(
+    Sequence = "1",
+    Cryoprobe = "1",
+    Vendor = "1",
+    VOI = "1"
+  ),
+  M.1.f = list(
+    Sequence = "1",
+    Cryoprobe = "1",
+    Vendor = "1"
+  ),
+  M.1.g = list(
     Sequence = "1",
     Cryoprobe = "1"
+  ),
+  M.1.h = list(
+    Sequence = "1"
   )
 )
 
 fixed_effects <- list(
   M.0.f = c("FieldStrength"),
-  M.0.g = c("Age"),
-  M.0.h = c("Sex"),
+  M.0.g = c("FieldStrength", "Age"),
+  M.0.h = c("FieldStrength", "Sex"),
   M.1.a = c("FieldStrength", "Age", "Sex"),
-  M.1.b = c("FieldStrength", "Age")
+  M.1.b = c("FieldStrength", "Age"),
+  M.1.c = c("FieldStrength"),
+  M.1.d = c("FieldStrength"),
+  M.1.e = c("FieldStrength"),
+  M.1.f = c("FieldStrength"),
+  M.1.g = c("FieldStrength"),
+  M.1.h = c("FieldStrength")
 )
 
 # # Null model with no random effects
@@ -363,7 +406,7 @@ if (calc_VPCs) {
 
 ### Inference by LRT with parametric bootstrapping ----------------------------
 # Compare large model with smaller model to derive p-value for added random 
-# effect (e.g., Sequence_collapsed)
+# effect (e.g., Sequence)
 # Note, models have to be fitted with REML = FALSE for valid comparison by LRT,
 # and this can be time-consuming with larger datasets
 
