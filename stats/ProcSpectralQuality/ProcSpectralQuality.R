@@ -412,10 +412,15 @@ if (calc_VPCs) {
 
 source(file.path(base_dir, "scripts", "RunLRT.R"))
 
-model_contrasts <- list(
-
-  small_models = c("M.0.a", "M.0.b", "M.0.c", "M.0.d"),
-  large_models = c("M.0.b", "M.0.c", "M.0.d", "M.0.e")
+model_contrasts <- tibble::tribble(
+  ~small_models, ~large_models,
+  "M.1.a",       "M.1.b",
+  "M.1.b",       "M.1.c",
+  "M.1.c",       "M.1.d",
+  "M.1.d",       "M.1.e",
+  "M.1.e",       "M.1.f",
+  "M.1.f",       "M.1.g",
+  "M.1.g",       "M.1.h"
 )
 
 if (run_LRTs || run_pbkrtest) {
