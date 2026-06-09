@@ -76,7 +76,7 @@ RunLMEM <- function(data, dv = "", rand_ef = list(), fix_ef = "") {
   
   # Remove rows with missing values -------------------------------------------
   
-  data <- drop_na(data, .data[[dv]])
+  data <- drop_na(data, dplyr::all_of(dv))
   
   
   # Models --------------------------------------------------------------------
