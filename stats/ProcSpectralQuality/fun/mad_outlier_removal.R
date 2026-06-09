@@ -12,7 +12,7 @@
 # ============================================================
 #
 # Created using Claude Opus 4.6 (2026-03-30)
-# Modified by Mark Mikkelsen, Ph.D. (2026-03-30)
+# Modified by Mark Mikkelsen, Ph.D. (2026-06-09)
 
 mad_outlier_removal <- function(data,
                                 outcome,
