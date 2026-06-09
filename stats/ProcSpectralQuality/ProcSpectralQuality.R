@@ -8,7 +8,7 @@
 # the authors then modified and extended the code as needed for the specific
 # analyses and visualizations in this project.
 #
-# Last updated: 2026-04-16
+# Last updated: 2026-06-18
 
 # Initialize ------------------------------------------------------------------
 
@@ -62,7 +62,7 @@ source(file.path(base_dir, "scripts", "PlotFacetBoxPlots.R"))
 
 # Analysis options ------------------------------------------------------------
 
-save_csv               <- FALSE # Set to TRUE to save descriptive statistics tables as CSV files in the derivatives directory
+save_csv               <- TRUE # Set to TRUE to save descriptive statistics tables as CSV files in the derivatives directory
 show_pie_charts        <- FALSE # Set to TRUE to create pie charts of categorical variables (e.g., species
 show_amcharts          <- FALSE # Set to TRUE to create interactive 3D pie charts using amCharts4
 show_dot_plots         <- FALSE # Set to TRUE to create dot plots of spectral quality metrics by different grouping variables
@@ -72,7 +72,7 @@ show_model_diagnostics <- TRUE # Set to TRUE to show model diagnostic plots (e.g
 calc_VPCs              <- TRUE # Set to TRUE to calculate variance partition coefficients (VPCs) from linear mixed-effects models to assess the proportion of variance explained by each random effect
 export_model_table     <- TRUE # Set to TRUE to export a modelsummary comparison table of LMEM results to Word (.docx)
 run_LRTs               <- TRUE # Set to TRUE to run likelihood ratio tests (LRTs) to compare linear mixed-effects models with different random effects structures and derive p-values for the added random effects
-run_pbkrtest           <- TRUE # Set to TRUE to run parametric bootstrapping using the pbkrtest package to compare linear mixed-effects models with different random effects structures and derive p-values for the added random effects (can be time-consuming with larger datasets)
+run_pbkrtest           <- FALSE # Set to TRUE to run parametric bootstrapping using the pbkrtest package to compare linear mixed-effects models with different random effects structures and derive p-values for the added random effects (can be time-consuming with larger datasets)
 
 # Load data -------------------------------------------------------------------
 # Also clean up data (incl. outlier removal) and create new variables (e.g., normalized SNR/LW ratio)
@@ -264,13 +264,19 @@ random_effects <- list(
     Cryoprobe = "1",
     ShimMethod = "1"
   ),
-  M.1 = list(
+  M.1.a = list(
     Vendor = "1",
     Species = "1",
     VOI = "1",
     Sequence = "1",
     Cryoprobe = "1",
     ShimMethod = "1"
+  ),
+  M.1.b = list(
+    Vendor = "1",
+    VOI = "1",
+    Sequence = "1",
+    Cryoprobe = "1"
   )
 )
 
@@ -278,7 +284,8 @@ fixed_effects <- list(
   M.0.f = c("FieldStrength"),
   M.0.g = c("Age"),
   M.0.h = c("Sex"),
-  M.1 = c("FieldStrength", "Age", "Sex")
+  M.1.a = c("FieldStrength", "Age", "Sex"),
+  M.1.b = c("FieldStrength", "Age")
 )
 
 # # Null model with no random effects

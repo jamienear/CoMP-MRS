@@ -12,39 +12,39 @@ SaveCSV <- function(data, out_dir) {
   write_csv(data$SiteID$Ratio, file.path(out_dir, "stats_SiteID_Ratio.csv"))
   write_csv(data$SiteID$Product, file.path(out_dir, "stats_SiteID_Product.csv"))
   
-  write_csv(data$AnimalSpecies$LW, file.path(out_dir, "stats_AnimalSpecies_LW.csv"))
-  write_csv(data$AnimalSpecies$SNR, file.path(out_dir, "stats_AnimalSpecies_SNR.csv"))
-  write_csv(data$AnimalSpecies$Ratio, file.path(out_dir, "stats_AnimalSpecies_Ratio.csv"))
-  write_csv(data$AnimalSpecies$Product, file.path(out_dir, "stats_AnimalSpecies_Product.csv"))
+  write_csv(data$Species$LW, file.path(out_dir, "stats_Species_LW.csv"))
+  write_csv(data$Species$SNR, file.path(out_dir, "stats_Species_SNR.csv"))
+  write_csv(data$Species$Ratio, file.path(out_dir, "stats_Species_Ratio.csv"))
+  write_csv(data$Species$Product, file.path(out_dir, "stats_Species_Product.csv"))
   
-  write_csv(data$MRvendor$LW, file.path(out_dir, "stats_MRvendor_LW.csv"))
-  write_csv(data$MRvendor$SNR, file.path(out_dir, "stats_MRvendor_SNR.csv"))
-  write_csv(data$MRvendor$Ratio, file.path(out_dir, "stats_MRvendor_Ratio.csv"))
-  write_csv(data$MRvendor$Product, file.path(out_dir, "stats_MRvendor_Product.csv"))
+  write_csv(data$Vendor$LW, file.path(out_dir, "stats_Vendor_LW.csv"))
+  write_csv(data$Vendor$SNR, file.path(out_dir, "stats_Vendor_SNR.csv"))
+  write_csv(data$Vendor$Ratio, file.path(out_dir, "stats_Vendor_Ratio.csv"))
+  write_csv(data$Vendor$Product, file.path(out_dir, "stats_Vendor_Product.csv"))
   
-  write_csv(data$MRfield$LW, file.path(out_dir, "stats_MRfield_LW.csv"))
-  write_csv(data$MRfield$SNR, file.path(out_dir, "stats_MRfield_SNR.csv"))
-  write_csv(data$MRfield$Ratio, file.path(out_dir, "stats_MRfield_Ratio.csv"))
-  write_csv(data$MRfield$Product, file.path(out_dir, "stats_MRfield_Product.csv"))
+  write_csv(data$FieldStrength$LW, file.path(out_dir, "stats_FieldStrength_LW.csv"))
+  write_csv(data$FieldStrength$SNR, file.path(out_dir, "stats_FieldStrength_SNR.csv"))
+  write_csv(data$FieldStrength$Ratio, file.path(out_dir, "stats_FieldStrength_Ratio.csv"))
+  write_csv(data$FieldStrength$Product, file.path(out_dir, "stats_FieldStrength_Product.csv"))
   
-  write_csv(data$MRsequence$LW, file.path(out_dir, "stats_MRsequence_LW.csv"))
-  write_csv(data$MRsequence$SNR, file.path(out_dir, "stats_MRsequence_SNR.csv"))
-  write_csv(data$MRsequence$Ratio, file.path(out_dir, "stats_MRsequence_Ratio.csv"))
-  write_csv(data$MRsequence$Product, file.path(out_dir, "stats_MRsequence_Product.csv"))
+  write_csv(data$Sequence$LW, file.path(out_dir, "stats_Sequence_LW.csv"))
+  write_csv(data$Sequence$SNR, file.path(out_dir, "stats_Sequence_SNR.csv"))
+  write_csv(data$Sequence$Ratio, file.path(out_dir, "stats_Sequence_Ratio.csv"))
+  write_csv(data$Sequence$Product, file.path(out_dir, "stats_Sequence_Product.csv"))
   
-  write_csv(data$MRbrainregion$LW, file.path(out_dir, "stats_MRbrainregion_LW.csv"))
-  write_csv(data$MRbrainregion$SNR, file.path(out_dir, "stats_MRbrainregion_SNR.csv"))
-  write_csv(data$MRbrainregion$Ratio, file.path(out_dir, "stats_MRbrainregion_Ratio.csv"))
-  write_csv(data$MRbrainregion$Product, file.path(out_dir, "stats_MRbrainregion_Product.csv"))
+  write_csv(data$VOI$LW, file.path(out_dir, "stats_VOI_LW.csv"))
+  write_csv(data$VOI$SNR, file.path(out_dir, "stats_VOI_SNR.csv"))
+  write_csv(data$VOI$Ratio, file.path(out_dir, "stats_VOI_Ratio.csv"))
+  write_csv(data$VOI$Product, file.path(out_dir, "stats_VOI_Product.csv"))
   
   write_csv(
     data$Species_Vendor,
-    file.path(out_dir, "stats_AnimalSpecies_MRvendor.csv")
+    file.path(out_dir, "stats_Species_Vendor.csv")
   )
   
   write_csv(
     data$Species_VOI,
-    file.path(out_dir, "stats_AnimalSpecies_MRbrainregion.csv")
+    file.path(out_dir, "stats_Species_VOI.csv")
   )
   
   write_csv(
