@@ -137,7 +137,7 @@ PlotPieCharts <- function(data, out_dir, plots_dir, show_pie_charts = TRUE, show
     list(var = "Sex",      title = "Sex (#animals)"),
     list(var = "Vendor",       title = "Vendor (#DPs)"),
     list(var = "FieldStrength",        title = "Field strength (#DPs)"),
-    list(var = "Sequence_collapsed",     title = "Pulse sequence (#DPs)"),
+    list(var = "Sequence",     title = "Pulse sequence (#DPs)"),
     list(var = "VOI",  title = "Voxel location (#DPs)"),
     list(var = "Averages",     title = "Nr. of averages (#DPs)"),
     list(var = "Cryoprobe",     title = "Cryoprobe (#DPs)"),
@@ -213,7 +213,7 @@ PlotPieCharts <- function(data, out_dir, plots_dir, show_pie_charts = TRUE, show
       "Sex",
       "Vendor",
       "FieldStrength",
-      "Sequence_collapsed",
+      "Sequence",
       "VOI",
       "Averages"
     )

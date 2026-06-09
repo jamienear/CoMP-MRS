@@ -45,11 +45,11 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
   DATA <- DATA %>%
     rename(
       Vendor = MRvendor,
-      FieldStrength = MRfield,
+      FieldStrength_orig = MRfield,
       Averages = MRaverages,
       ShimMethod = MRSshim,
-      Sequence = MRsequence,
-      VOI = MRbrainregion,
+      Sequence_orig = MRsequence,
+      VOI_orig = MRbrainregion,
       VoxelVolume = MRvoxelvolume,
       Species = AnimalSpecies,
       Sex = AnimalSex,
@@ -59,10 +59,10 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
       SoftwareVer = MRsoftwareversion
     )
   
-  # Remove DP01 (example only) ------------------------------------------------
+  # Remove DP01 (example DP) and DP32 -----------------------------------------
   
   DATA <- DATA %>%
-    filter(DP != "DP01") 
+    filter(!DP %in% c("DP01", "DP32"))
   
   # Rename some data entries --------------------------------------------------
   
@@ -76,10 +76,14 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
       CompID = as.factor(str_remove_all(CompID, "compMR"))
     ) %>%
     mutate(
-      ShimMethod = as.factor(if_else(ShimMethod == "Other", "MAPSHIM", ShimMethod))
+      ShimMethod = as.factor(if_else(
+        ShimMethod == "Other", "MAPSHIM", ShimMethod
+        ))
     ) %>%
     mutate(
-      ShimMethod = as.factor(if_else(ShimMethod == "FASTMAP-FASTESTMAP", "FAST(EST)MAP", ShimMethod))
+      ShimMethod = as.factor(if_else(
+        ShimMethod == "FASTMAP-FASTESTMAP", "FAST(EST)MAP", ShimMethod
+        ))
     )
   
   # Reorder all factors alphabetically / numerically ascending ----------------
@@ -87,8 +91,8 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
   DATA <- DATA %>%
     mutate(across(where(is.factor), ~ fct_relevel(., sort(levels(.))))) %>%
     mutate(
-      VOI = fct_relevel(
-        VOI,
+      VOI_orig = fct_relevel(
+        VOI_orig,
         "Lhippocampus",
         "Rhippocampus",
         "Lstriatum",
@@ -96,8 +100,8 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
       )
     ) %>%
     mutate(
-      Sequence = fct_relevel(
-        Sequence,
+      Sequence_orig = fct_relevel(
+        Sequence_orig,
         "LASER",
         "sLASER",
         "PRESS",
@@ -107,29 +111,50 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
       )
     ) %>%
     mutate(Cryoprobe = factor(Cryoprobe, levels = c(TRUE, FALSE)))
-  
-  
-  # Create a new variable where similar sequences are collapsed ---------------
-  
-  lookup <- tibble::tribble(
-    ~from,      ~to,
+
+
+  # Create new variables where some levels are collapsed ----------------------
+
+  lookup_seq <- tibble::tribble(
+    ~from,       ~to,
     "sLASER",   "LASER",
     "sSPECIAL", "SPECIAL"
   )
-  
+
+  lookup_voi <- tibble::tribble(
+    ~from,            ~to,
+    "Lhippocampus",   "Hippocampus",
+    "Rhippocampus",   "Hippocampus",
+    "Lstriatum",      "Striatum",
+    "Rstriatum",      "Striatum"
+  )
+
   DATA <- DATA %>%
     mutate(
-      Sequence_collapsed = factor(recode_values(
-        Sequence,
-        from = lookup$from,
-        to = lookup$to,
-        default = Sequence
-      ))
+      Sequence = factor(recode_values(
+        Sequence_orig,
+        from = lookup_seq$from,
+        to = lookup_seq$to,
+        default = Sequence_orig
+      )),
+      VOI = factor(recode_values(
+        VOI_orig,
+        from = lookup_voi$from,
+        to = lookup_voi$to,
+        default = VOI_orig
+      )),
+      # FieldStrength = factor(case_when(
+      #   FieldStrength_orig %in% c(11.7, 14.1, 15.2) ~ "11.7+",
+      #   TRUE ~ as.character(FieldStrength_orig)
+      # )),
+      FieldStrength = case_when(
+        FieldStrength_orig %in% c(14.1, 15.2) ~ 11.7,
+        TRUE ~ as.numeric(FieldStrength_orig)
+      )
     ) %>%
-    relocate(
-      Sequence_collapsed,
-      .after = Sequence
-    )
+    relocate(Sequence, .after = Sequence_orig) %>%
+    relocate(VOI, .after = VOI_orig) %>%
+    relocate(FieldStrength, .after = FieldStrength_orig)
   
   # Spectral quality metrics and normalization --------------------------------
   
@@ -176,9 +201,11 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
       Species,
       Sex,
       Vendor,
+      FieldStrength_orig,
       FieldStrength,
+      Sequence_orig,
       Sequence,
-      Sequence_collapsed,
+      VOI_orig,
       VOI
     ) %>%
     dplyr::summarise(

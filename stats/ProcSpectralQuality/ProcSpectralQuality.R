@@ -8,7 +8,7 @@
 # the authors then modified and extended the code as needed for the specific
 # analyses and visualizations in this project.
 #
-# Last updated: 2026-06-18
+# Last updated: 2026-06-09
 
 # Initialize ------------------------------------------------------------------
 
@@ -66,8 +66,8 @@ save_csv               <- TRUE # Set to TRUE to save descriptive statistics tabl
 show_pie_charts        <- FALSE # Set to TRUE to create pie charts of categorical variables (e.g., species
 show_amcharts          <- FALSE # Set to TRUE to create interactive 3D pie charts using amCharts4
 show_dot_plots         <- FALSE # Set to TRUE to create dot plots of spectral quality metrics by different grouping variables
-show_box_plots         <- FALSE # Set to TRUE to create box plots of spectral quality metrics by different grouping variables
-show_facet_plots       <- FALSE # Set to TRUE to create facet plots of spectral quality metrics by different grouping variables
+show_box_plots         <- TRUE # Set to TRUE to create box plots of spectral quality metrics by different grouping variables
+show_facet_plots       <- TRUE # Set to TRUE to create facet plots of spectral quality metrics by different grouping variables
 show_model_diagnostics <- TRUE # Set to TRUE to show model diagnostic plots (e.g., residuals, Q-Q plots) for linear mixed-effects models
 calc_VPCs              <- TRUE # Set to TRUE to calculate variance partition coefficients (VPCs) from linear mixed-effects models to assess the proportion of variance explained by each random effect
 export_model_table     <- TRUE # Set to TRUE to export a modelsummary comparison table of LMEM results to Word (.docx)
@@ -136,9 +136,11 @@ if (show_box_plots) {
     "Species",
     "Sex",
     "Vendor",
+    "FieldStrength_orig",
     "FieldStrength",
+    "Sequence_orig",
     "Sequence",
-    "Sequence_collapsed",
+    "VOI_orig",
     "VOI",
     "Cryoprobe",
     "ShimMethod"
@@ -186,7 +188,7 @@ if (show_facet_plots) {
   )
   
   facet_vars <- list(
-    list(var = "Sequence_collapsed", label = "MRS sequence")
+    list(var = "Sequence", label = "MRS sequence")
   )
   
   facet_plots <- PlotFacetBoxPlots(
@@ -265,53 +267,108 @@ random_effects <- list(
     ShimMethod = "1"
   ),
   M.1.a = list(
-    Vendor = "1",
-    Species = "1",
-    VOI = "1",
     Sequence = "1",
     Cryoprobe = "1",
+    Vendor = "1",
+    VOI = "1",
+    Species = "1",
     ShimMethod = "1"
   ),
   M.1.b = list(
+    Sequence = "1",
+    Cryoprobe = "1",
     Vendor = "1",
     VOI = "1",
+    Species = "1",
+    ShimMethod = "1"
+  ),
+  M.1.c = list(
+    Sequence = "1",
+    Cryoprobe = "1",
+    Vendor = "1",
+    VOI = "1",
+    Species = "1",
+    ShimMethod = "1"
+  ),
+  M.1.d = list(
+    Sequence = "1",
+    Cryoprobe = "1",
+    Vendor = "1",
+    VOI = "1",
+    Species = "1"
+  ),
+  M.1.e = list(
+    Sequence = "1",
+    Cryoprobe = "1",
+    Vendor = "1",
+    VOI = "1"
+  ),
+  M.1.f = list(
+    Sequence = "1",
+    Cryoprobe = "1",
+    Vendor = "1"
+  ),
+  M.1.g = list(
     Sequence = "1",
     Cryoprobe = "1"
+  ),
+  M.1.h = list(
+    Sequence = "1"
   )
 )
 
 fixed_effects <- list(
   M.0.f = c("FieldStrength"),
-  M.0.g = c("Age"),
-  M.0.h = c("Sex"),
+  M.0.g = c("FieldStrength", "Age"),
+  M.0.h = c("FieldStrength", "Sex"),
   M.1.a = c("FieldStrength", "Age", "Sex"),
-  M.1.b = c("FieldStrength", "Age")
+  M.1.b = c("FieldStrength", "Age"),
+  M.1.c = c("FieldStrength"),
+  M.1.d = c("FieldStrength"),
+  M.1.e = c("FieldStrength"),
+  M.1.f = c("FieldStrength"),
+  M.1.g = c("FieldStrength"),
+  M.1.h = c("FieldStrength")
 )
 
 # # Null model with no random effects
-# 
+#
 # M.null <- lm(
 #   formula = as.formula(paste(dv, "~ 1")),
 #   data = DATA$data
 # )
 
+# Pre-filter to complete cases across all variables used in any model so that
+# every model is fitted to the same dataset (required for valid LRT comparison)
+all_fix_ef_vars    <- unique(unlist(fixed_effects))
+all_rand_ef_groups <- unique(unlist(lapply(random_effects, names)))
+all_model_vars     <- c(dv, all_fix_ef_vars, all_rand_ef_groups)
+
+data_for_models <- DATA$data %>%
+  dplyr::filter(dplyr::if_all(dplyr::any_of(all_model_vars), ~ !is.na(.)))
+
+n_dropped <- nrow(DATA$data) - nrow(data_for_models)
+if (n_dropped > 0) {
+  message(sprintf("LMEMs: dropped %d row(s) with missing values to ensure a common dataset across models.", n_dropped))
+}
+
 # Run LMEM models
 
 LMEM_MODELS <- lapply(names(random_effects), function(model_name) {
-  
+
   if (is_empty(fixed_effects[[model_name]])) {
     fix_ef <- ""
   } else {
     fix_ef = fixed_effects[[model_name]]
   }
-  
+
   RunLMEM(
-    data = DATA$data,
+    data = data_for_models,
     dv = dv,
     rand_ef = random_effects[[model_name]],
     fix_ef = fix_ef
   )
-  
+
 })
 
 names(LMEM_MODELS) <- names(random_effects)
@@ -319,7 +376,7 @@ names(LMEM_MODELS) <- names(random_effects)
 ### Model diagnostics ---------------------------------------------------------
 
 if (show_model_diagnostics) {
-  
+
   LMEM_MODELS.diagnostics <- lapply(
     names(random_effects),
     function(model_name) {
@@ -334,9 +391,9 @@ if (show_model_diagnostics) {
       return(diagnostics)
     }
   )
-  
+
   names(LMEM_MODELS.diagnostics) <- names(random_effects)
-  
+
 }
 
 ### Variance partitioning -----------------------------------------------------
@@ -349,16 +406,21 @@ if (calc_VPCs) {
 
 ### Inference by LRT with parametric bootstrapping ----------------------------
 # Compare large model with smaller model to derive p-value for added random 
-# effect (e.g., Sequence_collapsed)
+# effect (e.g., Sequence)
 # Note, models have to be fitted with REML = FALSE for valid comparison by LRT,
 # and this can be time-consuming with larger datasets
 
 source(file.path(base_dir, "scripts", "RunLRT.R"))
 
-model_contrasts <- list(
-
-  small_models = c("M.0.a", "M.0.b", "M.0.c", "M.0.d"),
-  large_models = c("M.0.b", "M.0.c", "M.0.d", "M.0.e")
+model_contrasts <- tibble::tribble(
+  ~small_models, ~large_models,
+  "M.1.a",       "M.1.b",
+  "M.1.b",       "M.1.c",
+  "M.1.c",       "M.1.d",
+  "M.1.d",       "M.1.e",
+  "M.1.e",       "M.1.f",
+  "M.1.f",       "M.1.g",
+  "M.1.g",       "M.1.h"
 )
 
 if (run_LRTs || run_pbkrtest) {
