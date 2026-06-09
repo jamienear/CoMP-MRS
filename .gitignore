@@ -20,3 +20,4 @@ stats/ProcSpectralQuality/data/derivatives/plots/amcharts_pies/
 .positai
 .Rhistory
 *.Rproj
+.vscode
