@@ -66,8 +66,8 @@ save_csv               <- TRUE # Set to TRUE to save descriptive statistics tabl
 show_pie_charts        <- FALSE # Set to TRUE to create pie charts of categorical variables (e.g., species
 show_amcharts          <- FALSE # Set to TRUE to create interactive 3D pie charts using amCharts4
 show_dot_plots         <- FALSE # Set to TRUE to create dot plots of spectral quality metrics by different grouping variables
-show_box_plots         <- FALSE # Set to TRUE to create box plots of spectral quality metrics by different grouping variables
-show_facet_plots       <- FALSE # Set to TRUE to create facet plots of spectral quality metrics by different grouping variables
+show_box_plots         <- TRUE # Set to TRUE to create box plots of spectral quality metrics by different grouping variables
+show_facet_plots       <- TRUE # Set to TRUE to create facet plots of spectral quality metrics by different grouping variables
 show_model_diagnostics <- TRUE # Set to TRUE to show model diagnostic plots (e.g., residuals, Q-Q plots) for linear mixed-effects models
 calc_VPCs              <- TRUE # Set to TRUE to calculate variance partition coefficients (VPCs) from linear mixed-effects models to assess the proportion of variance explained by each random effect
 export_model_table     <- TRUE # Set to TRUE to export a modelsummary comparison table of LMEM results to Word (.docx)
@@ -289,29 +289,43 @@ fixed_effects <- list(
 )
 
 # # Null model with no random effects
-# 
+#
 # M.null <- lm(
 #   formula = as.formula(paste(dv, "~ 1")),
 #   data = DATA$data
 # )
 
+# Pre-filter to complete cases across all variables used in any model so that
+# every model is fitted to the same dataset (required for valid LRT comparison)
+all_fix_ef_vars    <- unique(unlist(fixed_effects))
+all_rand_ef_groups <- unique(unlist(lapply(random_effects, names)))
+all_model_vars     <- c(dv, all_fix_ef_vars, all_rand_ef_groups)
+
+data_for_models <- DATA$data %>%
+  dplyr::filter(dplyr::if_all(dplyr::any_of(all_model_vars), ~ !is.na(.)))
+
+n_dropped <- nrow(DATA$data) - nrow(data_for_models)
+if (n_dropped > 0) {
+  message(sprintf("LMEMs: dropped %d row(s) with missing values to ensure a common dataset across models.", n_dropped))
+}
+
 # Run LMEM models
 
 LMEM_MODELS <- lapply(names(random_effects), function(model_name) {
-  
+
   if (is_empty(fixed_effects[[model_name]])) {
     fix_ef <- ""
   } else {
     fix_ef = fixed_effects[[model_name]]
   }
-  
+
   RunLMEM(
-    data = DATA$data,
+    data = data_for_models,
     dv = dv,
     rand_ef = random_effects[[model_name]],
     fix_ef = fix_ef
   )
-  
+
 })
 
 names(LMEM_MODELS) <- names(random_effects)
@@ -319,7 +333,7 @@ names(LMEM_MODELS) <- names(random_effects)
 ### Model diagnostics ---------------------------------------------------------
 
 if (show_model_diagnostics) {
-  
+
   LMEM_MODELS.diagnostics <- lapply(
     names(random_effects),
     function(model_name) {
@@ -334,9 +348,9 @@ if (show_model_diagnostics) {
       return(diagnostics)
     }
   )
-  
+
   names(LMEM_MODELS.diagnostics) <- names(random_effects)
-  
+
 }
 
 ### Variance partitioning -----------------------------------------------------

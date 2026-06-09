@@ -1,4 +1,4 @@
-# Box plots for each (with jittered points) -----------------------------------
+# Box plots for each (with jittered points)
 
 PlotBoxPlots <- function(data, out_dir, y_vars, x_vars) {
   
@@ -60,7 +60,7 @@ PlotBoxPlots <- function(data, out_dir, y_vars, x_vars) {
       j <- 1
     }
     
-    if (x_var %in% c( "ShimMethod")) {
+    if (x_var %in% c("ShimMethod")) {
       a <- 15
       j <- 1
     }
@@ -103,16 +103,10 @@ PlotBoxPlots <- function(data, out_dir, y_vars, x_vars) {
       scale_x_discrete(
         breaks = every_nth(nth)
       ) +
-      theme_comp() +
-      theme(
-        axis.text.x = element_text(angle = a, hjust = j),
-        panel.background = element_rect(fill = "transparent", color = NA),
-        plot.background  = element_rect(fill = "transparent", color = NA),
-        legend.background = element_rect(fill = "transparent", color = NA)
-      )
-    
+      theme_comp()
+
     print(p)
-    
+
     ggsave(
       filename = file.path(out_dir, file_name),
       plot = p,
@@ -122,15 +116,14 @@ PlotBoxPlots <- function(data, out_dir, y_vars, x_vars) {
       dpi = 300,
       bg = "transparent"
     )
-    
+
     return(p)
   }
   
-  
   # Make box plots ------------------------------------------------------------
-  
+
   all_boxplots <- list()
-  
+
   for (y in y_vars) {
     for (x in x_vars) {
       file_name <- paste0("boxplot_", y$var, "_by_", x, ".png")
@@ -165,10 +158,7 @@ PlotBoxPlots <- function(data, out_dir, y_vars, x_vars) {
         axis.text = element_text(size = 7),
         axis.text.x = element_text(size = 8, face = "bold"),
         axis.text.y = element_text(size = 8, face = "bold"),
-        legend.position = "none",
-        panel.background = element_rect(fill = "transparent", color = NA),
-        plot.background  = element_rect(fill = "transparent", color = NA),
-        legend.background = element_rect(fill = "transparent", color = NA)
+        legend.position = "none"
       )
   }
   
@@ -270,8 +260,7 @@ PlotBoxPlots <- function(data, out_dir, y_vars, x_vars) {
       height = page_height,
       units = "in",
       dpi = 300,
-      type = "cairo",
-      bg = "transparent"
+      type = "cairo"
     )
     
     # SVG (best for editing in Illustrator / Inkscape)
