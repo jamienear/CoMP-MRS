@@ -59,10 +59,10 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
       SoftwareVer = MRsoftwareversion
     )
   
-  # Remove DP01 (example only) ------------------------------------------------
+  # Remove DP01 (example DP) and DP32 -----------------------------------------
   
   DATA <- DATA %>%
-    filter(DP != "DP01") 
+    filter(!DP %in% c("DP01", "DP32"))
   
   # Rename some data entries --------------------------------------------------
   
@@ -76,10 +76,14 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
       CompID = as.factor(str_remove_all(CompID, "compMR"))
     ) %>%
     mutate(
-      ShimMethod = as.factor(if_else(ShimMethod == "Other", "MAPSHIM", ShimMethod))
+      ShimMethod = as.factor(if_else(
+        ShimMethod == "Other", "MAPSHIM", ShimMethod
+        ))
     ) %>%
     mutate(
-      ShimMethod = as.factor(if_else(ShimMethod == "FASTMAP-FASTESTMAP", "FAST(EST)MAP", ShimMethod))
+      ShimMethod = as.factor(if_else(
+        ShimMethod == "FASTMAP-FASTESTMAP", "FAST(EST)MAP", ShimMethod
+        ))
     )
   
   # Reorder all factors alphabetically / numerically ascending ----------------
