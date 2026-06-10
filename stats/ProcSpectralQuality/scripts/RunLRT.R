@@ -5,11 +5,11 @@ RunLRT <- function(models,
                    run_LRTs = TRUE,
                    run_pbkrtest = FALSE,
                    verbose = FALSE) {
-  
+
   if (verbose) cat("\n── Running likelihood ratio test (LRT) ──\n")
 
   results <- list()
-  
+
   if (run_LRTs) {
     results$LRT <- mapply(
       function(large, small) {

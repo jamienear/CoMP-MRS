@@ -433,6 +433,16 @@ if (run_LRTs || run_pbkrtest) {
   )
 }
 
+### Export LRT results table to Word ------------------------------------------
+
+source(file.path(base_dir, "scripts", "ExportLRTTable.R"))
+
+if (run_LRTs && exists("LRT_RESULTS") && !is.null(LRT_RESULTS$LRT)) {
+  ExportLRTTable(
+    lrt_results = LRT_RESULTS$LRT,
+    out_dir     = deriv_dir
+  )
+}
 
 ### Export LMEM model comparison table to Word --------------------------------
 
