@@ -8,7 +8,7 @@
 # the authors then modified and extended the code as needed for the specific
 # analyses and visualizations in this project.
 #
-# Last updated: 2026-06-09
+# Last updated: 2026-06-10
 
 # Initialize ------------------------------------------------------------------
 
@@ -243,11 +243,13 @@ random_effects <- list(
     ShimMethod = "1"
   ),
   M.1.a = list(
+    Species = "1",
     Sequence = "1",
     Cryoprobe = "1",
     ShimMethod = "1"
   ),
   M.1.b = list(
+    Species = "1",
     Sequence = "1",
     Cryoprobe = "1",
     ShimMethod = "1"
