@@ -146,7 +146,7 @@ LoadData <- function(csv_file = "CoMP_MRS_Rstats_input.csv",
       # FieldStrength = factor(case_when(
       #   FieldStrength_orig %in% c(11.7, 14.1, 15.2) ~ "11.7+",
       #   TRUE ~ as.character(FieldStrength_orig)
-      # )),
+      # ))
       FieldStrength = case_when(
         FieldStrength_orig %in% c(14.1, 15.2) ~ 11.7,
         TRUE ~ as.numeric(FieldStrength_orig)

@@ -8,11 +8,13 @@ DescripStats <- function(data) {
   
   make_stats <- function(data, group_var, value_var, prefix) {
     data %>%
-      dplyr::group_by(across(all_of(group_var))) %>%
+      dplyr::group_by(
+        across(all_of(group_var))
+      ) %>%
       dplyr::summarise(
-        mean = mean(.data[[value_var]], na.rm = TRUE),
-        sd   = sd(.data[[value_var]], na.rm = TRUE),
-        cv   = cv(.data[[value_var]], na.rm = TRUE),
+        mean    = mean(.data[[value_var]], na.rm = TRUE),
+        sd      = sd(.data[[value_var]], na.rm = TRUE),
+        cv      = cv(.data[[value_var]], na.rm = TRUE),
         .groups = "drop"
       ) %>%
       rename(
@@ -40,7 +42,7 @@ DescripStats <- function(data) {
     Product = make_stats(data, "SiteID", "SNR_LW_Product_norm", "Product")
   )
   
-  ### Species -----------------------------------------------------------
+  ### Species -----------------------------------------------------------------
   
   STATS$Species <- list(
     LW      = make_stats(data, "Species", "LW_norm", "LW"),
@@ -49,7 +51,7 @@ DescripStats <- function(data) {
     Product = make_stats(data, "Species", "SNR_LW_Product_norm", "Product")
   )
   
-  ### Vendor ----------------------------------------------------------------
+  ### Vendor ------------------------------------------------------------------
   
   STATS$Vendor <- list(
     LW      = make_stats(data, "Vendor", "LW_norm", "LW"),
@@ -58,7 +60,7 @@ DescripStats <- function(data) {
     Product = make_stats(data, "Vendor", "SNR_LW_Product_norm", "Product")
   )
   
-  ### FieldStrength -----------------------------------------------------------------
+  ### FieldStrength -----------------------------------------------------------
   
   STATS$FieldStrength <- list(
     LW      = make_stats(data, "FieldStrength", "LW_norm", "LW"),
@@ -67,7 +69,7 @@ DescripStats <- function(data) {
     Product = make_stats(data, "FieldStrength", "SNR_LW_Product_norm", "Product")
   )
   
-  ### Sequence --------------------------------------------------------------
+  ### Sequence ----------------------------------------------------------------
   
   STATS$Sequence <- list(
     LW      = make_stats(data, "Sequence", "LW_norm", "LW"),
@@ -76,7 +78,7 @@ DescripStats <- function(data) {
     Product = make_stats(data, "Sequence", "SNR_LW_Product_norm", "Product")
   )
   
-  ### VOI -----------------------------------------------------------
+  ### VOI ---------------------------------------------------------------------
   
   STATS$VOI <- list(
     LW      = make_stats(data, "VOI", "LW_norm", "LW"),
@@ -85,7 +87,32 @@ DescripStats <- function(data) {
     Product = make_stats(data, "VOI", "SNR_LW_Product_norm", "Product")
   )
   
-  ### Species x Vendor ------------------------------------------------
+  ### Cryoprobe ---------------------------------------------------------------
+  
+  STATS$Cryoprobe <- list(
+    LW      = make_stats(data, "Cryoprobe", "LW_norm", "LW"),
+    SNR     = make_stats(data, "Cryoprobe", "SNR_norm", "SNR"),
+    Ratio   = make_stats(data, "Cryoprobe", "SNR_LW_Ratio_norm", "Ratio"),
+    Product = make_stats(data, "Cryoprobe", "SNR_LW_Product_norm", "Product")
+  )
+
+  ### Cryoprobe percentage change (TRUE vs FALSE) -----------------------------
+
+  pct_change <- function(stats, prefix) {
+    mean_col <- paste0("mean", prefix)
+    m_true   <- stats[[mean_col]][stats$Cryoprobe == TRUE]
+    m_false  <- stats[[mean_col]][stats$Cryoprobe == FALSE]
+    (m_true - m_false) / m_false * 100
+  }
+
+  STATS$Cryoprobe_pct_change <- list(
+    LW      = pct_change(STATS$Cryoprobe$LW,      "LW"),
+    SNR     = pct_change(STATS$Cryoprobe$SNR,     "SNR"),
+    Ratio   = pct_change(STATS$Cryoprobe$Ratio,   "Ratio"),
+    Product = pct_change(STATS$Cryoprobe$Product, "Product")
+  )
+  
+  ### Species x Vendor --------------------------------------------------------
   
   STATS$Species_Vendor <- data %>%
     dplyr::group_by(Vendor, Species) %>%
@@ -102,10 +129,10 @@ DescripStats <- function(data) {
       meanProduct = mean(SNR_LW_Product_norm, na.rm = TRUE),
       sdProduct   = sd(SNR_LW_Product_norm, na.rm = TRUE),
       cvProduct   = cv(SNR_LW_Product_norm, na.rm = TRUE),
-      .groups = "drop"
+      .groups     = "drop"
     )
   
-  ### Species x VOI -------------------------------------------
+  ### Species x VOI -----------------------------------------------------------
   
   STATS$Species_VOI <- data %>%
     dplyr::group_by(Species, VOI) %>%
@@ -122,7 +149,7 @@ DescripStats <- function(data) {
       meanProduct = mean(SNR_LW_Product_norm, na.rm = TRUE),
       sdProduct   = sd(SNR_LW_Product_norm, na.rm = TRUE),
       cvProduct   = cv(SNR_LW_Product_norm, na.rm = TRUE),
-      .groups = "drop"
+      .groups     = "drop"
     )
   
   ### All ---------------------------------------------------------------------

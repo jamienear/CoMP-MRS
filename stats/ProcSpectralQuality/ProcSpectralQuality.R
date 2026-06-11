@@ -8,7 +8,7 @@
 # the authors then modified and extended the code as needed for the specific
 # analyses and visualizations in this project.
 #
-# Last updated: 2026-06-09
+# Last updated: 2026-06-10
 
 # Initialize ------------------------------------------------------------------
 
@@ -213,130 +213,67 @@ dv <- "SNR_LW_Ratio_norm"
 
 random_effects <- list(
   M.0.a = list(
-    Vendor = "1",
-    Species = "1"
+    Vendor = "1"
   ),
   M.0.b = list(
-    Vendor = "1",
-    Species = "1",
-    VOI = "1"
+    Species = "1"
   ),
   M.0.c = list(
     Vendor = "1",
-    Species = "1",
-    VOI = "1",
-    Sequence = "1"
+    Species = "1"
   ),
   M.0.d = list(
-    Vendor = "1",
     Species = "1",
-    VOI = "1",
+    Sequence = "1"
+  ),
+  M.0.e = list(
+    Species = "1",
+    Sequence = "1",
+    VOI = "1"
+  ),
+  M.0.f = list(
+    Species = "1",
     Sequence = "1",
     Cryoprobe = "1"
   ),
-  M.0.e = list(
-    Vendor = "1",
-    Species = "1",
-    VOI = "1",
-    Sequence = "1",
-    Cryoprobe = "1",
-    ShimMethod = "1"
-  ),
-  M.0.f = list(
-    Vendor = "1",
-    Species = "1",
-    VOI = "1",
-    Sequence = "1",
-    Cryoprobe = "1",
-    ShimMethod = "1"
-  ),
   M.0.g = list(
-    Vendor = "1",
     Species = "1",
-    VOI = "1",
-    Sequence = "1",
-    Cryoprobe = "1",
-    ShimMethod = "1"
-  ),
-  M.0.h = list(
-    Vendor = "1",
-    Species = "1",
-    VOI = "1",
     Sequence = "1",
     Cryoprobe = "1",
     ShimMethod = "1"
   ),
   M.1.a = list(
+    Species = "1",
     Sequence = "1",
     Cryoprobe = "1",
-    Vendor = "1",
-    VOI = "1",
-    Species = "1",
     ShimMethod = "1"
   ),
   M.1.b = list(
+    Species = "1",
     Sequence = "1",
     Cryoprobe = "1",
-    Vendor = "1",
-    VOI = "1",
-    Species = "1",
     ShimMethod = "1"
   ),
   M.1.c = list(
+    Species = "1",
     Sequence = "1",
     Cryoprobe = "1",
-    Vendor = "1",
-    VOI = "1",
-    Species = "1",
     ShimMethod = "1"
   ),
-  M.1.d = list(
+  M.final = list(
+    Species = "1",
     Sequence = "1",
     Cryoprobe = "1",
-    Vendor = "1",
-    VOI = "1",
-    Species = "1"
-  ),
-  M.1.e = list(
-    Sequence = "1",
-    Cryoprobe = "1",
-    Vendor = "1",
-    VOI = "1"
-  ),
-  M.1.f = list(
-    Sequence = "1",
-    Cryoprobe = "1",
-    Vendor = "1"
-  ),
-  M.1.g = list(
-    Sequence = "1",
-    Cryoprobe = "1"
-  ),
-  M.1.h = list(
-    Sequence = "1"
+    ShimMethod = "1"
   )
 )
 
 fixed_effects <- list(
-  M.0.f = c("FieldStrength"),
-  M.0.g = c("FieldStrength", "Age"),
-  M.0.h = c("FieldStrength", "Sex"),
-  M.1.a = c("FieldStrength", "Age", "Sex"),
-  M.1.b = c("FieldStrength", "Age"),
-  M.1.c = c("FieldStrength"),
-  M.1.d = c("FieldStrength"),
-  M.1.e = c("FieldStrength"),
-  M.1.f = c("FieldStrength"),
-  M.1.g = c("FieldStrength"),
-  M.1.h = c("FieldStrength")
+  M.1.a   = c("FieldStrength"),
+  M.1.b   = c("FieldStrength", "Age"),
+  M.1.c   = c("FieldStrength", "Sex"),
+  M.final = c("FieldStrength")
 )
-
-# # Null model with no random effects
-#
-# M.null <- lm(
-#   formula = as.formula(paste(dv, "~ 1")),
-#   data = DATA$data
-# )
 
 # Pre-filter to complete cases across all variables used in any model so that
 # every model is fitted to the same dataset (required for valid LRT comparison)
@@ -353,6 +290,12 @@ if (n_dropped > 0) {
 }
 
 # Run LMEM models
+
+# Null model with no random effects
+M.null <- lm(
+  formula = as.formula(paste(dv, "~ 1")),
+  data = DATA$data
+)
 
 LMEM_MODELS <- lapply(names(random_effects), function(model_name) {
 
@@ -414,13 +357,17 @@ source(file.path(base_dir, "scripts", "RunLRT.R"))
 
 model_contrasts <- tibble::tribble(
   ~small_models, ~large_models,
+  # Models with random effects only
+  "M.0.a",       "M.0.c",
+  "M.0.b",       "M.0.c",
+  "M.0.b",       "M.0.d",
+  "M.0.d",       "M.0.e",
+  "M.0.d",       "M.0.f",
+  "M.0.f",       "M.0.g",
+  # Models with random and fixed effects
+  "M.0.g",       "M.1.a",
   "M.1.a",       "M.1.b",
-  "M.1.b",       "M.1.c",
-  "M.1.c",       "M.1.d",
-  "M.1.d",       "M.1.e",
-  "M.1.e",       "M.1.f",
-  "M.1.f",       "M.1.g",
-  "M.1.g",       "M.1.h"
+  "M.1.a",       "M.1.c"
 )
 
 if (run_LRTs || run_pbkrtest) {
@@ -433,6 +380,16 @@ if (run_LRTs || run_pbkrtest) {
   )
 }
 
+### Export LRT results table to Word ------------------------------------------
+
+source(file.path(base_dir, "scripts", "ExportLRTTable.R"))
+
+if (run_LRTs && exists("LRT_RESULTS") && !is.null(LRT_RESULTS$LRT)) {
+  ExportLRTTable(
+    lrt_results = LRT_RESULTS$LRT,
+    out_dir     = deriv_dir
+  )
+}
 
 ### Export LMEM model comparison table to Word --------------------------------
 

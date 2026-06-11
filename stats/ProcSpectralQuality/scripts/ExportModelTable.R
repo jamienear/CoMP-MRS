@@ -27,15 +27,15 @@ ExportModelTable <- function(models,
   #' @param title    Table title shown above the table
   #'
   #' @return Invisibly returns the flextable object
-  
+
   if (is.null(models) || length(models) == 0) {
     stop("No models provided. Please supply a named list of model objects.")
   }
-  
+
   if (!dir.exists(out_dir)) {
     dir.create(out_dir, recursive = TRUE)
   }
-  
+
   # ── Extract conditional R² for each model ─────────────────────────────────
   r2_conditional <- vapply(
     models,
@@ -52,7 +52,7 @@ ExportModelTable <- function(models,
     },
     numeric(1)
   )
-  
+
   # ── Determine VPC columns ──────────────────────────────────────────────────
   all_grps      <- NULL
   vpc_col_names <- NULL
@@ -61,7 +61,7 @@ ExportModelTable <- function(models,
     all_grps      <- c("Residual", setdiff(all_grps, "Residual"))
     vpc_col_names <- paste0("VPC: ", all_grps)
   }
-  
+
   # ── Notes ──────────────────────────────────────────────────────────────────
   notes <- c(
     "Standard errors in parentheses.",
@@ -100,13 +100,13 @@ ExportModelTable <- function(models,
   bd <- tbl$body$data
   
   # First visible column is the model column
-  orig_model_col <- bd[[tbl$col_keys[[1L]]]]
+  orig_model_col <- bd[[tbl$col_keys[[1]]]]
   model_col <- orig_model_col
   
   # Fill down blank model labels for lookup purposes
-  for (i in seq_len(length(model_col))[-1L]) {
+  for (i in seq_len(length(model_col))[-1]) {
     if (nchar(trimws(model_col[[i]])) == 0L) {
-      model_col[[i]] <- model_col[[i - 1L]]
+      model_col[[i]] <- model_col[[i - 1]]
     }
   }
   
@@ -163,14 +163,14 @@ ExportModelTable <- function(models,
     flextable::fontsize(size = 10, part = "all") |>
     flextable::font(fontname = "Arial", part = "all") |>
     flextable::set_table_properties(layout = "autofit")
-  
+
   # ── Save to Word ───────────────────────────────────────────────────────────
   out_path <- file.path(out_dir, filename)
   sect_properties <- officer::prop_section(
     page_size = officer::page_size(orient = "landscape")
   )
   flextable::save_as_docx(tbl, path = out_path, pr_section = sect_properties)
-  
+
   message("Model table exported to: ", out_path)
   invisible(tbl)
 }
