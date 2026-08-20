@@ -23,7 +23,17 @@ DescripStats <- function(data) {
         !!paste0("cv", prefix)   := cv
       )
   }
-  
+
+  # The percent difference is calculated using the median because some of the  
+  # variables for which we calculate SNR/LW_norm are NOT normally distributed,  
+  # although we assume their normality for the LMEM
+  # This function only works for 2-level variables!
+  percent_difference <- function(data, group_var, value_var, lvl1, lvl2) {
+    m1 <- median(data[[value_var]][data[[group_var]] == lvl1], na.rm = TRUE)
+    m2 <- median(data[[value_var]][data[[group_var]] == lvl2], na.rm = TRUE)
+    (m1 - m2) / m2 * 100
+  }
+
   ### DP ----------------------------------------------------------------------
   
   STATS$DP <- list(
@@ -77,6 +87,33 @@ DescripStats <- function(data) {
     Ratio   = make_stats(data, "Sequence", "SNR_LW_Ratio_norm", "Ratio"),
     Product = make_stats(data, "Sequence", "SNR_LW_Product_norm", "Product")
   )
+    
+  ### Sequence percentage difference (LASER vs. PRESS) -----------------------
+
+  STATS$Sequence_percent_difference$LvP <- list(
+    LW      = percent_difference(data, "Sequence", "LW_norm", "LASER", "PRESS"),
+    SNR     = percent_difference(data, "Sequence", "SNR_norm", "LASER", "PRESS"),
+    Ratio   = percent_difference(data, "Sequence", "SNR_LW_Ratio_norm", "LASER", "PRESS"),
+    Product = percent_difference(data, "Sequence", "SNR_LW_Product_norm", "LASER", "PRESS")
+  )
+     
+  ### Sequence percentage difference (LASER vs. STEAM) -----------------------
+
+  STATS$Sequence_percent_difference$LvSt <- list(
+    LW      = percent_difference(data, "Sequence", "LW_norm", "LASER", "STEAM"),
+    SNR     = percent_difference(data, "Sequence", "SNR_norm", "LASER", "STEAM"),
+    Ratio   = percent_difference(data, "Sequence", "SNR_LW_Ratio_norm", "LASER", "STEAM"),
+    Product = percent_difference(data, "Sequence", "SNR_LW_Product_norm", "LASER", "STEAM")
+  ) 
+
+  ### Sequence percentage difference (LASER vs. SPECIAL) -----------------------
+
+  STATS$Sequence_percent_difference$LvSp <- list(
+    LW      = percent_difference(data, "Sequence", "LW_norm", "LASER", "SPECIAL"),
+    SNR     = percent_difference(data, "Sequence", "SNR_norm", "LASER", "SPECIAL"),
+    Ratio   = percent_difference(data, "Sequence", "SNR_LW_Ratio_norm", "LASER", "SPECIAL"),
+    Product = percent_difference(data, "Sequence", "SNR_LW_Product_norm", "LASER", "SPECIAL")
+  )
   
   ### VOI ---------------------------------------------------------------------
   
@@ -96,20 +133,31 @@ DescripStats <- function(data) {
     Product = make_stats(data, "Cryoprobe", "SNR_LW_Product_norm", "Product")
   )
 
-  ### Cryoprobe percentage change (TRUE vs FALSE) -----------------------------
+  ### Cryoprobe percentage difference (TRUE vs FALSE) -----------------------------
 
-  pct_change <- function(stats, prefix) {
-    mean_col <- paste0("mean", prefix)
-    m_true   <- stats[[mean_col]][stats$Cryoprobe == TRUE]
-    m_false  <- stats[[mean_col]][stats$Cryoprobe == FALSE]
-    (m_true - m_false) / m_false * 100
-  }
-
-  STATS$Cryoprobe_pct_change <- list(
-    LW      = pct_change(STATS$Cryoprobe$LW,      "LW"),
-    SNR     = pct_change(STATS$Cryoprobe$SNR,     "SNR"),
-    Ratio   = pct_change(STATS$Cryoprobe$Ratio,   "Ratio"),
-    Product = pct_change(STATS$Cryoprobe$Product, "Product")
+  STATS$Cryoprobe_percent_difference <- list(
+    LW      = percent_difference(data, "Cryoprobe", "LW_norm", TRUE, FALSE),
+    SNR     = percent_difference(data, "Cryoprobe", "SNR_norm", TRUE, FALSE),
+    Ratio   = percent_difference(data, "Cryoprobe", "SNR_LW_Ratio_norm", TRUE, FALSE),
+    Product = percent_difference(data, "Cryoprobe", "SNR_LW_Product_norm", TRUE, FALSE)
+  )
+  
+  ### ShimMethod ---------------------------------------------------------------
+  
+  STATS$ShimMethod <- list(
+    LW      = make_stats(data, "ShimMethod", "LW_norm", "LW"),
+    SNR     = make_stats(data, "ShimMethod", "SNR_norm", "SNR"),
+    Ratio   = make_stats(data, "ShimMethod", "SNR_LW_Ratio_norm", "Ratio"),
+    Product = make_stats(data, "ShimMethod", "SNR_LW_Product_norm", "Product")
+  )
+  
+  ### ShimMethod percentage difference (FAST(EST)MAP vs MAPSHIM) -----------------------------
+  
+  STATS$ShimMethod_percent_difference <- list(
+    LW      = percent_difference(data, "ShimMethod", "LW_norm", "MAPSHIM", "FAST(EST)MAP"),
+    SNR     = percent_difference(data, "ShimMethod", "SNR_norm", "MAPSHIM", "FAST(EST)MAP"),
+    Ratio   = percent_difference(data, "ShimMethod", "SNR_LW_Ratio_norm", "MAPSHIM", "FAST(EST)MAP"),
+    Product = percent_difference(data, "ShimMethod", "SNR_LW_Product_norm", "MAPSHIM", "FAST(EST)MAP")
   )
   
   ### Species x Vendor --------------------------------------------------------

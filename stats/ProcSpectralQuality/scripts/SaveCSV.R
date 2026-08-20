@@ -32,10 +32,60 @@ SaveCSV <- function(data, out_dir) {
   write_csv(data$Sequence$Ratio, file.path(out_dir, "stats_Sequence_Ratio.csv"))
   write_csv(data$Sequence$Product, file.path(out_dir, "stats_Sequence_Product.csv"))
   
+  write_csv(
+    tibble(
+      Metric = names(data$Sequence_percent_difference$LvP),
+      PercentChange = unlist(data$Sequence_percent_difference$LvP)
+    ),
+    file.path(out_dir, "stats_Sequence_percent_change_LASERvsPRESS.csv")
+  )  
+  
+  write_csv(
+    tibble(
+      Metric = names(data$Sequence_percent_difference$LvSt),
+      PercentChange = unlist(data$Sequence_percent_difference$LvSt)
+    ),
+    file.path(out_dir, "stats_Sequence_percent_change_LASERvsSTEAM.csv")
+  )
+  
+  write_csv(
+    tibble(
+      Metric = names(data$Sequence_percent_difference$LvSp),
+      PercentChange = unlist(data$Sequence_percent_difference$LvSp)
+    ),
+    file.path(out_dir, "stats_Sequence_percent_change_LASERvsSPECIAL.csv")
+  )
+  
   write_csv(data$VOI$LW, file.path(out_dir, "stats_VOI_LW.csv"))
   write_csv(data$VOI$SNR, file.path(out_dir, "stats_VOI_SNR.csv"))
   write_csv(data$VOI$Ratio, file.path(out_dir, "stats_VOI_Ratio.csv"))
   write_csv(data$VOI$Product, file.path(out_dir, "stats_VOI_Product.csv"))
+  
+  write_csv(data$Cryoprobe$LW, file.path(out_dir, "stats_Cryoprobe_LW.csv"))
+  write_csv(data$Cryoprobe$SNR, file.path(out_dir, "stats_Cryoprobe_SNR.csv"))
+  write_csv(data$Cryoprobe$Ratio, file.path(out_dir, "stats_Cryoprobe_Ratio.csv"))
+  write_csv(data$Cryoprobe$Product, file.path(out_dir, "stats_Cryoprobe_Product.csv"))
+  
+  write_csv(
+    tibble(
+      Metric = names(data$Cryoprobe_percent_difference),
+      PercentChange = unlist(data$Cryoprobe_percent_difference)
+    ),
+    file.path(out_dir, "stats_Cryoprobe_percent_change.csv")
+  )
+  
+  write_csv(data$ShimMethod$LW, file.path(out_dir, "stats_ShimMethod_LW.csv"))
+  write_csv(data$ShimMethod$SNR, file.path(out_dir, "stats_ShimMethod_SNR.csv"))
+  write_csv(data$ShimMethod$Ratio, file.path(out_dir, "stats_ShimMethod_Ratio.csv"))
+  write_csv(data$ShimMethod$Product, file.path(out_dir, "stats_ShimMethod_Product.csv"))
+  
+  write_csv(
+    tibble(
+      Metric = names(data$ShimMethod_percent_difference),
+      PercentChange = unlist(data$ShimMethod_percent_difference)
+    ),
+    file.path(out_dir, "stats_ShimMethod_percent_change.csv")
+  )
   
   write_csv(
     data$Species_Vendor,
