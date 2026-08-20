@@ -1,8 +1,9 @@
 % op_getLW.m
 % Jamie Near, McGill University 2014.
+% JN - CoMP-MRS Edits - Apr 2026
 % 
 % USAGE:
-% [FWHM]=op_getLW(in,Refppmmin,Refppmmax,zpfactor,suppressPlots);
+% [FWHM,FWHM_hz]=op_getLW(in,Refppmmin,Refppmmax,zpfactor,suppressPlots);
 % 
 % DESCRIPTION:
 % Estimates the linewidth of a reference peak in the spectrum.  By default, 
@@ -24,10 +25,11 @@
 %                  (Optional.  Default = false)
 %
 % OUTPUTS:
-% FWHM       = Estimated linewidth of the input spectrum (in Hz).
+% FWHM       = Estimated linewidth of the input spectrum (in ppm).
+% FWHM_hz    = Estimated linewidth of the input spectrum (in Hz).
 
 
-function FWHM=op_getLW(in,Refppmmin,Refppmmax,zpfactor,suppressPlots)
+function [FWHM,FWHM_hz]=op_getLW(in,Refppmmin,Refppmmax,zpfactor,suppressPlots)
 
 if nargin<5
     suppressPlots=false;
@@ -59,10 +61,15 @@ if ~suppressPlots
     set(gca,'Xdir','reverse');
 end
 
-gtHalfMax=find(abs(real(Refwindow)) >= 0.5*abs(maxRef));
+base1=mean(real(Refwindow(1:10)));
+base2=mean(real(Refwindow(end-9:end)));
+base=mean([base1 base2]);
+halfMax=abs(maxRef)-(0.5*(abs(maxRef)-base));
+
+gtHalfMax=find(abs(real(Refwindow)) >= halfMax);
 
 FWHM1=ppmwindow(gtHalfMax(1)) - ppmwindow(gtHalfMax(end));
-FWHM1=FWHM1*(42.577*in.Bo);  %Assumes proton.
+%FWHM1=FWHM1*(42.577*in.Bo);  %Assumes proton.  %JN CoMP-MRS return LW in ppm instead of Hz
 
 
 %METHOD 2:  FIT WATER PEAK TO DETERMINE FWHM PARAM
@@ -101,9 +108,10 @@ end
 
 
 FWHM2=abs(parsFit(2));
-FWHM2=FWHM2*(42.577*in.Bo);  %Assumes Proton.
+%FWHM2=FWHM2*(42.577*in.Bo);  %Assumes Proton.  %JN CoMP-MRS return LW in ppm instead of Hz
 
-FWHM=mean([FWHM1 FWHM2]);  
+FWHM=mean([FWHM1 FWHM2]);
+FWHM_hz=FWHM*(42.577*in.Bo);
 
 if ~suppressPlots
     fprintf(['The calculated linewidth is:  ' num2str(FWHM) ' Hz.' ]);
