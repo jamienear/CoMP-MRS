@@ -48,14 +48,23 @@ if ~exist('opt','var')
                                                  19,1,1; 19,2,1; 19,3,1; 19,4,1; 19,5,1; 19,6,1; 19,7,1; 19,8,1;...% (DPid, idsubject, idses)
                                                  14,1,1; 14,2,1; 14,3,1; 14,4,1; 14,5,1; 14,6,1; 14,7,1; 14,8,1] ;% EM: handle special cases (07.04.2026) (DPid, idsubject, idses): remove separated water
     opt.exception.discardData.ListDPsub     =   [5,2,1; 16,2,1;...
-                                                 17,1,1; 17,2,1; 17,3,1; 17,4,1; 17,5,1; 17,6,1; 17,7,1; 17,8,1] ;% EM: handle special cases (07.04.2026) (DPid, idsubject, idses): remove data (corrupted dataset or poor data quality)
+                                                 20,1,2; 20,2,2; 20,3,2; 20,4,2; 20,5,2; 20,6,2; 20,7,2; 20,8,2,... % ses-02 folders were created for all subjects but they are all empty and disrupt the preprocessing 
+%                                                17,1,1; 17,2,1; 17,3,1; 17,4,1; 17,5,1; 17,6,1; 17,7,1; 17,8,1,...
+                                                 ] ;% EM: handle special cases (07.04.2026) (DPid, idsubject, idses): remove data (corrupted dataset or poor data quality)
     opt.exception.manualRephase.listIdent     =   {['DP30_sub-8_ses-1'  '_sepWater']}; % % EM: handle special cases (07.04.2026)
     opt.exception.manualRephase.listPhase     =   [-70,1.5, 2 ]; % % EM: handle special cases (07.04.2026) (ph0(°), ph1, ppm0) for each DPid, idsubject in opt.exception.manuallyRephase.ListDPsub 
     % *** EM: handle special cases (07.04.2026)
 end
 
-
- try
+%---EM 27.02.2026-----
+opt.debug_path = [pwd filesep 'plots' filesep 'debug' ];
+mkdir([opt.debug_path])
+date_ana = char(string(datetime('now'),"yyyy-MM-dd_HH-mm-ss"));
+opt.debug_FileName = ['debug_' num2str(DPid) '_' char(date_ana) '.log'];
+debug_id = fopen([opt.debug_path filesep opt.debug_FileName ], 'w');
+%---EM 27.02.2026 (end)-----
+ 
+try
     
     [check]=compMRS_DPcheck(DPid);
     if check.allSame
@@ -66,11 +75,6 @@ end
         end
 
         %---EM 27.02.2026-----
-        opt.debug_path = [pwd filesep 'plots' filesep 'debug' ];
-        mkdir([opt.debug_path])
-        date_ana = char(string(datetime('now'),"yyyy-MM-dd_HH-mm-ss"));
-        opt.debug_FileName = ['debug_' num2str(DPid) '_' char(date_ana) '.log'];
-        debug_id = fopen([opt.debug_path filesep opt.debug_FileName ], 'w');
         fprintf(debug_id,['Processing ' num2str(DPid)]);
         fclose(debug_id);
         %---EM 27.02.2026 (end)-----
@@ -106,6 +110,7 @@ end
                 % disp(['Processing ' DPid ' sub-' num2str(m) ' ses-' num2str(n)]) % <--- EM 27.02.2026-----
                 disp_writelog_v26(opt.debug_path, opt.debug_FileName,['Processing ' DPid ' sub-' num2str(m) ' ses-' num2str(n)])  % ---> EM 27.02.2026-----
 
+                try
                 nsubj = string(extractBetween(in{m,n}.filepath,[filesep 'sub-0'],[filesep 'ses-']));
                 ident = ([DPid '_sub-' nsubj '_ses-' num2str(n)]);
                 ident = char(join(ident,""));
@@ -120,6 +125,9 @@ end
                 if autoWaterExists && ~isempty(inw_auto{m, n}) && sum(contains(opt.exception.discardData.listIdent,ident))==0  % EM: handle special cases (07.04.2026)
                     disp_writelog_v26(opt.debug_path, opt.debug_FileName,['*** Processing water auto'])  % ---> EM 27.02.2026-----
                     [out_auto{m}{n}, outw_auto{m}{n}] = compMRS_DPproc_sub(in{m, n}, inw_auto{m, n}, [ident  '_autoWater'], check, opt);
+                end
+                catch
+                    disp([DPid ' error'])
                 end
             end
         end

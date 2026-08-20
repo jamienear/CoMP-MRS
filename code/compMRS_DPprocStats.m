@@ -1,72 +1,17 @@
 % compMRS_DPprocStats.m
 % Diana Rotaru, Columbia University & Medical University of Vienna, 2025
 % Mark Mikkelsen, Weill Cornell Medicine, 2025
-%
-% USAGE:
-% [out]=compMRS_DPprocStats(allDPs_parentfolder)
-%
-% DESCRIPTION:
-% Computes and compiles processing statistics across all data packets.
-% Extracts relevant quantitative processing outputs and summarizes them
-% into a single overview for quality control and downstream evaluation.
-%
-% INPUTS:
-% allDPs_parentfolder = directory containing all data packets
-% The scripts needs to be ran within the folder containing the xlsx, and
-% mat files needed for information extraction
-%
-% OUTPUTS:
-% out = excel file containing processing statistics
 
 clear; clc;
-% dir_name = mfilename("fullpath");
-% dir_name = fileparts(fileparts(dir_name));
-% data_dir = fullfile(dir_name,'data','supplementary');
-%
-% %% File names
-% xlsxFile = fullfile(data_dir,'CoMP-MRS_participantSpreadsheet.xlsx');
-% matFile  = fullfile(data_dir,'CoMP-MRS.mat');
-% siteFile = fullfile(data_dir,'CoMP-MRS-sites.xlsx');
-% outCsv   = fullfile(data_dir,'CoMP_MRS_Rstats_input_v1.csv');
 
-cd('A:\CoMP-MRS\Data\data\supplementary')
+cd('A:\CoMP-MRS\CoMP-MRS-DGR\stats\ProcSpectralQuality\data\input_table\v3_20260415')
+
 %% File names
-xlsxFile = 'CoMP-MRS_participantSpreadsheet.xlsx';
-matFile  = 'CoMP-MRS.mat';
-siteFile = 'CoMP-MRS-sites.xlsx';
-outCsv   = 'CoMP_MRS_Rstats_input.csv';
-
-%% Exceptions
-% DP05-sub-02 corrupted data
-% DP07-sub-01 rejected due to distortions; SNR/LW ~ 0.3;
-% DP16-sub-02 corrupted data
-% DP17-sub01, sub-04 discard due to poor quality
-% DP21-sub-01 discard due to distortions near NAA
-% DP22-sub-04, sub-07 fix phase
-% DP29-sub-02, sub-03, maybe sub-05 too fix phase + frequency, sub-01 and sub-04 have voxel sizes of 3.0 x 1.5 x 3.0 and 3.1 x 2.1 x 3.0 instead of 2.5 x 1.5 x 3.0
-% DP30-sub-08 fix phase
-% DP33-no data
-% DP35-no data
-
-%% Differences
-% DP04-sub-01 very high LW => SNR/LW ~ 0.7, x5-10 smaller than the rest
-% DP06-sub-07 voxel size is 3.1 x 0.9 x 1.3 instead of 3.1 x 0.9 x 1.4
-% DP07-sub-06 very low SNR/LW similar to sub01, ~0.8
-% DP08-sub-01, sub-03, sub-04 3.8 x 2.3 x 1.8 instead of 3.8 x 2.5 x 1.8;  sub-06, sub-07, sub-08 have SNR/LW ratios x5, x4, x8 times higher than the others
-% DP09-sub06 SNR/LW ~ 0.4 and x8-10 smaller than other ratios; sub-08 SNR/LW ~ 0.7 and x6-8 smaller than other ratios;
-% DP13-sub03, sub-04 - high lactate
-% DP14-all high lactate
-% DP17-sub01 L-hippocampus, all others R-hippocampus
-% DP18-sub-02 no weight
-% DP19-all different voxel size
-% DP20-all high lactate
-% DP22-sub-04, sub-07 fix phase
-% DP23-all high taurine
-% DP25-all SNR/LW differences of an order of magnitude due to low SNR
-% DP27-only sub-06 ses-02and sub-08 se-s02 are 2.3 x 1.2 x 2.0 instead of 2.5 x 1.2 x 2.0; not relevant here
-% DP29-sub-02, sub-03, maybe sub-05 too fix phase + frequency, sub-01 and sub-04 have voxel sizes of 3.0 x 1.5 x 3.0 and 3.1 x 2.1 x 3.0 instead of 2.5 x 1.5 x 3.0
-% DP30-sub-08 fix phase, sub-01-05 high lactate, sub-03 low SNR/LW
-% DP36-all very low SNR/LW ratios
+xlsxFile       = 'CoMP-MRS_participantSpreadsheet.xlsx';
+matFile        = 'CoMP-MRS-final.mat';
+siteFile       = 'CoMP-MRS-sites.xlsx';
+outCsv         = 'CoMP_MRS_Rstats_input.csv';
+outSummaryXlsx = 'CoMP_MRS_summary_table.xlsx';
 
 %% ------------------------------------------------------------------------
 % Read Excel file
@@ -90,11 +35,13 @@ fullTable = readtable(xlsxFile, opts);
 % 12 = animal.ses-01.weight
 % 28 = MRI.vendor
 % 29 = MRI.field.strength
+% 32 = MRI.coil.setup
 % 35 = MRS.pulse.sequence
 % 36 = MRS.brain.region
 % 37 = MRS.VoI.size
 % 44 = MRS.n.ave
-selectedCols = [1 3 6 7 9 11 12 28 29 35 36 37 44];
+% 62 = MRS.shim.method
+selectedCols = [1 3 6 7 9 11 12 28 29 32 35 36 37 44 62];
 selectedData = fullTable(:, selectedCols);
 
 %% ------------------------------------------------------------------------
@@ -137,7 +84,7 @@ dpLabels     = dpLabels(validIdx);
 nRows = height(fullTable);
 
 %% ------------------------------------------------------------------------
-% Subject numbering within DP
+% Subject numbering within DP (internal only)
 %% ------------------------------------------------------------------------
 subjectNumberWithinDP = zeros(nRows,1);
 
@@ -156,8 +103,6 @@ end
 
 %% ------------------------------------------------------------------------
 % Build participant table
-% NOTE:
-% Pull by original spreadsheet column number, not by position in selectedData.
 %% ------------------------------------------------------------------------
 participantTable = table();
 
@@ -171,67 +116,73 @@ participantTable.AnimalWeight  = local_get_selected_column(selectedData, selecte
 
 participantTable.MRvendor      = local_get_selected_column(selectedData, selectedCols, 28);
 participantTable.MRfield       = local_get_selected_column(selectedData, selectedCols, 29);
+participantTable.MRcoil        = local_get_selected_column(selectedData, selectedCols, 32);
 participantTable.MRsequence    = local_get_selected_column(selectedData, selectedCols, 35);
 participantTable.MRbrainregion = local_get_selected_column(selectedData, selectedCols, 36);
-participantTable.VoISize       = local_get_selected_column(selectedData, selectedCols, 37);
+participantTable.MRVoxSize       = local_get_selected_column(selectedData, selectedCols, 37);
 participantTable.MRaverages    = local_get_selected_column(selectedData, selectedCols, 44);
 
 %% ------------------------------------------------------------------------
 % Add extra fields from fullTable by header name
 %% ------------------------------------------------------------------------
 participantTable.MRsoftwareversion = local_get_fulltable_column(fullTable, "MRI.software.version");
-participantTable.MRcoildetail      = local_get_fulltable_column(fullTable, "MRI.coil.detail");
 participantTable.MRSsw             = local_get_fulltable_column(fullTable, "MRS.sw");
 participantTable.MRSnpts           = local_get_fulltable_column(fullTable, "MRS.n.pts");
 participantTable.MRSTE             = local_get_fulltable_column(fullTable, "MRS.TE");
 participantTable.MRSTR             = local_get_fulltable_column(fullTable, "MRS.TR");
-participantTable.MRSshimmethod     = local_get_fulltable_column(fullTable, "MRS.shim.method");
+participantTable.MRSshim           = local_get_fulltable_column(fullTable, "MRS.shim.method");
 
 %% ------------------------------------------------------------------------
-% Standardize string values
+% Standardize / normalize field types and values
 %% ------------------------------------------------------------------------
-participantTable.MRbrainregion = string(participantTable.MRbrainregion);
-participantTable.MRvendor = string(participantTable.MRvendor);
-participantTable.AnimalStrain = string(participantTable.AnimalStrain);
-participantTable.MRSshimmethod = string(participantTable.MRSshimmethod);
+participantTable.AnimalSpecies     = string(participantTable.AnimalSpecies);
+participantTable.AnimalStrain      = string(participantTable.AnimalStrain);
+participantTable.AnimalSex         = string(participantTable.AnimalSex);
+participantTable.MRvendor          = string(participantTable.MRvendor);
+participantTable.MRcoil            = string(participantTable.MRcoil);
+participantTable.MRsequence        = string(participantTable.MRsequence);
+participantTable.MRbrainregion     = string(participantTable.MRbrainregion);
+participantTable.MRVoxSize           = string(participantTable.MRVoxSize);
+participantTable.MRsoftwareversion = string(participantTable.MRsoftwareversion);
+participantTable.MRSshim           = string(participantTable.MRSshim);
+
+%% ------------------------------------------------------------------------
+% Add Cryoprobe column (yes/no based on MRcoil)
+%% ------------------------------------------------------------------------
+coilStr = lower(string(participantTable.MRcoil));
+
+isCryo = contains(coilStr, "cryo") | contains(coilStr, "cryoprobe");
+
+Cryoprobe = repmat("FALSE", height(participantTable), 1);
+Cryoprobe(isCryo) = "TRUE";
+
+participantTable.Cryoprobe = Cryoprobe;
+
+participantTable = movevars(participantTable, 'Cryoprobe', 'After', 'MRcoil');
 
 % MRbrainregion
-participantTable.MRbrainregion = strrep(participantTable.MRbrainregion, ...
-    "Right hippocampus", "Rhippocampus");
-participantTable.MRbrainregion = strrep(participantTable.MRbrainregion, ...
-    "Left hippocampus", "Lhippocampus");
-participantTable.MRbrainregion = strrep(participantTable.MRbrainregion, ...
-    "Right striatum", "Rstriatum");
-participantTable.MRbrainregion = strrep(participantTable.MRbrainregion, ...
-    "Left striatum", "Lstriatum");
+participantTable.MRbrainregion = strrep(participantTable.MRbrainregion, "Right hippocampus", "Rhippocampus");
+participantTable.MRbrainregion = strrep(participantTable.MRbrainregion, "Left hippocampus", "Lhippocampus");
+participantTable.MRbrainregion = strrep(participantTable.MRbrainregion, "Right striatum", "Rstriatum");
+participantTable.MRbrainregion = strrep(participantTable.MRbrainregion, "Left striatum", "Lstriatum");
 
 % MRvendor
-participantTable.MRvendor = strrep(participantTable.MRvendor, ...
-    "Agilent/Varian", "Varian");
-participantTable.MRvendor = strrep(participantTable.MRvendor, ...
-    "Varian/Agilent", "Varian");
+participantTable.MRvendor = strrep(participantTable.MRvendor, "Agilent/Varian", "Varian");
+participantTable.MRvendor = strrep(participantTable.MRvendor, "Varian/Agilent", "Varian");
 
 % AnimalStrain
-participantTable.AnimalStrain = strrep(participantTable.AnimalStrain, ...
-    "C57BL/6J", "C57BL-6J");
-participantTable.AnimalStrain = strrep(participantTable.AnimalStrain, ...
-    "C57BL/6", "C57BL-6");
-participantTable.AnimalStrain = strrep(participantTable.AnimalStrain, ...
-    "balb/c", "BALB-c");
-participantTable.AnimalStrain = strrep(participantTable.AnimalStrain, ...
-    "BALB/c", "BALB-c");
-participantTable.AnimalStrain = strrep(participantTable.AnimalStrain, ...
-    "B6129SF2/J", "B6129SF2-J");
-participantTable.AnimalStrain = strrep(participantTable.AnimalStrain, ...
-    "FVB/N", "FVB-N");
+participantTable.AnimalStrain = strrep(participantTable.AnimalStrain, "C57BL/6J", "C57BL-6J");
+participantTable.AnimalStrain = strrep(participantTable.AnimalStrain, "C57BL/6", "C57BL-6");
+participantTable.AnimalStrain = strrep(participantTable.AnimalStrain, "balb/c", "BALB-c");
+participantTable.AnimalStrain = strrep(participantTable.AnimalStrain, "BALB/c", "BALB-c");
+participantTable.AnimalStrain = strrep(participantTable.AnimalStrain, "B6129SF2/J", "B6129SF2-J");
+participantTable.AnimalStrain = strrep(participantTable.AnimalStrain, "FVB/N", "FVB-N");
 
-% MRSshimmethod
-participantTable.MRSshimmethod = strrep(participantTable.MRSshimmethod, ...
-    "FASTMAP/FASTESTMAP", "FASTMAP-FASTESTMAP");
+% MRSshim
+participantTable.MRSshim = strrep(participantTable.MRSshim, "FASTMAP/FASTESTMAP", "FASTMAP-FASTESTMAP");
 
 %% ------------------------------------------------------------------------
 % Standardize MRfield
-% Replace all values between 9 and 9.4 with 9.4
 %% ------------------------------------------------------------------------
 participantTable.MRfield = str2double(string(participantTable.MRfield));
 idxField = participantTable.MRfield >= 9 & participantTable.MRfield < 9.4;
@@ -243,7 +194,7 @@ participantTable.MRfield(idxField) = 9.4;
 VoISizeProduct = nan(nRows,1);
 
 for i = 1:nRows
-    val = participantTable.VoISize(i);
+    val = participantTable.MRVoxSize(i);
 
     if iscell(val)
         val = string(val{1});
@@ -265,14 +216,13 @@ for i = 1:nRows
 end
 
 participantTable = addvars(participantTable, VoISizeProduct, ...
-    'After', 'VoISize', ...
+    'After', 'MRVoxSize', ...
     'NewVariableNames', 'MRvoxelvolume');
+
 
 %% ------------------------------------------------------------------------
 % Load MAT file
 %% ------------------------------------------------------------------------
-% in case the DP does not have a separate water scan, then the out_auto and
-% outw_auto variables should be used to extract LW, SNR, etc.
 matData = load(matFile);
 
 if ~isfield(matData, 'out')
@@ -291,17 +241,9 @@ nDPinMat = size(out,2);
 
 %% ------------------------------------------------------------------------
 % Extract LW / SNR / SNR_LW_ratio
-% First try matData.out
-% If empty/missing, fall back to matData.out_auto
-%
-% Exceptions:
-% DP05-sub-02 -> force NaN, fail
-% DP16-sub-02 -> force NaN, fail
-%
-% For these DPs, later subjects are shifted by -1 in the MAT data because
-% sub-02 is missing/corrupted there.
 %% ------------------------------------------------------------------------
 LW = nan(nRows,1);
+LW_hz = nan(nRows,1);
 SNR = nan(nRows,1);
 SNR_LW_ratio = nan(nRows,1);
 
@@ -320,24 +262,19 @@ for i = 1:nRows
         continue
     end
 
-    % ---- Hard-coded exceptions for corrupted sub-02 ----
-    if (dpNumber == 5 && subjNum == 2) || (dpNumber == 16 && subjNum == 2)
-        LW(i) = NaN;
-        SNR(i) = NaN;
-        SNR_LW_ratio(i) = NaN;
+    % Exceptions
+    if (dpNumber == 16 && subjNum == 2) || (dpNumber == 17 && subjNum == 1)
         CompCheck(i) = "fail";
         continue
     end
 
-    % ---- Adjust MAT subject index for DPs where sub-02 is missing ----
     matSubjNum = subjNum;
-    if (dpNumber == 5 || dpNumber == 16) && subjNum > 2
+    if (dpNumber == 16) && subjNum > 2
         matSubjNum = subjNum - 1;
     end
 
     metricStruct = [];
 
-    % ---- First try out ----
     try
         dpCell = out{1, dpNumber};
 
@@ -352,25 +289,19 @@ for i = 1:nRows
     catch
     end
 
-    % Read values from out if present
     lw_val = NaN;
+    lwhz_val = NaN;
     snr_val = NaN;
     ratio_val = NaN;
 
     if ~isempty(metricStruct)
-        if isfield(metricStruct,'LW') && ~isempty(metricStruct.LW)
-            lw_val = metricStruct.LW;
-        end
-        if isfield(metricStruct,'SNR') && ~isempty(metricStruct.SNR)
-            snr_val = metricStruct.SNR;
-        end
-        if isfield(metricStruct,'SNR_LW_ratio') && ~isempty(metricStruct.SNR_LW_ratio)
-            ratio_val = metricStruct.SNR_LW_ratio;
-        end
+        if isfield(metricStruct,'LW') && ~isempty(metricStruct.LW), lw_val = metricStruct.LW; end
+        if isfield(metricStruct,'LW_hz') && ~isempty(metricStruct.LW_hz), lwhz_val = metricStruct.LW_hz; end
+        if isfield(metricStruct,'SNR') && ~isempty(metricStruct.SNR), snr_val = metricStruct.SNR; end
+        if isfield(metricStruct,'SNR_LW_ratio') && ~isempty(metricStruct.SNR_LW_ratio), ratio_val = metricStruct.SNR_LW_ratio; end
     end
 
-    % ---- Use out_auto only for values still missing ----
-    needsFallback = isnan(lw_val) || isnan(snr_val) || isnan(ratio_val);
+    needsFallback = isnan(lw_val) || isnan(lwhz_val) || isnan(snr_val) || isnan(ratio_val);
 
     if needsFallback && ~isempty(out_auto) && dpNumber <= size(out_auto,2)
         try
@@ -381,15 +312,10 @@ for i = 1:nRows
                 candidateStruct_auto = local_extract_struct(subjEntry_auto);
 
                 if isstruct(candidateStruct_auto)
-                    if isnan(lw_val) && isfield(candidateStruct_auto,'LW') && ~isempty(candidateStruct_auto.LW)
-                        lw_val = candidateStruct_auto.LW;
-                    end
-                    if isnan(snr_val) && isfield(candidateStruct_auto,'SNR') && ~isempty(candidateStruct_auto.SNR)
-                        snr_val = candidateStruct_auto.SNR;
-                    end
-                    if isnan(ratio_val) && isfield(candidateStruct_auto,'SNR_LW_ratio') && ~isempty(candidateStruct_auto.SNR_LW_ratio)
-                        ratio_val = candidateStruct_auto.SNR_LW_ratio;
-                    end
+                    if isnan(lw_val) && isfield(candidateStruct_auto,'LW') && ~isempty(candidateStruct_auto.LW), lw_val = candidateStruct_auto.LW; end
+                    if isnan(lwhz_val) && isfield(candidateStruct_auto,'LW_hz') && ~isempty(candidateStruct_auto.LW_hz), lwhz_val = candidateStruct_auto.LW_hz; end
+                    if isnan(snr_val) && isfield(candidateStruct_auto,'SNR') && ~isempty(candidateStruct_auto.SNR), snr_val = candidateStruct_auto.SNR; end
+                    if isnan(ratio_val) && isfield(candidateStruct_auto,'SNR_LW_ratio') && ~isempty(candidateStruct_auto.SNR_LW_ratio), ratio_val = candidateStruct_auto.SNR_LW_ratio; end
                 end
             end
         catch
@@ -397,6 +323,7 @@ for i = 1:nRows
     end
 
     LW(i) = lw_val;
+    LW_hz(i) = lwhz_val;
     SNR(i) = snr_val;
     SNR_LW_ratio(i) = ratio_val;
 end
@@ -405,8 +332,9 @@ end
 % Add DP + metrics
 %% ------------------------------------------------------------------------
 participantTable.DP = dpLabels;
-participantTable.SubjectInDP = subjectNumberWithinDP;
+participantTable.SubjectInDP = subjectNumberWithinDP; % internal only
 participantTable.LW = LW;
+participantTable.LW_hz = LW_hz;
 participantTable.SNR = SNR;
 participantTable.SNR_LW_Ratio = SNR_LW_ratio;
 
@@ -415,52 +343,62 @@ participantTable = movevars(participantTable, {'DP','SubjectInDP'}, 'Before', 1)
 %% ------------------------------------------------------------------------
 % Add CompID
 %% ------------------------------------------------------------------------
-nRowsFinal = height(participantTable);
-compIDs = strcat("compMRS", compose("%03d", (1:nRowsFinal)'));
-
-participantTable = addvars(participantTable, compIDs, ...
-    'Before', 1, ...
-    'NewVariableNames', 'CompID');
+participantTable.CompID = strcat("compMRS", compose("%03d", (1:nRows)'));
 
 %% ------------------------------------------------------------------------
-% Add SiteID (S01, S02, ...)
+% Add SiteID (robust DP ↔ site mapping)
 %% ------------------------------------------------------------------------
 siteTable = readtable(siteFile);
 
-siteDP = string(siteTable{:,1});
-siteRaw = string(siteTable{:,2});
+% Extract DP numbers from BOTH tables (robust to formatting)
+siteDP_raw = string(siteTable{:,1});
+participantDP_raw = string(participantTable.DP);
 
-for i = 1:numel(siteDP)
-    token = regexp(siteDP(i), 'DP\s*0*(\d+)', 'tokens', 'once');
+siteDP_num = nan(height(siteTable),1);
+for i = 1:height(siteTable)
+    token = regexp(siteDP_raw(i), 'DP\s*0*(\d+)', 'tokens', 'once');
     if ~isempty(token)
-        siteDP(i) = "DP" + compose("%02d", str2double(token{1}));
+        siteDP_num(i) = str2double(token{1});
     end
 end
 
-[uniqueSites, ~, siteIdx] = unique(siteRaw, 'stable');
+participantDP_num = nan(height(participantTable),1);
+for i = 1:height(participantTable)
+    token = regexp(participantDP_raw(i), 'DP\s*0*(\d+)', 'tokens', 'once');
+    if ~isempty(token)
+        participantDP_num(i) = str2double(token{1});
+    end
+end
+
+% Get site names
+siteNames = string(siteTable{:,2});
+
+% Convert site names → standardized SiteID (S01, S02, …)
+[uniqueSites, ~, siteIdx] = unique(siteNames, 'stable');
 standardSiteIDs = "S" + compose("%02d", (1:numel(uniqueSites))');
-siteStandardLookup = standardSiteIDs(siteIdx);
 
-participantTable.DP = string(participantTable.DP);
+siteLookup = standardSiteIDs(siteIdx);
 
+% Assign SiteID by DP number (SAFE MATCHING)
 SiteID = strings(height(participantTable),1);
-[isMatch, loc] = ismember(participantTable.DP, siteDP);
-SiteID(isMatch) = siteStandardLookup(loc(isMatch));
 
-participantTable = addvars(participantTable, SiteID, ...
-    'After', 'CompID', ...
-    'NewVariableNames', 'SiteID');
+for i = 1:height(participantTable)
+    dpNum = participantDP_num(i);
+    matchIdx = find(siteDP_num == dpNum, 1);
+
+    if ~isempty(matchIdx)
+        SiteID(i) = siteLookup(matchIdx);
+    else
+        SiteID(i) = ""; % leave empty if no match
+    end
+end
+
+participantTable.SiteID = SiteID;
 
 %% ------------------------------------------------------------------------
 % Sort rows
 %% ------------------------------------------------------------------------
 participantTable = sortrows(participantTable, {'DP','SubjectInDP'});
-
-%% ------------------------------------------------------------------------
-% Remove unnecessary columns
-%% ------------------------------------------------------------------------
-participantTable.PacketID = [];
-participantTable.VoISize  = [];
 
 %% ------------------------------------------------------------------------
 % Safe cleaning
@@ -481,30 +419,212 @@ participantTable = addvars(participantTable, CompCheck, ...
     'NewVariableNames', 'CompCheck');
 
 %% ------------------------------------------------------------------------
-% Export CSV
+% Create summary table
+% PI, location, n_fail, comments removed
 %% ------------------------------------------------------------------------
-writetable(participantTable, outCsv, ...
-    'Delimiter', ',', ...
-    'QuoteStrings', true);
+uniqueDPs = unique(string(participantTable.DP), 'stable');
+nDP = numel(uniqueDPs);
+
+summaryTable = table();
+summaryTable.dataset = uniqueDPs;
+summaryTable.site = strings(nDP,1);
+summaryTable.species = strings(nDP,1);
+summaryTable.animal_strain = strings(nDP,1);
+summaryTable.age_mean = nan(nDP,1);
+summaryTable.age_SD = nan(nDP,1);
+summaryTable.sex = strings(nDP,1);
+summaryTable.vendor = strings(nDP,1);
+summaryTable.field_strength = nan(nDP,1);
+summaryTable.software_version = strings(nDP,1);
+summaryTable.coil_setup = strings(nDP,1);
+summaryTable.sequence = strings(nDP,1);
+summaryTable.sw = nan(nDP,1);
+summaryTable.n_pts = nan(nDP,1);
+summaryTable.TE = nan(nDP,1);
+summaryTable.TR = nan(nDP,1);
+summaryTable.shim_method = strings(nDP,1);
+summaryTable.number_of_averages = nan(nDP,1);
+summaryTable.region = strings(nDP,1);
+summaryTable.voxel_size = strings(nDP,1);
+summaryTable.voxel_volume = nan(nDP,1);
+summaryTable.LW_mean = nan(nDP,1);
+summaryTable.LW_hz_mean = nan(nDP,1);
+summaryTable.SNR_mean = nan(nDP,1);
+summaryTable.SNR_LW_ratio_mean = nan(nDP,1);
+
+for d = 1:nDP
+    dp = uniqueDPs(d);
+    subT = participantTable(string(participantTable.DP) == dp,:);
+
+    summaryTable.site(d) = local_first(subT.SiteID);
+    summaryTable.species(d) = local_first(subT.AnimalSpecies);
+    summaryTable.animal_strain(d) = local_first(subT.AnimalStrain);
+    summaryTable.vendor(d) = local_first(subT.MRvendor);
+    summaryTable.software_version(d) = local_first(subT.MRsoftwareversion);
+    summaryTable.coil_setup(d) = local_first(subT.MRcoil);
+    summaryTable.sequence(d) = local_first(subT.MRsequence);
+    summaryTable.shim_method(d) = local_first(subT.MRSshim);
+    summaryTable.region(d) = local_first(subT.MRbrainregion);
+    summaryTable.voxel_size(d) = local_first(subT.MRVoxSize);
+
+    ageVals = str2double(string(subT.AnimalAge));
+    ageVals = ageVals(~isnan(ageVals));
+    if ~isempty(ageVals)
+        summaryTable.age_mean(d) = mean(ageVals);
+        if numel(ageVals) > 1
+            summaryTable.age_SD(d) = std(ageVals,0);
+        else
+            summaryTable.age_SD(d) = 0;
+        end
+    end
+
+    sexVals = upper(strtrim(string(subT.AnimalSex)));
+    nF = sum(sexVals == "F");
+    nM = sum(sexVals == "M");
+    if nF > 0 && nM > 0
+        summaryTable.sex(d) = sprintf('%dF, %dM', nF, nM);
+    elseif nF > 0
+        summaryTable.sex(d) = sprintf('%dF', nF);
+    elseif nM > 0
+        summaryTable.sex(d) = sprintf('%dM', nM);
+    else
+        summaryTable.sex(d) = "";
+    end
+
+    fieldVals = subT.MRfield;
+    fieldVals = fieldVals(~isnan(fieldVals));
+    if ~isempty(fieldVals), summaryTable.field_strength(d) = fieldVals(1); end
+
+    vvVals = subT.MRvoxelvolume;
+    vvVals = vvVals(~isnan(vvVals));
+    if ~isempty(vvVals), summaryTable.voxel_volume(d) = vvVals(1); end
+
+    lwVals = subT.LW;
+    lwVals = lwVals(~isnan(lwVals));
+    if ~isempty(lwVals), summaryTable.LW_mean(d) = mean(lwVals); end
+
+    lwhzVals = subT.LW_hz;
+    lwhzVals = lwhzVals(~isnan(lwhzVals));
+    if ~isempty(lwhzVals), summaryTable.LW_hz_mean(d) = mean(lwhzVals); end
+
+    snrVals = subT.SNR;
+    snrVals = snrVals(~isnan(snrVals));
+    if ~isempty(snrVals), summaryTable.SNR_mean(d) = mean(snrVals); end
+
+    ratioVals = subT.SNR_LW_Ratio;
+    ratioVals = ratioVals(~isnan(ratioVals));
+    if ~isempty(ratioVals), summaryTable.SNR_LW_ratio_mean(d) = mean(ratioVals); end
+
+    swVals = str2double(string(subT.MRSsw));
+    swVals = swVals(~isnan(swVals));
+    if ~isempty(swVals), summaryTable.sw(d) = swVals(1); end
+
+    nptsVals = str2double(string(subT.MRSnpts));
+    nptsVals = nptsVals(~isnan(nptsVals));
+    if ~isempty(nptsVals), summaryTable.n_pts(d) = nptsVals(1); end
+
+    teVals = str2double(string(subT.MRSTE));
+    teVals = teVals(~isnan(teVals));
+    if ~isempty(teVals), summaryTable.TE(d) = teVals(1); end
+
+    trVals = str2double(string(subT.MRSTR));
+    trVals = trVals(~isnan(trVals));
+    if ~isempty(trVals), summaryTable.TR(d) = trVals(1); end
+
+    navVals = str2double(string(subT.MRaverages));
+    navVals = navVals(~isnan(navVals));
+    if ~isempty(navVals), summaryTable.number_of_averages(d) = navVals(1); end
+end
 
 %% ------------------------------------------------------------------------
-% Preview
+% Remove columns from final subject-level output
 %% ------------------------------------------------------------------------
-disp('Done. Output saved to:')
-disp(outCsv)
-
-disp(head(participantTable))
+participantTable.PacketID = [];
+participantTable.SubjectInDP = [];
 
 %% ------------------------------------------------------------------------
-% Local functions
+% Put CompID and SiteID first
+%% ------------------------------------------------------------------------
+participantTable = movevars(participantTable, {'CompID','SiteID'}, 'Before', 1);
+
+%% ------------------------------------------------------------------------
+% Format summary table numeric columns to 2 decimals
+%% ------------------------------------------------------------------------
+for k = 1:width(summaryTable)
+    if isnumeric(summaryTable{:,k})
+        summaryTable{:,k} = round(summaryTable{:,k}, 2);
+    end
+end
+
+%% ------------------------------------------------------------------------
+% Reorder FULL summary table columns (core first, rest after)
+%% ------------------------------------------------------------------------
+
+coreCols = { ...
+    'dataset','site','species','strain','sex','vendor','B0',...
+    'software_version','sequence','coil','shim','averages',...
+    'region','voxel_size','voxel_volume','sw','TE','TR','n_points' ...
+};
+
+% Keep only those that actually exist (safety)
+coreCols = coreCols(ismember(coreCols, summaryTable.Properties.VariableNames));
+
+% Get remaining columns automatically
+otherCols = setdiff(summaryTable.Properties.VariableNames, coreCols, 'stable');
+
+% Final order: core first, then everything else
+summaryTable = summaryTable(:, [coreCols, otherCols]);
+
+%% ------------------------------------------------------------------------
+% Create SHORT summary table (selected columns only)
+%% ------------------------------------------------------------------------
+%% This section of the code needs updates to match the formats and entries#
+%% in the table in figure 4 (boxplots)
+summaryShort = table();
+
+summaryShort.dataset           = summaryTable.dataset;
+summaryShort.site              = summaryTable.site;
+summaryShort.species           = summaryTable.species;
+summaryShort.animal_strain     = summaryTable.animal_strain;
+summaryShort.sex               = summaryTable.sex;
+summaryShort.vendor            = summaryTable.vendor;
+
+% Rename field_strength → B0
+summaryShort.B0                = summaryTable.field_strength;
+
+summaryShort.software_version  = summaryTable.software_version;
+summaryShort.coil_setup        = summaryTable.coil_setup;
+summaryShort.sequence          = summaryTable.sequence;
+summaryShort.sw                = summaryTable.sw;
+summaryShort.n_pts             = summaryTable.n_pts;
+summaryShort.TE                = summaryTable.TE;
+summaryShort.TR                = summaryTable.TR;
+summaryShort.shim_method       = summaryTable.shim_method;
+
+% Rename number_of_averages → averages
+summaryShort.averages          = summaryTable.number_of_averages;
+
+summaryShort.region            = summaryTable.region;
+summaryShort.voxel_size        = summaryTable.voxel_size;
+
+%% ------------------------------------------------------------------------
+% Export
+%% ------------------------------------------------------------------------
+writetable(participantTable, outCsv);
+writetable(summaryTable, outSummaryXlsx, 'Sheet','Summary');
+
+writetable(summaryShort, outSummaryXlsx, 'Sheet','Summary_short');
+
+disp('Done.')
+
+%% ------------------------------------------------------------------------
+% Helpers
 %% ------------------------------------------------------------------------
 function col = local_get_selected_column(selectedData, selectedCols, originalColNumber)
 idx = find(selectedCols == originalColNumber, 1);
-
 if isempty(idx)
     error('Requested original column %d is not present in selectedCols.', originalColNumber);
 end
-
 col = selectedData{:, idx};
 end
 
@@ -514,12 +634,11 @@ normVars = local_normalize_names(varNames);
 normTarget = local_normalize_names(string(candidateName));
 
 idx = find(normVars == normTarget, 1);
-
 if isempty(idx)
     error('Could not find column "%s" in fullTable.', string(candidateName));
 end
 
-col = tbl{:, idx};
+col = tbl{:,idx};
 end
 
 function out = local_normalize_names(x)
@@ -554,5 +673,15 @@ if iscell(entry)
             return
         end
     end
+end
+end
+
+function val = local_first(x)
+x = string(x);
+x = x(x ~= "" & ~ismissing(x));
+if isempty(x)
+    val = "";
+else
+    val = x(1);
 end
 end
