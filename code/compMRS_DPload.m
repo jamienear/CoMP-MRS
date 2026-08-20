@@ -6,19 +6,19 @@
 % USAGE:
 % [out,outw]=compMRS_DPload(DPid);
 %
-% DESCRIPTION:  
+% DESCRIPTION:
 % Simple script to load an entire DP into MATLAB/FID-A.  The function
 % returns a m x n cell array where m is the number of subjects in the DP,
 % and n is the number of sessions in the DP.  Each element of the cell
-% array is a FID-A data structure. 
+% array is a FID-A data structure.
 %
 % INPUTS:
 % DPid:     Data Packet ID (i.e. DP01, DP02, etc.)
-% 
+%
 % OUTPUTS:
 % out:      m x n cell array where m is the number of subjects in the DP,
 %           and n is the number of sessions in the DP.  Each element of the
-%           cell array is a water suppressed FID-A data struct. 
+%           cell array is a water suppressed FID-A data struct.
 % outw:     m x n cell array where m is the number of subjects in the DP,
 %           and n is the number of sessions in the DP.  Each element of the
 %           cell array is a water unsuppressed FID-A data struct.
@@ -42,7 +42,7 @@ outw_auto = [];
 %First check the vendor to be the same for all subj using DPcheck:
 check = compMRS_DPcheck(DPid);
 
-%Loop through subjs and sess.  If bruker, load using compMRS_loadspecBruker (initially, io_loadspec_bruk_new.m).  
+%Loop through subjs and sess.  If bruker, load using compMRS_loadspecBruker (initially, io_loadspec_bruk_new.m).
 % If varian, load using compMRS_loadspecVarian (initially,
 % io_loadspec_varian.m).
 if strcmp(check.vendor(1),'BRUKER')
@@ -51,23 +51,27 @@ if strcmp(check.vendor(1),'BRUKER')
         subjs=dir([DPid filesep 'sub*']);
         for n = 1:check.nSes(m)
             sess=dir([DPid filesep subjs(m).name filesep 'ses*']);
-            
+
             %Find the MRS data path and the REF data path (if applicable):
             svspath = dir([DPid filesep subjs(m).name filesep sess(n).name filesep 'mrs' filesep '*svs']);
             refpath = dir([DPid filesep subjs(m).name filesep sess(n).name filesep 'mrs' filesep '*mrsref']);
-            
-            % Only one directory is expected to exist if water data was
-            % acquired automatically, or two directories if the water data
-            % was acquired separately
-            
-			% refscan may be acquired automatically
-			[out{m,n}, outw_auto{m,n}]=compMRS_loadspecBruker([svspath(length(svspath)).folder filesep svspath(length(svspath)).name],'y');
-			
-            % If there was a refscan acquired separatly, load it as well
-            if ~isempty(svspath) && ~isempty(refpath) % refscan acquired separately
-                [outw{m,n}]=compMRS_loadspecBruker([refpath(length(refpath)).folder filesep refpath(length(refpath)).name],'y');
-            end
 
+            if isempty(svspath)
+                disp([DPid filesep subjs(m).name filesep sess(n).name filesep 'mrs is empty'])
+            else
+
+                % Only one directory is expected to exist if water data was
+                % acquired automatically, or two directories if the water data
+                % was acquired separately
+
+                % refscan may be acquired automatically
+                [out{m,n}, outw_auto{m,n}]=compMRS_loadspecBruker([svspath(length(svspath)).folder filesep svspath(length(svspath)).name],'y');
+
+                % If there was a refscan acquired separatly, load it as well
+                if ~isempty(svspath) && ~isempty(refpath) % refscan acquired separately
+                    [outw{m,n}]=compMRS_loadspecBruker([refpath(length(refpath)).folder filesep refpath(length(refpath)).name],'y');
+                end
+            end
         end
     end
 elseif strcmp(check.vendor(1),'VARIAN')
@@ -79,12 +83,15 @@ elseif strcmp(check.vendor(1),'VARIAN')
             %Find the MRS data path and the REF data path:
             svspath = dir([DPid filesep subjs(m).name filesep sess(n).name filesep 'mrs' filesep '*svs']);
             refpath = dir([DPid filesep subjs(m).name filesep sess(n).name filesep 'mrs' filesep '*mrsref']);
-
-            [out{m,n}]=compMRS_loadspecVarian([svspath(length(svspath)).folder filesep svspath(length(svspath)).name]);
-            [outw{m,n}]=compMRS_loadspecVarian([refpath(length(refpath)).folder filesep refpath(length(refpath)).name]);
+            if isempty(svspath)
+                disp([DPid filesep subjs(m).name filesep sess(n).name filesep 'mrs is empty'])
+            else
+                [out{m,n}]=compMRS_loadspecVarian([svspath(length(svspath)).folder filesep svspath(length(svspath)).name]);
+                [outw{m,n}]=compMRS_loadspecVarian([refpath(length(refpath)).folder filesep refpath(length(refpath)).name]);
+            end
         end
     end
 end
 
-   
+
 
