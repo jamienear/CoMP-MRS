@@ -1,8 +1,9 @@
-% run_simSteamShaped_fast.m
+% compMRS_simSTEAM.m
 % Jamie Near, Sunnybrook Research Institute 2022.
+% Revised for CoMP-MRS - Jamie NEar and Diana Rotaru, 2025/2026.
 % 
 % USAGE:
-% out=run_simSteamShaped_fast(spinSys);
+% out=compMRS_simSTEAM(spinSys,simPars);
 % 
 % DESCRIPTION:
 % This script simulates a STEAM experiment with fully shaped RF 
@@ -15,59 +16,66 @@
 % slice selective pulse along the x-direction, but this can be changed.  Up 
 % to a factor of 12 acceleration can be achieved using this approach.  If 
 % the parallel processing toolbox is not available, then replace
-% the "parfor" loop with a "for" loop.
+% the "parfor" loop with a "for" loop.  This tool is based on the FID-A
+% function 'run_simSteamShaped_fast.m'.
+%
 % 
 % INPUTS:
-% To run this script, there is technically only one input argument:
+% To run this function, there are two input arguments:
 % spinSys           = spin system to simulate 
+% simPars           = structure variable containing the necessary
+%                     simulation parameters as follows:
+%           simPars.excWaveform:    STEAM localization pulse waveform in FID-A RF structure format
+%           simPars.Tp:             duration of RF pulses[ms]
+%           simPars.flipAngle:      flip angle of RF pulses [degrees]
+%           simPars.Bfield:         magnetic field strength in [T]
+%           simPars.Npts:           number of spectral points
+%           simPars.sw:             spectral width [Hz]
+%           simPars.lw:             linewidth of the output spectrum [Hz]
+%           simPars.thkX:           slice thickness of x refocusing pulse [cm]
+%           simPars.thkY:           slice thickness of y refocusing pulse [cm]
+%           simPars.fovX:           full simulation FOV in the x direction [cm]
+%           simPars.fovY:           full simulation FOV in the y direction [cm]
+%           simPars.nX:             number of spatial grid points to simulate in x-direction
+%           simPars.nY:             number of spatial grid points to simulate in y-direction
+%           simPars.tau1:           STEAM echo time TE  [ms]
+%           simPars.tau2:           STEAM mixing time TM [ms]
+%           simPars.centreFreq:     Centre frequency of simulation [ppm]
+%           simPars.lineshape:      Lineshape to simulate ('L' (lorentzian) or 'G' (gaussian))
 %
-% However, the user should also edit the following parameters as 
-% desired before running the function:
-% RFWaveform        = name of rf pulse waveform used for both (2nd & 3rd) selective 90 degree pulses.
-% Tp                = duration of rf pulses[ms]
-% Bfield            = Magnetic field strength in [T]
-% Npts              = number of spectral points
-% sw                = spectral width [Hz]
-% Bfield            = magnetic field strength [Tesla]
-% lw                = linewidth of the output spectrum [Hz]
-% thkX              = slice thickness of x refocusing pulse [cm]
-% thkY              = slice thickness of y refocusing pulse [cm]
-% fovX              = full simulation FOV in the x direction [cm]
-% fovY              = full simulation FOV in the y direction [cm]
-% nX                = number of spatial grid points to simulate in x-direction
-% nY                = number of spatial grid points to simulate in y-direction
-% taus              = vector of pulse sequence timings  [ms]
 %
 % OUTPUTS:
 % out               = Simulation results, summed over all space.
 
-function out=run_simSteamShaped_fast(sys)
+function out=compMRS_simSTEAM(sys,simPars)
 tic
 % ************INPUT PARAMETERS**********************************
-rfWaveform='sampleExcPulse.pta'; %name of RF pulse waveform.
-Tp=1.920; %duration of RF pulses[ms]
-flipAngle=90;  %Flip Angle of the RF pulses [degrees]
-Npts=4096; %number of spectral points
-sw=2000; %spectral width [Hz]
-Bfield=2.89; %magnetic field strength [Tesla]
-lw=21; %linewidth of the output spectrum [Hz]
-thkX=2.5; %slice thickness of x RF pulse [cm]
-thkY=2.5; %slice thickness of y RF pulse [cm]
-fovX=5; %size of the full simulation Field of View in the x-direction [cm]
-fovY=5; %size of the full simulation Field of View in the y-direction [cm]
-nX=48; %Number of grid points to simulate in the x-direction
-nY=48; %Number of grid points to simulate in the y-direction
-tau1=160; %TE for STEAM sequence [ms]
-tau2=40; %TM for STEAM sequence [ms]
-centreFreq=2.3; %Centre frequency of simulation [ppm]
+excWaveform     = simPars.excWaveform;    %STEAM localization pulse waveform in FID-A RF structure format
+Tp              = simPars.Tp;             %duration of RF pulses[ms]
+flipAngle       = simPars.flipAngle;      %flip angle of RF pulses [degrees]
+Bfield          = simPars.Bfield;         %magnetic field strength in [T]
+Npts            = simPars.Npts;           %number of spectral points
+sw              = simPars.sw;             %spectral width [Hz]
+lw              = simPars.lw;             %linewidth of the output spectrum [Hz]
+thkX            = simPars.thkX;           %slice thickness of x refocusing pulse [cm]
+thkY            = simPars.thkY;           %slice thickness of y refocusing pulse [cm]
+fovX            = simPars.fovX;           %full simulation FOV in the x direction [cm]
+fovY            = simPars.fovY;           %full simulation FOV in the y direction [cm]
+nX              = simPars.nX;             %number of spatial grid points to simulate in x-direction
+nY              = simPars.nY;             %number of spatial grid points to simulate in y-direction
+tau1            = simPars.tau1;           %STEAM echo time TE  [ms]
+tau2            = simPars.tau2;           %STEAM mixing time TM [ms]
+centreFreq      = simPars.centreFreq;     %Centre frequency of simulation [ppm]
+lineshape       = simPars.lineshape;      %Lineshape to simulate ('L' (lorentzian) or 'G' (gaussian))
 % ************END OF INPUT PARAMETERS**********************************
 
 %set up spatial grid
 x=linspace(-fovX/2,fovX/2,nX); %X positions to simulate [cm]
 y=linspace(-fovY/2,fovY/2,nY); %y positions to simulate [cm]
 
-%Load RF waveform
-RF=io_loadRFwaveform(rfWaveform,'exc',0);
+% %Load RF waveform
+% RF=io_loadRFwaveform(excWaveform,'exc',0);
+RF=excWaveform;
 
 gamma=42577000; %gyromagnetic ratio
 
@@ -119,7 +127,7 @@ out=struct([]);
 parfor Y=1:length(y) %Use this if you do have the MATLAB parallel processing toolbox
 %            disp(['Executing Y-position ' num2str(Y) ' of ' num2str(length(y)) '!!!']);
             out_temp{Y}=sim_steam_shaped_fastRF2(d{1},Npts,sw,Bfield,lw,sys,tau1,tau2,...
-                RF,Tp,y(Y),Gy,flipAngle,centreFreq);
+                RF,Tp,y(Y),Gy,flipAngle,centreFreq,lineshape);
 end
 
 %Now combine the outputs;  Again, doing this inside a separate for loop
@@ -259,10 +267,10 @@ end
 
 
 %Nested Function #2
-function out = sim_steam_shaped_fastRF2(d,n,sw,Bfield,linewidth,sys,TE,TM,RF,tp,dy,Gy,flipAngle,centreFreq)
+function out = sim_steam_shaped_fastRF2(d,n,sw,Bfield,linewidth,sys,TE,TM,RF,tp,dy,Gy,flipAngle,centreFreq,shape)
 %
 % USAGE:
-% out = sim_steam_shaped_fastRF(d,n,sw,Bfield,linewidth,sys,TE,TM,RF,tp,dy,Gy,flipAngle,centreFreq)
+% out = sim_steam_shaped_fastRF(d,n,sw,Bfield,linewidth,sys,TE,TM,RF,tp,dy,Gy,flipAngle,centreFreq,shape)
 % 
 % DESCRIPTION:
 % This function simulates only the last bit of the STEAM experiment, from the 
@@ -298,15 +306,20 @@ function out = sim_steam_shaped_fastRF2(d,n,sw,Bfield,linewidth,sys,TE,TM,RF,tp,
 % Gx        = gradient strength for 2nd STEAM RF pulse [G/cm]
 % Gy        = gradient strength for 3rd STEAM RF pulse [G/cm]
 % flipAngle = flip angle of RF pulses [degrees] (Optional.  Default = 90 deg)
+% centreFreq= centre frequency of simulation in [ppm].
+% shape     = Lineshape of simulated spectra ('L' for Lorentizian or 'G' for Gaussian).
 %
 % OUTPUTS:
 % out       = simulated spectrum, in FID-A structure format, using STEAM 
 %             sequence.
 
-if nargin<14
-    centreFreq=2.3;
-    if nargin<13
-        flipAngle=90;
+if nargin<15
+    shape='L';
+    if nargin<14
+        centreFreq=2.3;
+        if nargin<13
+            flipAngle=90;
+        end
     end
 end
 
@@ -355,7 +368,7 @@ d=sim_shapedRF(d,H,RF2,tp,flipAngle,90,dy,Gy);          %2nd shaped 90 degree se
 d=sim_gradSpoil(d,H,[0,Gy,0],[0,dy,0],tp*RF1.rfCentre);   %Rewind gradient for 3rd 90 degree pulse (Not sure why, but this only works when Gy is positive.  Intiutively, Gx amplitude should be the opposite of the slice select gradient (i.e. -Gy), but this does not seem to work).
 d=sim_COF(H,d,-1);                                      %Keep only -1 coherences
 d=sim_evolve(d,H,delays(1)/2000);                            %Evolve by delays(1)/2
-[out,~]=sim_readout(d,H,n,sw,linewidth,90,'G');      %Readout along y (90 degree phase);
+[out,~]=sim_readout(d,H,n,sw,linewidth,90,shape);      %Readout along y (90 degree phase);
 %END PULSE SEQUENCE**************
 
 %Correct the ppm scale:
