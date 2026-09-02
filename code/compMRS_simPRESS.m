@@ -1,9 +1,9 @@
 % compMRS_simPRESS.m
 % Dana Goerzen and Jamie Near, McGill University 2021.
-% Revised 2025 by Jamie Near & Diana Rotaru
+% Revised for CoMP-MRS - Jamie Near and Diana Rotaru, 2025/2026.
 % 
 % USAGE:
-% out=compMRS_simPRESS(spinSys,params);
+% out=compMRS_simPRESS(spinSys,simPars);
 % 
 % DESCRIPTION:
 % This script simulates a PRESS experiment with fully shaped refocusing 
@@ -23,59 +23,64 @@
 % parallel computing toolbox, initialize the multiple worked nodes using
 % "matlabpool size X" where "X" is the number of available processing
 % nodes.  If the parallel processing toolbox is not available, then replace
-% the "parfor" loop with a "for" loop.
+% the "parfor" loop with a "for" loop.  This tool is based on the FID-A
+% function 'run_simPressShaped_fast.m'.
 % 
 % INPUTS:
-% To run this script, there is technically only one input argument:
+% To run this function, there are two input arguments:
 % spinSys           = spin system to simulate 
-%
-% However, the user should also edit the following parameters as 
-% desired before running the function:
-% refocWaveform     = name of refocusing pulse waveform.
-% refTp             = duration of refocusing pulses[ms]
-% Bfield            = Magnetic field strength in [T]
-% Npts              = number of spectral points
-% sw                = spectral width [Hz]
-% Bfield            = magnetic field strength [Tesla]
-% lw                = linewidth of the output spectrum [Hz]
-% thkX              = slice thickness of x refocusing pulse [cm]
-% thkY              = slice thickness of y refocusing pulse [cm]
-% fovX              = full simulation FOV in the x direction [cm]
-% fovY              = full simulation FOV in the y direction [cm]
-% nX                = number of spatial grid points to simulate in x-direction
-% nY                = number of spatial grid points to simulate in y-direction
-% taus              = vector of pulse sequence timings  [ms]
+% simPars           = structure variable containing the necessary
+%                     simulation parameters as follows:
+%           simPars.refocWaveform:  PRESS refocusing pulse waveform in FID-A RF structure format
+%           simPars.refTp:          duration of refocusing pulses[ms]
+%           simPars.flipAngle:      flip angle of refocusing pulses [degrees]
+%           simPars.Bfield:         magnetic field strength in [T]
+%           simPars.Npts:           number of spectral points
+%           simPars.sw:             spectral width [Hz]
+%           simPars.lw:             linewidth of the output spectrum [Hz]
+%           simPars.thkX:           slice thickness of x refocusing pulse [cm]
+%           simPars.thkY:           slice thickness of y refocusing pulse [cm]
+%           simPars.fovX:           full simulation FOV in the x direction [cm]
+%           simPars.fovY:           full simulation FOV in the y direction [cm]
+%           simPars.nX:             number of spatial grid points to simulate in x-direction
+%           simPars.nY:             number of spatial grid points to simulate in y-direction
+%           simPars.tau1:           TE1 for first spin echo  [ms]
+%           simPars.tau2:           TE2 for second spin echo [ms]
+%           simPars.centreFreq:     Centre frequency of simulation [ppm]
+%           simPars.lineshape:      Lineshape to simulate ('L' (lorentzian) or 'G' (gaussian))
 %
 % OUTPUTS:
 % out               = Simulation results, summed over all space.
 
-function out=compMRS_simPRESS(spinSys,params)
+function out=compMRS_simPRESS(sys,simPars)
 tic
-% ************INPUT PARAMETERS**********************************
-refocWaveform=params.refocWaveform; %name of refocusing pulse waveform.
-refTp=params.refTp; %duration of refocusing pulses[ms]
-flipAngle=180;  %Flip Angle of the refocusing pulses [degrees] (e.g. Use 180 for Siemens PRESS.  Use 137 for GE PRESS).
-Npts=4096; %number of spectral points
-sw=4000; %spectral width [Hz]
-Bfield=params.B0; %magnetic field strength [Tesla]
-lw=2; %linewidth of the output spectrum [Hz]
-thkX=2; %slice thickness of x refocusing pulse [cm]
-thkY=2; %slice thickness of y refocusing pulse [cm]
-fovX=4; %size of the full simulation Field of View in the x-direction [cm]
-fovY=4; %size of the full simulation Field of View in the y-direction [cm]
-nX=48; %Number of grid points to simulate in the x-direction
-nY=48; %Number of grid points to simulate in the y-direction
-tau1=params.te1; %TE1 for first spin echo [ms]
-tau2=params.te2; %TE2 for second spin echo [ms]
-centreFreq=2.3; %Centre frequency of simulation [ppm]
+% ************ASSIGN INPUT PARAMETERS TO VARIABLES**********************************
+refocWaveform = simPars.refocWaveform;  %PRESS refocusing pulse waveform in FID-A RF structure format
+refTp         = simPars.refTp;          %duration of refocusing pulses[ms]
+flipAngle     = simPars.flipAngle;      %flip angle of refocusing pulses [degrees]
+Npts          = simPars.Npts;           %number of spectral points
+sw            = simPars.sw;             %spectral width [Hz]
+Bfield        = simPars.Bfield;         %magnetic field strength in [T]
+lw            = simPars.lw;             %linewidth of the output spectrum [Hz]
+thkX          = simPars.thkX;           %slice thickness of x refocusing pulse [cm]
+thkY          = simPars.thkY;           %slice thickness of y refocusing pulse [cm]
+fovX          = simPars.fovX;           %full simulation FOV in the x direction [cm]
+fovY          = simPars.fovY;           %full simulation FOV in the y direction [cm]
+nX            = simPars.nX;             %number of spatial grid points to simulate in x-direction
+nY            = simPars.nY;             %number of spatial grid points to simulate in y-direction
+tau1          = simPars.tau1;           %TE1 for first spin echo  [ms]
+tau2          = simPars.tau2;           %TE2 for second spin echo [ms]
+centreFreq    = simPars.centreFreq;     %Centre frequency of simulation [ppm]
+lineshape     = simPars.lineshape;      %Lineshape to simulate ('L' (lorentzian) or 'G' (gaussian))
 % ************END OF INPUT PARAMETERS**********************************
 
 %set up spatial grid
 x=linspace(-fovX/2,fovX/2,nX); %X positions to simulate [cm]
 y=linspace(-fovY/2,fovY/2,nY); %y positions to simulate [cm]
 
-%Load RF waveform
-refRF=io_loadRFwaveform(refocWaveform,'ref',0);
+% %Load RF waveform
+% refRF=io_loadRFwaveform(refocWaveform,'ref',0);
+refRF=refocWaveform;
 
 gamma=42577000; %gyromagnetic ratio
 
@@ -83,9 +88,11 @@ gamma=42577000; %gyromagnetic ratio
 %load spinSystems
 %sys=eval(['sys' spinSys]);
 
-%Resample refocusing RF pulse from 400 pts to 100 pts to reduce
+%If length of RF pulse is >200 pts, reample to 100 pts to reduce
 %computational workload
-refRF=rf_resample(refRF,100);
+if size(refRF.waveform,1)>200
+    refRF=rf_resample(refRF,100);
+end
 
 Gx=(refRF.tbw/(refTp/1000))/(gamma*thkX/10000); %[G/cm]
 Gy=(refRF.tbw/(refTp/1000))/(gamma*thkY/10000); %[G/cm]
@@ -126,7 +133,7 @@ out=struct([]);
 parfor Y=1:length(y) %Use this if you do have the MATLAB parallel processing toolbox
 %            disp(['Executing Y-position ' num2str(Y) ' of ' num2str(length(y)) '!!!']);
             out_temp{Y}=sim_press_shaped_fastRef2(d{1},Npts,sw,Bfield,lw,sys,tau1,tau2,...
-                refRF,refTp,y(Y),Gy,flipAngle,centreFreq);
+                refRF,refTp,y(Y),Gy,flipAngle,centreFreq,lineshape);
 end
 
 %Now combine the outputs;  Again, doing this inside a separate for loop
@@ -254,10 +261,10 @@ end
 
 
 %Nested Function #2
-function out = sim_press_shaped_fastRef2(d,n,sw,Bfield,linewidth,sys,tau1,tau2,RF,tp,dy,Gy,flipAngle,centreFreq)
+function out = sim_press_shaped_fastRef2(d,n,sw,Bfield,linewidth,sys,tau1,tau2,RF,tp,dy,Gy,flipAngle,centreFreq,shape)
 %
 % USAGE:
-% out = sim_press_shaped_fastRef2(d,n,sw,Bfield,linewidth,sys,tau2,RF,tp,dy,Gy,phCyc2,flipAngle)
+% out = sim_press_shaped_fastRef2(d,n,sw,Bfield,linewidth,sys,tau2,RF,tp,dy,Gy,phCyc2,flipAngle,centreFreq,shape)
 % 
 % DESCRIPTION:
 % This function simulates only the last bit of the PRESS experiment, from the 
@@ -293,15 +300,20 @@ function out = sim_press_shaped_fastRef2(d,n,sw,Bfield,linewidth,sys,tau1,tau2,R
 % Gx        = gradient strength for first selective refocusing pulse [G/cm]
 % Gy        = gradient strength for second selective refocusing pulse [G/cm]
 % flipAngle = flip angle of refocusing pulses [degrees] (Optional.  Default = 180 deg)
+% centreFreq= centre frequency of simulation in [ppm].
+% shape     = Lineshape of simulated spectra ('L' for Lorentizian or 'G' for Gaussian).
 %
 % OUTPUTS:
 % out       = simulated spectrum, in FID-A structure format, using PRESS 
 %             sequence.
 
-if nargin<14
-    centreFreq=2.3;
-    if nargin<13
-        flipAngle=180;
+if nargin<15
+    shape='L';
+    if nargin<14
+        centreFreq=2.3;
+        if nargin<13
+            flipAngle=180;
+        end
     end
 end
    
@@ -332,7 +344,7 @@ end
 d=sim_shapedRF(d,H,RF,tp,flipAngle,90,dy,Gy);          %2nd shaped 180 degree refocusing pulse
 d=sim_COF(H,d,-1);
 d=sim_evolve(d,H,delays(2)/2000);                            %Evolve by delays(2)/2
-[out,~]=sim_readout(d,H,n,sw,linewidth,90);      %Readout along y (90 degree phase);
+[out,~]=sim_readout(d,H,n,sw,linewidth,90,shape);      %Readout along y (90 degree phase);
 %END PULSE SEQUENCE**************
 
 %Correct the ppm scale:

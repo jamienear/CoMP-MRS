@@ -1,9 +1,10 @@
-
-% run_simSemiLASERShaped_fast.m
+% compMRS_simsLASER.m
 % Dana Goerzen and Jamie Near, McGill University 2021.
 % Fast version by Muhammad G Saleh (Johns Hopkins University School of Medicine, 2019)
+% Revised for CoMP-MRS - Jamie Near and Diana Rotaru, 2025/2026.
+%
 % USAGE:
-% out=run_simSemiLaserShaped_fast(spinSys);
+% out=compMRS_simsLASER(spinSys,simPars);
 % 
 % DESCRIPTION:
 % This script simulates a PRESS experiment with fully shaped refocusing 
@@ -23,54 +24,56 @@
 % parallel computing toolbox, initialize the multiple worked nodes using
 % "matlabpool size X" where "X" is the number of available processing
 % nodes.  If the parallel processing toolbox is not available, then replace
-% the "parfor" loop with a "for" loop.
+% the "parfor" loop with a "for" loop.  This tool is based on the FID-A
+% function 'run_simSemiLASERShaped_fast.m'.
 % 
 % INPUTS:
-% To run this script, there is technically only one input argument:
+% To run this function, there are two input arguments:
 % spinSys           = spin system to simulate 
+% simPars           = structure variable containing the necessary
+%                     simulation parameters as follows:
+%           simPars.refocWaveform:  sLASER refocusing pulse waveform in FID-A RF structure format
+%           simPars.refTp:          duration of refocusing pulses[ms]
+%           simPars.flipAngle:      flip angle of refocusing pulses [degrees]
+%           simPars.Bfield:         magnetic field strength in [T]
+%           simPars.Npts:           number of spectral points
+%           simPars.sw:             spectral width [Hz]
+%           simPars.lw:             linewidth of the output spectrum [Hz]
+%           simPars.thkX:           slice thickness of x refocusing pulse [cm]
+%           simPars.thkY:           slice thickness of y refocusing pulse [cm]
+%           simPars.fovX:           full simulation FOV in the x direction [cm]
+%           simPars.fovY:           full simulation FOV in the y direction [cm]
+%           simPars.nX:             number of spatial grid points to simulate in x-direction
+%           simPars.nY:             number of spatial grid points to simulate in y-direction
+%           simPars.te:             Total sLASER echo time (TE) [ms]
+%           simPars.centreFreq:     Centre frequency of simulation [ppm]
+%           simPars.lineshape:      Lineshape to simulate ('L' (lorentzian) or 'G' (gaussian))
 %
-% However, the user should also edit the following parameters as 
-% desired before running the function:
-% refocWaveform     = name of refocusing pulse waveform.
-% refTp             = duration of refocusing pulses[ms]
-% Bfield            = Magnetic field strength in [T]
-% Npts              = number of spectral points
-% sw                = spectral width [Hz]
-% Bfield            = magnetic field strength [Tesla]
-% lw                = linewidth of the output spectrum [Hz]
-% thkX              = slice thickness of x refocusing pulse [cm]
-% thkY              = slice thickness of y refocusing pulse [cm]
-% fovX              = full simulation FOV in the x direction [cm]
-% fovY              = full simulation FOV in the y direction [cm]
-% nX                = number of spatial grid points to simulate in x-direction
-% nY                = number of spatial grid points to simulate in y-direction
-% taus              = vector of pulse sequence timings  [ms]
 %
 % OUTPUTS:
 % out               = Simulation results, summed over all space.
 
 
-function out=run_simSemiLASERShaped_fast(sys)
+function out=compMRS_simsLASER(sys,simPars)
 
-% INPUTS:
-n=2048; %= number of points in fid/spectrum
-sw=2000; %= desired spectral width in [Hz]
-Bfield=2.89; %= main magnetic field strength in [T]
-lw=2; %= linewidth in [Hz]
-rfPulse=io_loadRFwaveform('GOIA_tthk0.01_R120.txt','inv'); % adiabatic RF pulse shaped waveform
-refTp=4.5; %= RF pulse duration in [ms]
-flipAngle=180; %= flip angle of refocusing pulses [degrees] (Optional.  Default = 180 deg)
-centreFreq=2.3; %= centre frequency of the spectrum in [ppm] (Optional.  Default = 2.3)
-thkX=1.66; %slice thickness of x refocusing pulse [cm]
-thkY=1.66; %slice thickness of y refocusing pulse [cm]
-fovX=4; %size of the full simulation Field of View in the x-direction [cm]
-fovY=4; %size of the full simulation Field of View in the y-direction [cm]
-nX=41; %Number of grid points to simulate in the x-direction
-nY=41; %Number of grid points to simulate in the y-direction
-te=135;         %semiLASER total echo time [ms]
-% OUTPUTS:
-% out       = simulated spectrum, in FID-A structure format, using PRESS
-%             sequence.
+% ************ASSIGN INPUT PARAMETERS TO VARIABLES**********************************
+refocWaveform = simPars.refocWaveform;  %sLASER refocusing pulse waveform in FID-A RF structure format
+refTp         = simPars.refTp;          %duration of refocusing pulses[ms]
+flipAngle     = simPars.flipAngle;      %flip angle of refocusing pulses [degrees]
+Npts          = simPars.Npts;           %number of spectral points
+sw            = simPars.sw;             %spectral width [Hz]
+Bfield        = simPars.Bfield;         %magnetic field strength in [T]
+lw            = simPars.lw;             %linewidth of the output spectrum [Hz]
+thkX          = simPars.thkX;           %slice thickness of x refocusing pulse [cm]
+thkY          = simPars.thkY;           %slice thickness of y refocusing pulse [cm]
+fovX          = simPars.fovX;           %full simulation FOV in the x direction [cm]
+fovY          = simPars.fovY;           %full simulation FOV in the y direction [cm]
+nX            = simPars.nX;             %number of spatial grid points to simulate in x-direction
+nY            = simPars.nY;             %number of spatial grid points to simulate in y-direction
+te            = simPars.te;             %Total sLASER echo time (TE) [ms]
+centreFreq    = simPars.centreFreq;     %Centre frequency of simulation [ppm]
+lineshape     = simPars.lineshape;      %Lineshape to simulate ('L' (lorentzian) or 'G' (gaussian))
+% ************END OF INPUT PARAMETERS**********************************
 
 %set up spatial grid
 x=linspace(-fovX/2,fovX/2,nX); %X positions to simulate [cm]
@@ -78,9 +81,15 @@ y=linspace(-fovY/2,fovY/2,nY); %y positions to simulate [cm]
 
 gamma=42577000; %gyromagnetic ratio
 
-%Resample refocusing RF pulse from 400 pts to 100 pts to reduce
+% %Load the RF pulse:
+% rfPulse=io_loadRFwaveform(refocWaveform,'inv');
+rfPulse=refocWaveform;
+
+%If length of RFpulse is >200pts, resample to 100 pts to reduce
 %computational workload
-rfPulse=rf_resample(rfPulse,100);
+if size(rfPulse.waveform,1)>200
+    rfPulse=rf_resample(rfPulse,100);
+end
 
 %sys=sysRef0ppm
 if ~rfPulse.isGM
@@ -126,7 +135,7 @@ out=struct([]);
 parfor Y=1:length(y) %Use this if you do have the MATLAB parallel processing toolbox
 %for Y=1:length(y) %Use this if you don't have the MATLAB parallel processing toolbox
         disp(['Executing Y-position ' num2str(Y) '!!' ]);
-        out_posy_rpc{Y}=sim_sLASER_shaped_Ref2(d{1},n,sw,Bfield,lw,sys,te,rfPulse,refTp,y(Y),Gy,flipAngle,centreFreq);
+        out_posy_rpc{Y}=sim_sLASER_shaped_Ref2(d{1},Npts,sw,Bfield,lw,sys,te,rfPulse,refTp,y(Y),Gy,flipAngle,centreFreq,lineshape);
 %                            sim_sLASER_shaped_Ref2(d,   n,sw,Bfield,linewidth,sys,te,RF,       tp, dy,  Gy,ph3,    ph4,  centreFreq)
 end
 
@@ -203,12 +212,15 @@ d=sim_evolve(d,H,tau2/1000);                            %Evolve by tau2
 end
 
 %% Simulate in Y-direction only
-function out = sim_sLASER_shaped_Ref2(d,n,sw,Bfield,linewidth,sys,te,RF,tp,dy,Gy,flipAngle,centreFreq)
+function out = sim_sLASER_shaped_Ref2(d,n,sw,Bfield,linewidth,sys,te,RF,tp,dy,Gy,flipAngle,centreFreq,shape)
 
-if nargin<13
-    centreFreq=2.3;
-    if nargin<12
-        flipAngle=180;
+if nargin<14
+    shape='L';
+    if nargin<13
+        centreFreq=2.3;
+        if nargin<12
+            flipAngle=180;
+        end
     end
 end
 
@@ -243,7 +255,7 @@ d=sim_shapedRF(d,H,RF,tp,flipAngle,0,dy,Gy);          %4th shaped 180 degree adi
 d=sim_COF(H,d,-1);
 d=sim_evolve(d,H,tau1/1000);                            %Evolve by tau1
 
-[out,~]=sim_readout(d,H,n,sw,linewidth,90);      %Readout along +y axis (90 degree phase);
+[out,~]=sim_readout(d,H,n,sw,linewidth,90,shape);      %Readout along +y axis (90 degree phase);
 %END PULSE SEQUENCE**************
 
 %Correct the ppm scale:
