@@ -129,8 +129,14 @@ if strcmp(check.vendor(1),'BRUKER')
 
     elseif contains(sequence,'special','IgnoreCase',true)
         isSPECIAL = true;
-        simPars.seq = 'SPECIAL';
-        simPars.tau1 = method.PVM_EchoTime;
+        if contains(sequence,'specialjm_adiabIR','IgnoreCase',true)
+            simPars.seq = 'sSPECIAL';
+            simPars.tau1 = method.PVM_EchoTime/2;
+            simPars.tau2 = method.PVM_EchoTime/2;
+        else
+            simPars.seq = 'SPECIAL';
+            simPars.tau1 = method.PVM_EchoTime;
+        end
 
         if isfield(method,'VoxPul3Enum')
             simPars.rfName = [char(method.VoxPul3Enum)];
@@ -233,11 +239,24 @@ end
 % Now, load the RF pulse waveform and replace the simPars RF waveform with 
 % the resulting FID-A structure:
 if isPRESS || isSPECIAL || isLASER
+    %If the asymmetric M8 pulse is being used for PRESS refocusing, the zeropadded
+    %version of the M8 pulse should be used for the simulation instead.  This
+    %gets rid of unwanted phase accrual across the slice due to the asymmetry
+    %of the pulse:
+    if contains(simPars.rfName,'M8','ignoreCase',true)
+        simPars.rfName = 'M8_pad';
+        simPars.refTp = simPars.refTp * 413/256;
+    end
     simPars.rfName = erase(simPars.rfName, {'<', '>'});
-    try
-        RF=io_loadRFwaveform([simPars.rfName '.rfc'],'ref');
-    catch
-        RF=io_loadRFwaveform([simPars.rfName '.inv'],'ref');
+    
+    if strcmp(check.vendor(1),'VARIAN')
+        RF=io_loadRFwaveform([simPars.rfName '.RF'],'ref');
+    elseif strcmp(check.vendor(1),'BRUKER')
+        try
+            RF=io_loadRFwaveform([simPars.rfName '.rfc'],'ref');
+        catch
+            RF=io_loadRFwaveform([simPars.rfName '.inv'],'ref');
+        end
     end
     simPars.refocWaveform = RF;
 elseif isSTEAM

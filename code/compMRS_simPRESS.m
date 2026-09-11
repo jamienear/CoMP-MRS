@@ -131,7 +131,7 @@ out=struct([]);
 %Now loop through y direction (second refoc pulse only);
 %for Y=1:length(y) %Use this if you don't have the MATLAB parallel processing toolbox
 parfor Y=1:length(y) %Use this if you do have the MATLAB parallel processing toolbox
-%            disp(['Executing Y-position ' num2str(Y) ' of ' num2str(length(y)) '!!!']);
+            disp(['Executing Y-position ' num2str(Y) ' of ' num2str(length(y)) '!!!']);
             out_temp{Y}=sim_press_shaped_fastRef2(d{1},Npts,sw,Bfield,lw,sys,tau1,tau2,...
                 refRF,refTp,y(Y),Gy,flipAngle,centreFreq,lineshape);
 end
