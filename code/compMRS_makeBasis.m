@@ -41,8 +41,8 @@ sess=dir([DPid filesep subjs(1).name filesep 'ses*']);
 svspath = dir([DPid filesep subjs(1).name filesep sess(1).name filesep 'mrs' filesep '*svs']);
 
 %Make a list of metabolites to include in basis set:
-%metabs = {'Ala','Asp','Cr','GABA','Glc','Gln','Glu','GPC','GSH','Ins','Lac','NAA','NAAG','PCh','PCr','PE','Ser','Tau','Ref0ppm'};
-metabs = {'NAA','Ref0ppm'};  %Shorter list of metabolites for testing.  Uncomment line above for full list.
+metabs = {'Ala','Asp','Cr','GABA','Glc','Gln','Glu','GPC','GSH','Ins','Lac','NAA','NAAG','PCh','PCr','PE','Ser','Tau','Ref0ppm'};
+%metabs = {'NAA','Ref0ppm'};  %Shorter list of metabolites for testing.  Uncomment line above for full list.
 
 %Make an inline function definition to make the MM spin systems:
 makeMM = @(n,shift,scale) struct('J',0,'shifts',shift,'name',['MM' num2str(n)],'scaleFactor',scale);
