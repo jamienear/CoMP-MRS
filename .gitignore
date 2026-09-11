@@ -6,6 +6,9 @@ stats/ProcSpectralQuality/cheatsheets
 stats/ProcSpectralQuality/lme_example
 stats/ProcSpectralQuality/scripts/.R*
 *.mat
+#Track FID-A metabolite files
+!code/dependencies/FID-A-master/simulationTools/metabolites/
+!code/dependencies/FID-A-master/simulationTools/metabolites/*.mat
 *.png
 *.fig
 *.csv
